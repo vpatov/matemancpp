@@ -19,7 +19,17 @@ enum Command {
   quit
 };
 
+typedef void (*CommandProcessor)(std::vector<std::string>);
+std::unordered_map<Command, CommandProcessor> command_processor_map;
 std::unordered_map<std::string, Command> command_map;
+
+void process_command_uci(std::vector<std::string> args) {
+  std::cout << "Processing UCI!" << std::endl;
+}
+
+void process_command_debug(std::vector<std::string> args) {
+  std::cout << "Processing Debug!" << std::endl;
+}
 
 void init_command_map() {
   command_map["uci"] = Command::uci;
@@ -32,21 +42,24 @@ void init_command_map() {
   command_map["stop"] = Command::stop;
   command_map["ponderhit"] = Command::ponderhit;
   command_map["quit"] = Command::quit;
+
+  command_processor_map[Command::uci] = &process_command_uci;
+  command_processor_map[Command::debug] = &process_command_debug;
 }
 
 void process_command(std::string command) {
-  std::vector<std::string> tokenized;
-  boost::algorithm::split(tokenized, command,
-                          boost::algorithm::is_any_of("\t "),
+  std::vector<std::string> args;
+  boost::algorithm::split(args, command, boost::algorithm::is_any_of("\t "),
                           boost::token_compress_on);
-  std::string primary = tokenized.at(0);
-  std::cerr << "Received command: " << primary << std::endl;
-  for (std::vector<std::string>::iterator t = ++tokenized.begin();
-       t != tokenized.end(); ++t) {
-    std::cout << *t << std::endl;
-  }
+  std::string primary = args.at(0);
 
-  // std::cout << command.size() << std::endl;
+  auto it = command_map.find(primary);
+  if (it == command_map.end()) {
+    // Error handling of invalid command
+    return;
+  }
+  auto command_processor = command_processor_map.find(it->second)->second;
+  command_processor(args);
 }
 
 void cli_main_thread() {
@@ -57,8 +70,10 @@ void cli_main_thread() {
 
   for (std::string line; std::getline(std::cin, line);) {
     process_command(line);
-    // std::cout << line << std::endl;
   }
 }
 
-int main(int argc, char *argv[]) { cli_main_thread(); }
+int main(int argc, char *argv[]) {
+  init_command_map();
+  cli_main_thread();
+}
