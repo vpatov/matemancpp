@@ -24,7 +24,8 @@ std::unordered_map<Command, CommandProcessor> command_processor_map;
 std::unordered_map<std::string, Command> command_map;
 
 void process_command_uci(std::vector<std::string> args) {
-  std::cout << "Processing UCI!" << std::endl;
+  std::cout << "id name MateMan" << std::endl;
+  std::cout << "id author Vasia Patov" << std::endl;
 }
 
 void process_command_debug(std::vector<std::string> args) {
@@ -77,3 +78,21 @@ int main(int argc, char *argv[]) {
   init_command_map();
   cli_main_thread();
 }
+
+/*
+TODO
+- Create remote repository (private)
+- Install logging library, log to file
+- Look into setoptions
+    one option could be threadcount
+- Create class for command processor
+- Start working on basic chess engine implementation
+- Separate application into several files
+- read up on bitboards and consider trying them again
+    (although, mailbox should be fine, the more interesting part is the
+heuristic evaluation)
+
+END GOALS:
+- play via the arena UCI-friendly GUI
+- make a computer that can beat you, and your friends
+*/
