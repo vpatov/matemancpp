@@ -1,5 +1,0 @@
-/home/vas/repos/matemancpp/build/CMakeFiles/edit_cache.dir
-/home/vas/repos/matemancpp/build/CMakeFiles/package_source.dir
-/home/vas/repos/matemancpp/build/CMakeFiles/rebuild_cache.dir
-/home/vas/repos/matemancpp/build/CMakeFiles/package.dir
-/home/vas/repos/matemancpp/build/CMakeFiles/matemancpp.dir

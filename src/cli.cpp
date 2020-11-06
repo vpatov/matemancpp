@@ -54,7 +54,6 @@ void init_command_map() {
 }
 
 void process_command(std::string command) {
-  std::cout << "inside process_command" << std::endl;
   std::vector<std::string> args;
   boost::algorithm::split(args, command, boost::algorithm::is_any_of("\t "),
                           boost::token_compress_on);

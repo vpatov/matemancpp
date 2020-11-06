@@ -1,10 +1,18 @@
-#include "cli.cpp"
+
 #include "cli.hpp"
+#include "fen.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <iostream>
 
-int main(int argc, char *argv[]) { cli_loop(); }
+// rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+int main(int argc, char *argv[]) {
+  auto position = fen_to_position("8/8/8/8/8/r7/b7/kb5K w - - 0 1");
+
+  print_position(position);
+
+  // cli_loop();
+}
 
 /*
 TODO

@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/vas/repos/matemancpp/build",
-  "command": "/bin/g++-9   -I/home/vas/repos/vcpkg/installed/x64-linux/include -I/home/vas/repos/matemancpp/include  -g   -pthread -o CMakeFiles/matemancpp.dir/src/main.cpp.o -c /home/vas/repos/matemancpp/src/main.cpp",
-  "file": "/home/vas/repos/matemancpp/src/main.cpp"
-}
-]
