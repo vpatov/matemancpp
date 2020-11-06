@@ -6,7 +6,21 @@
 
 #IncludeRegexTransform: 
 
-/home/vas/repos/matemancpp/src/main.cpp
+../include/cli.hpp
+iostream
+-
+string
+-
+unistd.h
+-
+unordered_map
+-
+vector
+-
+
+/home/vas/repos/matemancpp/src/cli.cpp
+cli.hpp
+/home/vas/repos/matemancpp/src/cli.hpp
 boost/algorithm/string.hpp
 -
 boost/algorithm/string/split.hpp
@@ -15,9 +29,23 @@ iostream
 -
 string
 -
+thread
+-
 unordered_map
 -
 vector
+-
+
+/home/vas/repos/matemancpp/src/main.cpp
+cli.cpp
+/home/vas/repos/matemancpp/src/cli.cpp
+cli.hpp
+/home/vas/repos/matemancpp/src/cli.hpp
+boost/algorithm/string.hpp
+-
+boost/algorithm/string/split.hpp
+-
+iostream
 -
 
 /home/vas/repos/vcpkg/installed/x64-linux/include/boost/algorithm/string.hpp

@@ -66,7 +66,6 @@
     "typeindex": "cpp",
     "variant": "cpp"
   },
-  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureSettings": {
     "DCMAKE_TOOLCHAIN_FILE": "/home/vas/repos/vcpkg/scripts/buildsystems/vcpkg.cmake"
   }
