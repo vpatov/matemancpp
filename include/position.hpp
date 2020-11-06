@@ -1,3 +1,6 @@
+#ifndef __POSITION_H__
+#define __POSITION_H__
+
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -53,3 +56,5 @@ class PositionC {
 uint8_t an_square_to_index(std::string square);
 std::string index_to_an_square(uint8_t index);
 void print_position(std::shared_ptr<Position> position);
+
+#endif

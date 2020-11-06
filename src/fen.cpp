@@ -1,3 +1,4 @@
+#include "fen.hpp"
 #include "position.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
