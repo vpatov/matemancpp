@@ -73,7 +73,10 @@ void process_command_go(std::vector<std::string> args) {
 };
 void process_command_stop(std::vector<std::string> args){};
 void process_command_ponderhit(std::vector<std::string> args){};
-void process_command_quit(std::vector<std::string> args){};
+void process_command_quit(std::vector<std::string> args) {
+  // TODO cleanup?
+  exit(0);
+};
 
 void init_command_map() {
   command_map["uci"] = Command::uci;

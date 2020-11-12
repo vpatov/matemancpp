@@ -7,10 +7,12 @@ set(SOURCES
     src/position.cpp
     src/fen.cpp
     src/options.cpp
+    src/move_generation.cpp
     include/cli.hpp
     include/position.hpp
     include/fen.hpp
     include/options.hpp
+    include/move_generation.hpp
 )
 
 

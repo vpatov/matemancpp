@@ -38,11 +38,3 @@ void process_command(std::string command);
 void cli_loop();
 
 #endif
-/*
- /home/vas/repos/matemancpp/src/cli.cpp:43:41: error:
- cannot convert
- ‘CLI::process_command_uci’ from type
- ‘void (CLI::)(std::vector<std::__cxx11::basic_string<char> >)’
- to type
- ‘void (*)    (std::vector<std::__cxx11::basic_string<char> >)’
-*/
