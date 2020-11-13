@@ -7,16 +7,26 @@
 
 int main(int argc, char *argv[]) {
 
-  std::shared_ptr<Position> position = starting_position();
-  for (uint8_t square = 16; square <= 23; square++) {
-    std::vector<uint8_t> moves =
-        generate_pseudolegal_wpawn_moves(position, square);
-    std::cout << "Moves for " << index_to_an_square(square) << ":" << std::endl;
-    for (auto it = moves.begin(); it != moves.end(); it++) {
-      std::cout << index_to_an_square(*it) << std::endl;
-    }
-    std::cout << std::endl;
+  std::shared_ptr<Position> position = fen_to_position(
+      "rnbqkbn1/pp1pp1p1/1P5r/8/2R2pp1/7P/2PPPPP1/1NBQKBNR w Kq - 0 1");
+
+  uint8_t square = an_square_to_index("c4");
+  std::vector<uint8_t> moves =
+      generate_pseudolegal_rook_moves<Color ::WHITE>(position, square);
+  std::cout << "Moves for " << index_to_an_square(square) << ":" << std::endl;
+  for (auto it = moves.begin(); it != moves.end(); it++) {
+    std::cout << index_to_an_square(*it) << std::endl;
   }
+  std::cout << std::endl;
+
+  square = an_square_to_index("h6");
+  moves = generate_pseudolegal_rook_moves<Color ::BLACK>(position, square);
+  std::cout << "Moves for " << index_to_an_square(square) << ":" << std::endl;
+  for (auto it = moves.begin(); it != moves.end(); it++) {
+    std::cout << index_to_an_square(*it) << std::endl;
+  }
+  std::cout << std::endl;
+
   cli_loop();
 }
 
