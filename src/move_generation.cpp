@@ -75,7 +75,33 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
       moves.push_back(candidate);
     }
   }
+  auto castling_moves =
+      generate_pseudolegal_castling_king_moves<C>(position, square);
+  moves.insert(moves.end(), castling_moves.begin(), castling_moves.end());
+  return moves;
+}
 
+#define KINGSIDE_CASTLE_C(C, position)                                         \
+  (white_mgen(C) ? position->white_kingside_castle                             \
+                 : position->black_kingside_castle)
+#define QUEENSIDE_CASTLE_C(C, position)                                        \
+  (white_mgen(C) ? position->white_queenside_castle                            \
+                 : position->black_queenside_castle)
+
+// TODO
+template <Color C>
+std::vector<uint8_t>
+generate_pseudolegal_castling_king_moves(std::shared_ptr<Position> position,
+                                         uint8_t square) {
+  /** Assumes that position's castling booleans are correct. That is, king moves
+   * and rook moves should immediately unset the respective castling boolean. */
+  std::vector<uint8_t> moves;
+  if (KINGSIDE_CASTLE_C(C, position)) {
+    moves.push_back(KING_ROOK_SQUARE_C(C));
+  }
+  if (QUEENSIDE_CASTLE_C(C, position)) {
+    moves.push_back(QUEEN_ROOK_SQUARE_C(C));
+  }
   return moves;
 }
 
@@ -180,6 +206,38 @@ generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
   return rook_moves;
 }
 
+template <Color C>
+std::vector<uint8_t>
+generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
+                                 uint8_t square) {
+  uint8_t piece = position->mailbox[square];
+  switch (piece) {
+  case PAWN:
+    return generate_pseudolegal_pawn_moves<C>(position, square);
+  case ROOK:
+    return generate_pseudolegal_rook_moves<C>(position, square);
+  case KNIGHT:
+    return generate_pseudolegal_knight_moves<C>(position, square);
+  case BISHOP:
+    return generate_pseudolegal_bishop_moves<C>(position, square);
+  case QUEEN:
+    return generate_pseudolegal_queen_moves<C>(position, square);
+  case KING:
+    return generate_pseudolegal_king_moves<C>(position, square);
+  default:
+    __builtin_unreachable();
+  }
+}
+
+std::vector<uint8_t>
+generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
+                                 uint8_t square) {
+  uint8_t piece = position->mailbox[square];
+  return IS_WHITE_PIECE(piece)
+             ? generate_pseudolegal_piece_moves<Color::WHITE>(position, square)
+             : generate_pseudolegal_piece_moves<Color::BLACK>(position, square);
+}
+
 template std::vector<uint8_t> generate_pseudolegal_pawn_moves<Color::WHITE>(
     std::shared_ptr<Position> position, uint8_t square);
 
@@ -190,6 +248,14 @@ template std::vector<uint8_t> generate_pseudolegal_king_moves<Color::WHITE>(
     std::shared_ptr<Position> position, uint8_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_king_moves<Color::BLACK>(
+    std::shared_ptr<Position> position, uint8_t square);
+
+template std::vector<uint8_t>
+generate_pseudolegal_castling_king_moves<Color::WHITE>(
+    std::shared_ptr<Position> position, uint8_t square);
+
+template std::vector<uint8_t>
+generate_pseudolegal_castling_king_moves<Color::BLACK>(
     std::shared_ptr<Position> position, uint8_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_rook_moves<Color::WHITE>(
@@ -208,4 +274,10 @@ template std::vector<uint8_t> generate_pseudolegal_queen_moves<Color::WHITE>(
     std::shared_ptr<Position> position, uint8_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_queen_moves<Color::BLACK>(
+    std::shared_ptr<Position> position, uint8_t square);
+
+template std::vector<uint8_t> generate_pseudolegal_piece_moves<Color::WHITE>(
+    std::shared_ptr<Position> position, uint8_t square);
+
+template std::vector<uint8_t> generate_pseudolegal_piece_moves<Color::BLACK>(
     std::shared_ptr<Position> position, uint8_t square);

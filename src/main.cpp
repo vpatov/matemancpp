@@ -5,34 +5,35 @@
 #include "position.hpp"
 #include <iostream>
 
-int main(int argc, char *argv[]) {
-
-  std::shared_ptr<Position> position = fen_to_position(
-      "rnbqkbn1/pp1pp1p1/1P5r/8/2R2pp1/7P/2PPPPP1/1NBQKBNR w Kq - 0 1");
-
-  uint8_t square = an_square_to_index("c4");
-  std::vector<uint8_t> moves =
-      generate_pseudolegal_rook_moves<Color ::WHITE>(position, square);
-  std::cout << "Moves for " << index_to_an_square(square) << ":" << std::endl;
-  for (auto it = moves.begin(); it != moves.end(); it++) {
-    std::cout << index_to_an_square(*it) << std::endl;
-  }
-  std::cout << std::endl;
-
-  square = an_square_to_index("h6");
-  moves = generate_pseudolegal_rook_moves<Color ::BLACK>(position, square);
-  std::cout << "Moves for " << index_to_an_square(square) << ":" << std::endl;
-  for (auto it = moves.begin(); it != moves.end(); it++) {
-    std::cout << index_to_an_square(*it) << std::endl;
-  }
-  std::cout << std::endl;
-
-  cli_loop();
-}
+int main(int argc, char *argv[]) { cli_loop(); }
 
 /*
-    MAIN TASK
-    Move generation
+    Tasks
+
+    - Castling
+    - Legal move generation
+      - Move cannot cause mover's king to be in check
+      - Mover's king cannot be in check, and cannot pass through check during
+   castling
+   - Position Evaluation Function
+   - Chess Engine that plays random legal moves, and is rule complete.
+*/
+
+/*
+ Methods for finding legal moves from pseudolegal moves
+
+    Naive:    For every move, iterate through opponents piece list and see if
+ they are attacking the king
+
+    Slightly better: For every move, check diagonals for enemy bishops/queens,
+ files/ranks for enemy rooks/queens, knight-hops for enemy knights,
+ pawn-captures for enemy pawns, and king captures for enemy kings. Then you
+ don't have to maintain a piece list.
+
+    Start with naive.
+    If it's really slow then user a profiler to improve it.
+
+
 */
 
 /*

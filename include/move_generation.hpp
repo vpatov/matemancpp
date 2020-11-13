@@ -9,12 +9,21 @@ enum Direction { UP, DOWN, LEFT, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT };
 
 constexpr bool white_mgen(Color C) { return C == Color::WHITE; }
 
-#define PAWNC(C) white_mgen(C) ? W_PAWN : B_PAWN
-#define ROOKC(C) white_mgen(C) ? W_ROOK : B_ROOK
-#define KNIGHTC(C) white_mgen(C) ? W_KNIGHT : B_KNIGHT
-#define BISHOPC(C) white_mgen(C) ? W_BISHOP : B_BISHOP
-#define QUEENC(C) white_mgen(C) ? W_QUEEN : B_QUEEN
-#define KINGC(C) white_mgen(C) ? W_KING : B_KING
+#define PAWNC(C) (white_mgen(C) ? W_PAWN : B_PAWN)
+#define ROOKC(C) (white_mgen(C) ? W_ROOK : B_ROOK)
+#define KNIGHTC(C) (white_mgen(C) ? W_KNIGHT : B_KNIGHT)
+#define BISHOPC(C) (white_mgen(C) ? W_BISHOP : B_BISHOP)
+#define QUEENC(C) (white_mgen(C) ? W_QUEEN : B_QUEEN)
+#define KINGC(C) (white_mgen(C) ? W_KING : B_KING)
+
+#define W_KING_ROOK_SQUARE 7
+#define W_QUEEN_ROOK_SQUARE 0
+#define B_KING_ROOK_SQUARE 119
+#define B_QUEEN_ROOK_SQUARE 112
+#define KING_ROOK_SQUARE_C(C)                                                  \
+  (white_mgen(C) ? W_KING_ROOK_SQUARE : B_KING_ROOK_SQUARE)
+#define QUEEN_ROOK_SQUARE_C(C)                                                 \
+  (white_mgen(C) ? W_QUEEN_ROOK_SQUARE : B_QUEEN_ROOK_SQUARE)
 
 #define RANK_OFFSET 16
 #define FILE_OFFSET 1
@@ -80,6 +89,11 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
 
 template <Color C>
 std::vector<uint8_t>
+generate_pseudolegal_castling_king_moves(std::shared_ptr<Position> position,
+                                         uint8_t square);
+
+template <Color C>
+std::vector<uint8_t>
 generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
                                   uint8_t square);
 
@@ -96,6 +110,15 @@ generate_pseudolegal_bishop_moves(std::shared_ptr<Position> position,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
+                                 uint8_t square);
+
+template <Color C>
+std::vector<uint8_t>
+generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
+                                 uint8_t square);
+
+std::vector<uint8_t>
+generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
                                  uint8_t square);
 
 #endif
