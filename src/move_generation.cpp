@@ -7,25 +7,6 @@
 
 /** Pseudolegal moves don't take check into account. */
 
-#define ROOK_PROD(IS_YOUR_PIECE, IS_THEIR_PIECE, ADVANCE_DIRECTION)            \
-  {                                                                            \
-    inline void rook_prod(std::vector<uint8_t> moves, uint8_t square,          \
-                          std::shared_ptr<Position> position) {                \
-      uint8_t candidate = ADVANCE_DIRECTION(square);                           \
-      do {                                                                     \
-        uint8_t piece = position->mailbox[candidate];                          \
-        if (IS_THEIR_PIECE(piece)) {                                           \
-          moves.push_back(candidate);                                          \
-          break;                                                               \
-        }                                                                      \
-        if (IS_YOUR_PIECE(piece)) {                                            \
-          break;                                                               \
-        }                                                                      \
-        candidate = ADVANCE_DIRECTION(candidate);                              \
-      } while (VALID_SQUARE(candidate));                                       \
-    }                                                                          \
-  }
-
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
@@ -130,31 +111,6 @@ generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
 
   return moves;
 }
-
-constexpr uint8_t direction_offset(Direction D) {
-  switch (D) {
-  case Direction::UP:
-    return NEXT_RANK(0);
-  case Direction::DOWN:
-    return PREV_RANK(0);
-  case Direction::RIGHT:
-    return NEXT_FILE(0);
-  case Direction::LEFT:
-    return PREV_FILE(0);
-  case Direction::UPLEFT:
-    return PREV_FILE(NEXT_RANK(0));
-  case Direction::UPRIGHT:
-    return NEXT_FILE(NEXT_RANK(0));
-  case Direction::DOWNLEFT:
-    return PREV_FILE(PREV_RANK(0));
-  case Direction::DOWNRIGHT:
-    return NEXT_FILE(PREV_RANK(0));
-  default:
-    __builtin_unreachable();
-  }
-}
-
-#define STEP_DIRECTION(D, square) (direction_offset(D) + square)
 
 template <Direction D, Color C>
 inline void sliding_piece_walk(std::vector<uint8_t> *moves, uint8_t square,
