@@ -14,9 +14,19 @@ int main(int argc, char *argv[]) { cli_loop(); }
     - Legal move generation
       - Move cannot cause mover's king to be in check
       - Mover's king cannot be in check, and cannot pass through check during
+    - Move representation (i.e. e2e4 or [16,32])
+    - Opening book (for up to 4/5 moves) https://www.chessprogramming.org/ECO
+    - endgame tablebases
    castling
    - Position Evaluation Function
    - Chess Engine that plays random legal moves, and is rule complete.
+
+Another drawback is that tablebases require a lot of memory to store the many
+thousands of positions. The Nalimov tablebases, which use advanced compression
+techniques, require 7.05 GB of hard disk space for all 5-piece endings. The
+6-piece endings require approximately 1.2 TB.[39][40] The 7-piece Lomonosov
+tablebase requires 140 TB of storage space.[41]
+
 */
 
 /*
