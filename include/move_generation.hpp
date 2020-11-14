@@ -16,10 +16,6 @@ constexpr bool white_mgen(Color C) { return C == Color::WHITE; }
 #define QUEENC(C) (white_mgen(C) ? W_QUEEN : B_QUEEN)
 #define KINGC(C) (white_mgen(C) ? W_KING : B_KING)
 
-#define W_KING_ROOK_SQUARE 7
-#define W_QUEEN_ROOK_SQUARE 0
-#define B_KING_ROOK_SQUARE 119
-#define B_QUEEN_ROOK_SQUARE 112
 #define KING_ROOK_SQUARE_C(C)                                                  \
   (white_mgen(C) ? W_KING_ROOK_SQUARE : B_KING_ROOK_SQUARE)
 #define QUEEN_ROOK_SQUARE_C(C)                                                 \
@@ -31,22 +27,18 @@ constexpr bool white_mgen(Color C) { return C == Color::WHITE; }
 #define NEXT_RANK(sq) (static_cast<uint8_t>(sq + RANK_OFFSET))
 #define PREV_RANK(sq) (static_cast<uint8_t>(sq - RANK_OFFSET))
 
+#define PREV_FILE(sq) (static_cast<uint8_t>(sq - FILE_OFFSET))
+#define NEXT_FILE(sq) (static_cast<uint8_t>(sq + FILE_OFFSET))
+
 // Returns the rank that is forward relative to the player
 #define FORWARD_RANK(C, square)                                                \
   (white_mgen(C) ? NEXT_RANK(square) : PREV_RANK(square))
-
-#define PREV_FILE(sq) (static_cast<uint8_t>(sq - FILE_OFFSET))
-#define NEXT_FILE(sq) (static_cast<uint8_t>(sq + FILE_OFFSET))
 
 #define IN_SECOND_RANK(sq) (sq >= 16 && sq <= 23)
 #define IN_SEVENTH_RANK(sq) (sq >= 96 && sq <= 103)
 #define IN_START_PAWN_RANK(C, square)                                          \
   (white_mgen(C) ? IN_SECOND_RANK(square) : IN_SEVENTH_RANK(square))
 
-#define VALID_SQUARE(sq) (!(sq & 0x88))
-#define IS_PIECE(piece) (piece & PIECE_MASK)
-#define IS_BLACK_PIECE(piece) (piece & BLACK_PIECE_MASK)
-#define IS_WHITE_PIECE(piece) (piece && !(IS_BLACK_PIECE(piece)))
 #define IS_YOUR_PIECE(C, piece)                                                \
   (white_mgen(C) ? IS_WHITE_PIECE(piece) : IS_BLACK_PIECE(piece))
 #define IS_OPPONENT_PIECE(C, piece)                                            \

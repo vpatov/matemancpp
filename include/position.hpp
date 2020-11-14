@@ -1,6 +1,7 @@
 #ifndef __POSITION_H__
 #define __POSITION_H__
 
+#include "squares.hpp"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -37,12 +38,21 @@
 #define BLACK_PIECE_MASK 0x10
 #define PIECE_MASK 0x7
 
-#define B_PAWN PAWN | BLACK_PIECE_MASK
-#define B_ROOK ROOK | BLACK_PIECE_MASK
-#define B_KNIGHT KNIGHT | BLACK_PIECE_MASK
-#define B_BISHOP BISHOP | BLACK_PIECE_MASK
-#define B_QUEEN QUEEN | BLACK_PIECE_MASK
-#define B_KING KING | BLACK_PIECE_MASK
+#define B_PAWN (PAWN | BLACK_PIECE_MASK)
+#define B_ROOK (ROOK | BLACK_PIECE_MASK)
+#define B_KNIGHT (KNIGHT | BLACK_PIECE_MASK)
+#define B_BISHOP (BISHOP | BLACK_PIECE_MASK)
+#define B_QUEEN (QUEEN | BLACK_PIECE_MASK)
+#define B_KING (KING | BLACK_PIECE_MASK)
+
+#define MAX_PIECE B_KING
+
+#define INVALID_SQUARE(sq) (sq & 0x88)
+#define VALID_SQUARE(sq) (!(INVALID_SQUARE(sq)))
+
+#define IS_PIECE(piece) (piece & PIECE_MASK)
+#define IS_BLACK_PIECE(piece) (piece & BLACK_PIECE_MASK)
+#define IS_WHITE_PIECE(piece) (piece && !(IS_BLACK_PIECE(piece)))
 
 struct Position {
   uint8_t mailbox[128]; // x88 mailbox flat array

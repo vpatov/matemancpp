@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(matemancpp VERSION 0.1.0)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 set(SOURCES
     src/main.cpp
     src/cli.cpp
@@ -8,11 +12,16 @@ set(SOURCES
     src/fen.cpp
     src/options.cpp
     src/move_generation.cpp
+    src/zobrist.cpp
+    src/parse_pgn.cpp
     include/cli.hpp
     include/position.hpp
     include/fen.hpp
     include/options.hpp
     include/move_generation.hpp
+    include/zobrist.hpp
+    include/squares.hpp
+    include/parse_pgn.hpp
 )
 
 
