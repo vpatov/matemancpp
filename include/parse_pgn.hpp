@@ -100,22 +100,25 @@ struct node {
 */
 
 // TODO
+// 1) implement next_position(from_square, dest_square, promotion)
+// 2) implement get_fromsq_destsq_promotion(playerMove)
+// 3) think about threading and locks for this code below
 /*
-  Probably want to create data structure that parser populates
+
 
 
   For each game:
     position = new Position in starting position:
-    current_node = opening_tablebase[starting_position]
+    current_node* = opening_tablebase[starting_position]
     If no result or elo below threshold: skip
     For every move in move list:
       key = (from_square, dest_square, promotion)
-      move = current_node.move_map.get(key, NULL);
+      move* = current_node.move_map.get(key, NULL);
 
       position = next_position(key)
 
       if (move != NULL){
-        move.times_played ++;
+        move->times_played ++;
         currrent_node = opening_tablebase[move.dest_hash];
       }
       else {
