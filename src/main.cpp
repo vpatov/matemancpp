@@ -12,6 +12,9 @@ int main(int argc, char *argv[]) { parse_all_pgn_files(); }
 /*
     Tasks
 
+    pgn parser - need to make multithreaded
+
+
     - Castling
     - Legal move generation
       - Move cannot cause mover's king to be in check
