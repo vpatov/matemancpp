@@ -1,51 +1,188 @@
 #include "parse_pgn.hpp"
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <memory>
+#include <regex>
+#include <sstream>
+#include <string>
+#include <tao/pegtl.hpp>
 
-/*
+#include <codecvt>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <locale>
+#include <string>
 
-[Event "St Stefan/Belgrade m"]
-[Site "Belgrade"]
-[Date "1992.??.??"]
-[Round "7"]
-[White "Fischer, Robert James"]
-[Black "Spassky, Boris V"]
-[Result "1-0"]
-[WhiteElo "2785"]
-[BlackElo "2560"]
-[ECO "C92"]
+namespace fs = std::filesystem;
 
-1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O Be7 6.Re1 b5 7.Bb3 d6 8.c3 O-O
-9.d3 Na5 10.Bc2 c5 11.Nbd2 Re8 12.h3 Bf8 13.Nf1 Bb7 14.Ng3 g6 15.Bg5 h6 16.Bd2
-d5 17.exd5 c4 18.b4 cxd3 19.Bxd3 Qxd5 20.Be4 Nxe4 21.Nxe4 Bg7 22.bxa5 f5 23.Ng3
-e4 24.Nh4 Bf6 25.Nxg6 e3 26.Nf4 Qxd2 27.Rxe3 Qxd1+ 28.Rxd1 Rxe3 29.fxe3 Rd8
-30.Rxd8+ Bxd8 31.Nxf5 Bxa5 32.Nd5 Kf8 33.e4 Bxd5 34.exd5 h5 35.Kf2 Bxc3 36.Ke3
-Kf7 37.Kd3 Bb2 38.g4 hxg4 39.hxg4 Kf6 40.d6 Ke6 41.g5 a5 42.g6 Bf6 43.g7 Kf7
-44.d7  1-0
+// Include the analyze function that checks
+// a grammar for possible infinite cycles.
 
-[Event "St Stefan/Belgrade m"]
-[Site "Belgrade"]
-[Date "1992.??.??"]
-[Round "8"]
-[White "Spassky, Boris V"]
-[Black "Fischer, Robert James"]
-[Result "0-1"]
-[WhiteElo "2560"]
-[BlackElo "2785"]
-[ECO "E84"]
+#include <tao/pegtl/contrib/analyze.hpp>
 
-1.d4 Nf6 2.c4 g6 3.Nc3 Bg7 4.e4 d6 5.f3 O-O 6.Be3 Nc6 7.Nge2 a6 8.Qd2 Rb8
-9.h4 h5 10.Bh6 e5 11.Bxg7 Kxg7 12.d5 Ne7 13.Ng3 c6 14.dxc6 Nxc6 15.O-O-O Be6
-16.Kb1 Ne8 17.Nd5 b5 18.Ne3 Rh8 19.Rc1 Qb6 20.Bd3 Nd4 21.Nd5 Qa7 22.Nf1 Nf6
-23.Nfe3 Bxd5 24.cxd5 Rbc8 25.Rcf1 Qe7 26.g4 Nd7 27.g5 Kf8 28.Rf2 Ke8 29.Bf1 Nc5
-30.Bh3 Rc7 31.Rc1 Ncb3 32.axb3 Nxb3 33.Rc6 Nxd2+ 34.Rxd2 Kf8 35.Rxa6 Ra7
-36.Rc6 Kg7 37.Bf1 Ra1+ 38.Kxa1 Qa7+ 39.Kb1 Qxe3 40.Kc2 b4  0-1
+namespace pegtl = TAO_PEGTL_NAMESPACE;
 
-*/
+namespace pgn_parser {
 
-void parse_pgn_game() {
-  parse_pgn_metadata();
-  parse_pgn_moves();
+using namespace tao::pegtl;
+
+struct metadata_val : seq<one<'"'>, until<at<one<'"'>>, any>, any> {};
+struct metadata_key : plus<alpha> {};
+struct metadata_line
+    : seq<one<'['>, metadata_key, space, metadata_val, one<']'>, pegtl::eol> {};
+
+struct pgn_group : pegtl::until<rep_min<1, eol>, metadata_line> {};
+
+struct sep : ascii::space {};
+struct file : utf8::range<'a', 'h'> {};
+struct rank : utf8::range<'1', '8'> {};
+struct piece : one<'K', 'Q', 'R', 'N', 'B'> {};
+struct capture : one<'x'> {};
+
+struct dest_square : seq<file, rank> {};
+
+struct mate : one<'#'> {};
+struct check : one<'+'> {};
+struct check_or_mate : sor<check, mate> {};
+
+struct kingside_castle : seq<one<'O'>, one<'-'>, one<'O'>> {};
+struct queenside_castle : seq<kingside_castle, one<'-'>, one<'O'>> {};
+
+struct promotion_move
+    : seq<rep_max<1, seq<file, capture>>, dest_square, one<'='>, piece> {};
+struct castle_move : sor<queenside_castle, kingside_castle> {};
+struct normal_move : star<sor<alpha, digit>> {
+}; // started normal_move by trying to actually represent from_square,
+   // dest_square, etc, but it ended up getting too complicated
+
+struct player_move : seq<sor<promotion_move, castle_move, normal_move>,
+                         rep_max<1, check_or_mate>, plus<sep>> {};
+struct game_move : seq<plus<digit>, one<'.'>, rep_min_max<1, 2, player_move>> {
+};
+
+struct one_half : seq<one<'1'>, one<'/'>, one<'2'>> {};
+struct draw : seq<one_half, one<'-'>, one_half> {};
+struct no_result : one<'*'> {};
+struct white_win : seq<one<'1'>, one<'-'>, one<'0'>> {};
+struct black_win : seq<one<'0'>, one<'-'>, one<'1'>> {};
+struct game_result : seq<sor<white_win, black_win, draw, no_result>, eol> {};
+
+struct game_moves : until<game_result, game_move> {};
+struct game : must<pgn_group, game_moves, star<eol>> {};
+struct pgn_file : until<eof, game> {};
+
+struct metadata_entry {
+  std::string key;
+  std::string value;
+};
+
+using result_data = std::vector<metadata_entry>;
+
+template <typename Rule> struct action {};
+
+template <> struct action<metadata_key> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, result_data &data) {
+    struct metadata_entry entry;
+    entry.key = in.string();
+    data.push_back(entry);
+  }
+};
+
+template <> struct action<metadata_val> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, result_data &data) {
+    // std::string res = in.string();
+    // data.back().value = res.substr(1, res.size() - 2);
+  }
+};
+
+template <> struct action<player_move> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, result_data &data) {
+    // std::cout << "player_move: '" << in.string() << "'" << std::endl;
+  }
+};
+
+template <> struct action<game_move> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, result_data &data) {
+    // std::cout << "game_move: '" << in.string() << "'" << std::endl;
+  }
+};
+
+template <> struct action<game_result> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, result_data &data) {
+    // std::cout << "game_result: '" << in.string() << "'" << std::endl;
+  }
+};
+
+template <> struct action<game_moves> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, result_data &data) {
+    // std::cout << "game_moves: '" << in.string() << "'" << std::endl;
+  }
+};
+
+template <> struct action<game> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, result_data &data) {
+    // std::string temp = in.string();
+
+    // std::cout << "game: \'" << temp.substr(0, 20) << "... ..."
+    //           << temp.substr(temp.size() - 20) << "'" << std::endl;
+  }
+};
+
+template <> struct action<pgn_group> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, result_data &data) {
+    // std::cout << "pgn_group: '" << in.string() << "'" << std::endl;
+  }
+};
+
+} // namespace pgn_parser
+
+void parse_all_pgn_files() {
+  parse_pgn_file("/home/vas/repos/matemancpp/database/pgn/Stein.pgn");
+
+  if (true) {
+    return;
+  }
+  std::string path = "/home/vas/repos/matemancpp/database/pgn";
+  for (const auto &entry : fs::directory_iterator(path)) {
+    parse_pgn_file(entry.path());
+  }
 }
 
-void parse_pgn_moves() {}
+void parse_pgn_file(std::string file_path) {
+
+  // Check the grammar for some possible issues.
+
+  if (pegtl::analyze<pgn_parser::pgn_file>() != 0) {
+    std::cout << "pgn_file grammar failed analysis. " << std::endl;
+    exit(1);
+  }
+
+  std::vector<pgn_parser::metadata_entry> res;
+
+  pegtl::file_input in(file_path);
+
+  try {
+    pegtl::parse<pgn_parser::pgn_file, pgn_parser::action>(in, res);
+
+  } catch (const pegtl::parse_error &e) {
+    const auto p = e.positions().front();
+    std::cerr << e.what() << std::endl
+              << in.line_at(p) << '\n'
+              << std::setw(p.column) << '^' << std::endl;
+  }
+}
 
 void parse_pgn_metadata() {}
+void parse_pgn_moves() {}

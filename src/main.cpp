@@ -2,16 +2,12 @@
 #include "cli.hpp"
 #include "fen.hpp"
 #include "move_generation.hpp"
+#include "parse_pgn.hpp"
 #include "position.hpp"
 #include "zobrist.hpp"
 #include <iostream>
 
-int main(int argc, char *argv[]) {
-  auto pos = starting_position();
-  uint8_t hash = zobrist_hash(pos);
-  //   std::cout << pos << std::endl;
-  //   cli_loop();
-}
+int main(int argc, char *argv[]) { parse_all_pgn_files(); }
 
 /*
     Tasks
