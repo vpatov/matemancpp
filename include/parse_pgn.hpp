@@ -22,13 +22,14 @@
 
 #define ELO_THRESHOLD 2200
 
+class OpeningTablebase;
 void parse_pgn_game();
 void parse_pgn_moves();
 void parse_pgn_metadata();
 void parse_pgn_file(std::string file_path);
 void parse_all_pgn_files();
-class Game;
-void process_player_move(std::string game_move, Game &current_game);
+void process_player_move(std::string game_move,
+                         OpeningTablebase &openingTablebase);
 
 struct move_edge {
   uint64_t dest_hash;

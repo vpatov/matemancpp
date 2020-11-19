@@ -1,4 +1,5 @@
 #include "parse_pgn.hpp"
+#include <tao/pegtl/contrib/trace.hpp>
 
 // std::string src_file = matches[1];
 // std::string src_rank = matches[2];
@@ -14,7 +15,7 @@
 //                      char dest_rank, std::string promotion,
 //                      char check_or_mate) {}
 
-void non_castling_move(std::smatch &matches, Game &game) {
+void non_castling_move(std::smatch &matches, OpeningTablebase &tablebase) {
   char src_file = matches[1].str().at(0);
   char src_rank = matches[2].str().at(0);
   char capture = matches[3].str().at(0);
@@ -77,8 +78,9 @@ void parse_pgn_file(std::string file_path) {
 
   // TODO why doesnt this parse anything? is some template wrong?
   try {
-    pegtl::parse<pgn_parser::pgn_file, pgn_parser::action>(in,
-                                                           &openingTablebase);
+    pegtl::complete_trace<pgn_parser::pgn_file>(in);
+    // pegtl::parse<pgn_parser::pgn_file, pgn_parser::action>(in,
+    //                                                        &openingTablebase);
 
   } catch (const pegtl::parse_error &e) {
     const auto p = e.positions().front();
@@ -92,6 +94,10 @@ void parse_pgn_metadata() {}
 void parse_pgn_moves() {}
 
 /*
+
+TODO use regex instead of pegtl parser to simplify everything. pegtl is slowing
+you down more than its helping, and its not the point of the project. It's also
+not particularly fast
 
 uint8_t start_square
 uint8_t end_square
@@ -121,6 +127,7 @@ struct node {
 // 1) implement next_position(from_square, dest_square, promotion)
 // 2) implement get_fromsq_destsq_promotion(playerMove)
 // 3) think about threading and locks for this code below
+// 4) Think about using regex instead of a parser
 /*
 
 
