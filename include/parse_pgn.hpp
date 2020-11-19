@@ -2,6 +2,8 @@
 #define __PARSE_PGN_H__
 
 #include "parse_pgn.hpp"
+#include "position.hpp"
+#include <boost/algorithm/string.hpp>
 #include <codecvt>
 #include <cstdlib>
 #include <filesystem>
@@ -16,6 +18,28 @@
 #include <string>
 #include <tao/pegtl.hpp>
 #include <tao/pegtl/contrib/analyze.hpp>
+#include <unordered_map>
+
+#define ELO_THRESHOLD 2200
+
+void parse_pgn_game();
+void parse_pgn_moves();
+void parse_pgn_metadata();
+void parse_pgn_file(std::string file_path);
+void parse_all_pgn_files();
+class Game;
+void process_player_move(std::string game_move, Game &current_game);
+
+struct move_edge {
+  uint64_t dest_hash;
+  uint32_t times_played;
+  // move key is concatenation of
+  // 0x00 + start_square + end_square + promotion_piece
+  uint32_t move_key;
+};
+
+// using position_node = ;
+// move_map;
 
 namespace pegtl = TAO_PEGTL_NAMESPACE;
 
@@ -73,152 +97,75 @@ struct metadata_entry {
   std::string value;
 };
 
-/*
+struct Game {
+  std::vector<metadata_entry> metadata;
+  Position position;
+  bool eloOverThreshold;
+};
 
-uint8_t start_square
-uint8_t end_square
-uint8_t promotion_piece (0 if no promotion)
-using move_key = uint32_t (concatenation of above);
-
-struct move {
-  uint64_t dest_hash
-  uint32_t times_played
-}
-
-
-struct node {
-
-  uint64_t hash (maybe not stored in node)
-  position (entire copy?, probably not)
-
-  // hash and position are technically not necessary to store, if
-  // we arrive at a position always walking from starting position
-
-  hashmap<move_key, uint64_t> move_map;
-  // might be better to use a vector and not a move_map
-}
-*/
-
-// TODO
-// 1) implement next_position(from_square, dest_square, promotion)
-// 2) implement get_fromsq_destsq_promotion(playerMove)
-// 3) think about threading and locks for this code below
-/*
-
-
-
-  For each game:
-    position = new Position in starting position:
-    current_node* = opening_tablebase[starting_position]
-    If no result or elo below threshold: skip
-    For every move in move list:
-      key = (from_square, dest_square, promotion)
-      move* = current_node.move_map.get(key, NULL);
-
-      position = next_position(key)
-
-      if (move != NULL){
-        move->times_played ++;
-        currrent_node = opening_tablebase[move.dest_hash];
-      }
-      else {
-        hash = calculate_zobrist_hash(position)
-        move = {
-          dest_hash : hash,
-          times_played : 1
-        };
-        current_node.move_map.set(key, move);
-      }
-*/
-
-using result_data = std::vector<metadata_entry>;
+class OpeningTablebase {
+  Game current_game;
+  std::unordered_map<uint64_t, std::vector<move_edge>> opening_tablebase;
+};
 
 template <typename Rule> struct action {};
 
 template <> struct action<metadata_key> {
   template <typename ActionInput>
-  static void apply(const ActionInput &in, result_data &data) {
+  static void apply(const ActionInput &in, OpeningTablebase &tablebase) {
     struct metadata_entry entry;
     entry.key = in.string();
-    data.push_back(entry);
+    tablebase.current_game.metadata.push_back(entry);
   }
 };
 
 template <> struct action<metadata_val> {
   template <typename ActionInput>
-  static void apply(const ActionInput &in, result_data &data) {
+  static void apply(const ActionInput &in, OpeningTablebase &tablebase) {
     std::string res = in.string();
-    data.back().value = res.substr(1, res.size() - 2);
-  }
-};
-
-// template <> struct action<metadata_key> {
-//   template <typename ActionInput>
-//   static void apply(const ActionInput &in, result_data &data) {
-//     struct metadata_entry entry;
-//     entry.key = in.string();
-//     data.push_back(entry);
-//   }
-// };
-
-// template <> struct action<metadata_val> {
-//   template <typename ActionInput>
-//   static void apply(const ActionInput &in, result_data &data) {
-//     // std::string res = in.string();
-//     data.back().value = res.substr(1, res.size() - 2);
-//   }
-// };
-
-template <> struct action<player_move> {
-  template <typename ActionInput>
-  static void apply(const ActionInput &in, result_data &data) {
-    // std::cout << "player_move: '" << in.string() << "'" << std::endl;
-  }
-};
-
-template <> struct action<game_move> {
-  template <typename ActionInput>
-  static void apply(const ActionInput &in, result_data &data) {
-    // std::cout << "game_move: '" << in.string() << "'" << std::endl;
-  }
-};
-
-template <> struct action<game_result> {
-  template <typename ActionInput>
-  static void apply(const ActionInput &in, result_data &data) {
-    // std::cout << "game_result: '" << in.string() << "'" << std::endl;
-  }
-};
-
-template <> struct action<game_moves> {
-  template <typename ActionInput>
-  static void apply(const ActionInput &in, result_data &data) {
-    // std::cout << "game_moves: '" << in.string() << "'" << std::endl;
-  }
-};
-
-template <> struct action<game> {
-  template <typename ActionInput>
-  static void apply(const ActionInput &in, result_data &data) {
-    // std::string temp = in.string();
-
-    // std::cout << "game: \'" << temp.substr(0, 20) << "... ..."
-    //           << temp.substr(temp.size() - 20) << "'" << std::endl;
+    tablebase.current_game.metadata.back().value =
+        res.substr(1, res.size() - 2);
   }
 };
 
 template <> struct action<pgn_group> {
   template <typename ActionInput>
-  static void apply(const ActionInput &in, result_data &data) {
-    // std::cout << "pgn_group: '" << in.string() << "'" << std::endl;
+  static void apply(const ActionInput &in, OpeningTablebase &tablebase) {
+    std::cout << "pgn_group" << std::endl;
+    auto metadata = tablebase.current_game.metadata;
+    int blackElo = 0;
+    int whiteElo = 0;
+    for (auto it = metadata.begin(); it != metadata.end(); it++) {
+      if (it->key.compare("WhiteElo")) {
+        whiteElo = std::stoi(it->value);
+        std::cout << "White elo: " << whiteElo << std::endl;
+      } else if (it->key.compare("BlackElo")) {
+        blackElo = std::stoi(it->value);
+      }
+    }
+    if (blackElo > ELO_THRESHOLD && whiteElo > ELO_THRESHOLD) {
+      tablebase.current_game.eloOverThreshold = true;
+    }
+  }
+};
+
+template <> struct action<player_move> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, OpeningTablebase &tablebase) {
+    // std::cout << "player_move: '" << in.string() << "'" << std::endl;
+    if (tablebase.current_game.eloOverThreshold) {
+      process_player_move(in.string(), tablebase);
+    }
+  }
+};
+
+template <> struct action<game> {
+  template <typename ActionInput>
+  static void apply(const ActionInput &in, OpeningTablebase &tablebase) {
+    std::cout << "game: '" << in.string() << "'" << std::endl;
   }
 };
 
 } // namespace pgn_parser
 
-void parse_pgn_game();
-void parse_pgn_moves();
-void parse_pgn_metadata();
-void parse_pgn_file(std::string file_path);
-void parse_all_pgn_files();
 #endif
