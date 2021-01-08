@@ -79,6 +79,7 @@ class PositionC {
 };
 
 uint8_t an_square_to_index(std::string square);
+uint8_t an_square_to_index(char src_file, char src_rank);
 std::string index_to_an_square(uint8_t index);
 void print_position(std::shared_ptr<Position> position);
 std::shared_ptr<Position> starting_position();

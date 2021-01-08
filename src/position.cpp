@@ -48,6 +48,10 @@ uint8_t an_square_to_index(std::string square) {
   return (square.at(0) - 'a') + ((square.at(1) - '1') * 0x10);
 }
 
+uint8_t an_square_to_index(char src_file, char src_rank) {
+  return (src_file - 'a') + ((src_rank - '1') * 0x10);
+}
+
 std::string index_to_an_square(uint8_t index) {
   return std::string() + (char)((index % 0x10) + 'a') +
          (char)((index / 0x10) + '1');

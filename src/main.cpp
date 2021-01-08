@@ -2,12 +2,12 @@
 #include "cli.hpp"
 #include "fen.hpp"
 #include "move_generation.hpp"
-#include "parse_pgn.hpp"
 #include "position.hpp"
+#include "read_pgn_data.hpp"
 #include "zobrist.hpp"
 #include <iostream>
 
-int main(int argc, char *argv[]) { parse_all_pgn_files(); }
+int main(int argc, char *argv[]) { read_all_pgn_files(); }
 
 /*
     Tasks

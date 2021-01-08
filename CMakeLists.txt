@@ -13,7 +13,7 @@ set(SOURCES
     src/options.cpp
     src/move_generation.cpp
     src/zobrist.cpp
-    src/parse_pgn.cpp
+    src/read_pgn_data.cpp
     include/cli.hpp
     include/position.hpp
     include/fen.hpp
@@ -21,7 +21,7 @@ set(SOURCES
     include/move_generation.hpp
     include/zobrist.hpp
     include/squares.hpp
-    include/parse_pgn.hpp
+    include/read_pgn_data.hpp
 )
 
 
