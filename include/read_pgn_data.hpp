@@ -52,6 +52,8 @@ struct Game {
       metadata_entry entry;
       entry.key = std::string(matches[1]);
       entry.value = std::string(matches[2]);
+      metadata.push_back(entry);
+
       return true;
     }
     return false;
@@ -128,17 +130,16 @@ struct Game {
     }
     uint8_t src_square;
     uint8_t dest_square;
-    uint8_t piece =
+    uint8_t piece;
 
-        // Very rare for both of these to be present. Only for some move like
-        // Qc1c2 (when theres multiple queens that could go to c2)
-        // where both src file and src rank are necessary for the move not to be
-        // ambigous
-        if (src_file && src_rank) {
+    // Very rare for both of these to be present. Only for some move like
+    // Qc1c2 (when theres multiple queens that could go to c2)
+    // where both src file and src rank are necessary for the move not to be
+    // ambigous
+    if (src_file && src_rank) {
       src_square = an_square_to_index(src_file, src_rank);
       dest_square = an_square_to_index(dest_file, dest_rank);
-    }
-    else if (src_file) {
+    } else if (src_file) {
     }
   }
 
