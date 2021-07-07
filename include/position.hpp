@@ -7,6 +7,7 @@
 #include <string>
 
 /**
+
   Mailbox
 
 112 113 114 115 116 117 118 119 |   120 121 122 123 124 125 126 127
@@ -17,9 +18,27 @@
 32  33  34  35  36  37  38  39  |   40  41  42  43  44  45  46  47
 16  17  18  19  20  21  22  23  |   24  25  26  27  28  29  30  31
 0   1   2   3   4   5   6   7   |   8   9   10  11  12  13  14  15
+
+  In hex
+
+70  71  72  73  74  75  76  77  |   78  79  7a  7b  7c  7d  7e  7f
+60  61  62  63  64  65  66  67  |   68  69  6a  6b  6c  6d  6e  6f
+50  51  52  53  54  55  56  57  |   58  59  5a  5b  5c  5d  5e  5f
+40  41  42  43  44  45  46  47  |   48  49  4a  4b  4c  4d  4e  4f
+30  31  32  33  34  35  36  37  |   38  39  3a  3b  3c  3d  3e  3f
+20  21  22  23  24  25  26  27  |   28  29  2a  2b  2c  2d  2e  2f
+10  11  12  13  14  15  16  17  |   18  19  1a  1b  1c  1d  1e  1f
+00  01  02  03  04  05  06  07  |   08  09  0a  0b  0c  0d  0e  0f
 */
 
 #define VOID_PIECE 0
+
+#define PAWN_CHAR 'P'
+#define ROOK_CHAR 'R'
+#define KNIGHT_CHAR 'N'
+#define BISHOP_CHAR 'B'
+#define QUEEN_CHAR 'Q'
+#define KING_CHAR 'K'
 
 #define PAWN 1
 #define ROOK 2
@@ -44,6 +63,10 @@
 #define B_BISHOP (BISHOP | BLACK_PIECE_MASK)
 #define B_QUEEN (QUEEN | BLACK_PIECE_MASK)
 #define B_KING (KING | BLACK_PIECE_MASK)
+
+const char PIECE_CHAR_MAP[24] = {'-', 'P', 'R', 'N', 'B', 'Q', 'K', 0,
+                                 0,   0,   0,   0,   0,   0,   0,   0,
+                                 0,   'p', 'r', 'n', 'b', 'q', 'k', 0};
 
 #define MAX_PIECE B_KING
 
@@ -80,6 +103,7 @@ class PositionC {
 
 uint8_t an_square_to_index(std::string square);
 uint8_t an_square_to_index(char src_file, char src_rank);
+uint8_t char_to_piece(char piece);
 std::string index_to_an_square(uint8_t index);
 void print_position(std::shared_ptr<Position> position);
 std::shared_ptr<Position> starting_position();

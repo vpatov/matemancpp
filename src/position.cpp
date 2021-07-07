@@ -57,24 +57,54 @@ std::string index_to_an_square(uint8_t index) {
          (char)((index / 0x10) + '1');
 }
 
-char piece_to_char(uint8_t piece) {
+uint8_t char_to_piece(char piece) {
+  bool white = piece >= 'A' && piece <= 'Z';
+  switch (std::toupper(piece)) {
+  case PAWN_CHAR:
+    return white ? W_PAWN : B_PAWN;
+  case ROOK_CHAR:
+    return white ? W_ROOK : B_ROOK;
+  case KNIGHT_CHAR:
+    return white ? W_KNIGHT : B_KNIGHT;
+  case BISHOP_CHAR:
+    return white ? W_BISHOP : B_BISHOP;
+  case QUEEN_CHAR:
+    return white ? W_QUEEN : B_QUEEN;
+  case KING_CHAR:
+    return white ? W_KING : B_KING;
+  default:
+    return 0;
+  }
+}
+
+char piece_to_char(uint8_t piece) { return PIECE_CHAR_MAP[piece]; }
+
+char old_piece_to_char(uint8_t piece) {
   bool white = piece & BLACK_PIECE_MASK;
+  char piece_char;
   switch (piece & PIECE_MASK) {
   case PAWN:
-    return 'P' + (white ? 0x20 : 0);
+    piece_char = 'P';
+    break;
   case ROOK:
-    return 'R' + (white ? 0x20 : 0);
+    piece_char = 'R';
+    break;
   case KNIGHT:
-    return 'N' + (white ? 0x20 : 0);
+    piece_char = 'N';
+    break;
   case BISHOP:
-    return 'B' + (white ? 0x20 : 0);
+    piece_char = 'B';
+    break;
   case QUEEN:
-    return 'Q' + (white ? 0x20 : 0);
+    piece_char = 'Q';
+    break;
   case KING:
-    return 'K' + (white ? 0x20 : 0);
+    piece_char = 'K';
+    break;
   default:
     return '-';
   }
+  return piece_char + (white ? 0x0 : 0x20);
 }
 
 void print_position(std::shared_ptr<Position> position) {
