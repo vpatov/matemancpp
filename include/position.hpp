@@ -2,6 +2,7 @@
 #define __POSITION_H__
 
 #include "squares.hpp"
+#include <assert.h>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -104,8 +105,13 @@ class PositionC {
 uint8_t an_square_to_index(std::string square);
 uint8_t an_square_to_index(char src_file, char src_rank);
 uint8_t char_to_piece(char piece);
+char piece_to_char(uint8_t piece);
 std::string index_to_an_square(uint8_t index);
-void print_position(std::shared_ptr<Position> position);
+void print_position(Position *position);
 std::shared_ptr<Position> starting_position();
+void populate_starting_position(Position *position);
+
+void adjust_position(Position *position, uint8_t src_square,
+                     uint8_t dest_square, uint8_t promotion_piece);
 
 #endif

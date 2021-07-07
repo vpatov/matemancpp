@@ -1,6 +1,7 @@
 #ifndef __READ_PGN_DATA_H__
 #define __READ_PGN_DATA_H__
 
+#include "move_generation.hpp"
 #include "position.hpp"
 #include <boost/algorithm/string.hpp>
 #include <codecvt>
@@ -16,6 +17,8 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+
+struct Game;
 
 struct metadata_entry {
   std::string key;
@@ -59,7 +62,7 @@ struct Game {
     return false;
   }
 
-  void process_player_move(std::string player_move) {
+  void process_player_move(std::string player_move, bool white) {
     uint32_t move_key;
 
     const std::string non_castling_move_regex =
@@ -76,7 +79,7 @@ struct Game {
     if (std::regex_match(player_move, matches,
                          std::regex(non_castling_move_regex))) {
 
-      move_key = non_castling_move(matches);
+      move_key = non_castling_move(matches, white);
 
     } else if (std::regex_match(player_move, matches,
                                 std::regex(castling_move_regex))) {
@@ -109,11 +112,18 @@ struct Game {
   // only the rook on the d file could have gone to a4, because the e file rook
   // is blocked by the d file rook. However, to program this correctly, I would
   // need to scan the rank, file, or diagonal (depending on the piece) to
-  // determine this.
-  uint32_t non_castling_move(std::smatch &matches) {
-    uint8_t src_square;
-    uint8_t dest_square;
-    uint8_t promotion_piece;
+  // determine this. To make matters worse, if two pieces of the same type could
+  // potentially move to the same square, but moving one would be illegal due to
+  // discovered check, then the move notation does not include the source
+  // file/rank.
+  // TODO: refactor into several smaller functions
+  uint32_t non_castling_move(std::smatch &matches, bool white) {
+    std::cout << "PGN move: " << matches[0] << std::endl;
+
+    uint8_t src_square = 0x7f;
+    uint8_t dest_square = 0x7f;
+    uint8_t promotion_piece = 0;
+    Color color = white ? Color::WHITE : Color::BLACK;
 
     char piece_char = getc(1, matches);
     char src_file = getc(2, matches);
@@ -126,17 +136,53 @@ struct Game {
 
     // Get the promotion piece
     if (promotion.size()) {
+      std::cout << "PROMOTION: (" << promotion << ")" << std::endl;
       promotion_piece = char_to_piece(promotion.at(1));
+      // piece should always be uppercase
+      assert(promotion_piece < PIECE_MASK);
     }
 
     // destination file and rank should be present in every non-castling move
     assert(dest_file && dest_rank);
+    dest_square = an_square_to_index(dest_file, dest_rank);
+
     bool is_pawn_move = !piece_char;
     if (is_pawn_move) {
       // there should never be a src_rank when it's a pawn move
       assert(!src_rank);
+      uint8_t target = white ? W_PAWN : B_PAWN;
 
-      // TODO: implement
+      if (capture) {
+        // if we are capturing, the src_file should be present
+        assert(src_file);
+        src_rank = white ? dest_rank - 1 : dest_rank + 1;
+        src_square = an_square_to_index(src_file, src_rank);
+        assert(position.mailbox[src_square] == target);
+      } else {
+        Direction direction = white ? Direction::DOWN : Direction::UP;
+        uint8_t candidate_square = STEP_DIRECTION(direction, dest_square);
+        if (position.mailbox[candidate_square] == target) {
+          src_square = candidate_square;
+        } else {
+          // If the pawn didn't come from the square we just checked, that
+          // square must be empty
+          assert(position.mailbox[candidate_square] == 0);
+          candidate_square = STEP_DIRECTION(direction, candidate_square);
+          assert(position.mailbox[candidate_square] == target);
+          src_square = candidate_square;
+        }
+      }
+    }
+
+    else if (piece_char == KING_CHAR) {
+
+    }
+
+    else if (piece_char == KNIGHT_CHAR) {
+
+    }
+
+    else if (piece_char == BISHOP_CHAR) {
     }
 
     // Very rare for both of src_file and src_rank to be present. Only for some
@@ -146,7 +192,6 @@ struct Game {
     // data.
     if (src_file && src_rank) {
       src_square = an_square_to_index(src_file, src_rank);
-      dest_square = an_square_to_index(dest_file, dest_rank);
     } else if (src_file) {
       // TODO: implement
     } else {
@@ -158,6 +203,23 @@ struct Game {
     // 0x00 + start_square + end_square + promotion_piece
     uint32_t move_key =
         (src_square << 16) + (dest_square << 8) + promotion_piece;
+
+    assert(!INVALID_SQUARE(dest_square));
+    if (INVALID_SQUARE(src_square)) {
+      std::cout << "Impl incomplete for move: " << matches[0] << std::endl;
+    } else {
+      std::cout << "Generated move: " << index_to_an_square(src_square)
+                << " -> " << index_to_an_square(dest_square);
+      if (promotion_piece) {
+        std::cout << " Promotion: " << piece_to_char(promotion_piece);
+      }
+      std::cout << std::endl << std::endl;
+
+      adjust_position(&this->position, src_square, dest_square,
+                      promotion_piece);
+
+      print_position(&this->position);
+    }
 
     return move_key;
   }
@@ -179,8 +241,8 @@ struct Game {
     std::smatch matches;
     while (std::regex_search(line, matches, game_line_regex)) {
       is_game_line = true;
-      process_player_move(matches[1]);
-      process_player_move(matches[2]);
+      process_player_move(matches[1], true);
+      process_player_move(matches[2], false);
       if (matches[3].length() > 1) {
         process_result(matches[3]);
       }
@@ -191,17 +253,7 @@ struct Game {
   }
 };
 
-void print_matches(std::smatch &matches) {
-  std::cout << matches[0] << std::endl;
-  std::cout << "1: " << matches[1] << std::endl;
-  std::cout << "2: " << matches[2] << std::endl;
-  std::cout << "3: " << matches[3] << std::endl;
-  std::cout << "4: " << matches[4] << std::endl;
-  std::cout << "5: " << matches[5] << std::endl;
-  std::cout << "6: " << matches[6] << std::endl;
-  std::cout << "7: " << matches[7] << std::endl;
-  std::cout << "8: " << matches[8] << std::endl;
-}
+void print_matches(std::smatch &matches);
 
 #define ELO_THRESHOLD 2200
 

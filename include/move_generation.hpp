@@ -30,9 +30,15 @@ constexpr bool white_mgen(Color C) { return C == Color::WHITE; }
 #define PREV_FILE(sq) (static_cast<uint8_t>(sq - FILE_OFFSET))
 #define NEXT_FILE(sq) (static_cast<uint8_t>(sq + FILE_OFFSET))
 
+#define RANKC_TO_RANK(rankc) (rankc - '1')
+#define FILEC_TO_FILE(filec) (filec - 'a')
+
 // Returns the rank that is forward relative to the player
 #define FORWARD_RANK(C, square)                                                \
   (white_mgen(C) ? NEXT_RANK(square) : PREV_RANK(square))
+
+#define BACKWARD_RANK(C, square)                                               \
+  (white_mgen(C) ? PREV_RANK(square) : NEXT_RANK(square))
 
 #define IN_SECOND_RANK(sq) (sq >= 16 && sq <= 23)
 #define IN_SEVENTH_RANK(sq) (sq >= 96 && sq <= 103)

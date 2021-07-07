@@ -34,12 +34,14 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
 
   // check diagonals for capture
   candidate = PREV_FILE(FORWARD_RANK(C, candidate));
-  if (VALID_SQUARE(candidate) && IS_BLACK_PIECE(position->mailbox[candidate])) {
+  if (VALID_SQUARE(candidate) &&
+      IS_OPPONENT_PIECE(C, position->mailbox[candidate])) {
     moves.push_back(candidate);
   }
 
   candidate = NEXT_FILE(FORWARD_RANK(C, candidate));
-  if (VALID_SQUARE(candidate) && IS_BLACK_PIECE(position->mailbox[candidate])) {
+  if (VALID_SQUARE(candidate) &&
+      IS_OPPONENT_PIECE(C, position->mailbox[candidate])) {
     moves.push_back(candidate);
   }
 

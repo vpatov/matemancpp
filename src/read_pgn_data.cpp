@@ -64,6 +64,7 @@ void read_pgn_file(std::string file_path) {
   std::ifstream infile(file_path);
   std::vector<Game> games;
   games.emplace_back();
+  populate_starting_position(&(games.back().position));
   bool reading_game = false;
   bool elo_calc_done = false;
   int whiteElo;
@@ -116,6 +117,18 @@ void read_pgn_file(std::string file_path) {
     }
   }
   std::cout << "Done" << std::endl;
+}
+
+void print_matches(std::smatch &matches) {
+  std::cout << matches[0] << std::endl;
+  std::cout << "1: " << matches[1] << std::endl;
+  std::cout << "2: " << matches[2] << std::endl;
+  std::cout << "3: " << matches[3] << std::endl;
+  std::cout << "4: " << matches[4] << std::endl;
+  std::cout << "5: " << matches[5] << std::endl;
+  std::cout << "6: " << matches[6] << std::endl;
+  std::cout << "7: " << matches[7] << std::endl;
+  std::cout << "8: " << matches[8] << std::endl;
 }
 
 void read_all_pgn_files() {
