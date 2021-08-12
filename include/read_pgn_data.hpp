@@ -117,6 +117,8 @@ struct Game {
   // discovered check, then the move notation does not include the source
   // file/rank.
   // TODO: refactor into several smaller functions
+  // TODO: create function that asserts that a given chess position is legal
+  // (includes turn to move)
   uint32_t non_castling_move(std::smatch &matches, bool white) {
     std::cout << "PGN move: " << matches[0] << std::endl;
 
@@ -174,6 +176,8 @@ struct Game {
       }
     }
 
+    // There is only one king per side so this should be simple
+    // There should never be ambiguity.
     else if (piece_char == KING_CHAR) {
 
     }
