@@ -31,7 +31,6 @@ struct node {
 // 2) implement get_fromsq_destsq_promotion(playerMove)
 // 3) think about threading and locks for this code below
 // 4) Think about using regex instead of a parser
-/*
 
 
 
@@ -133,7 +132,7 @@ void print_matches(std::smatch &matches) {
 
 void read_all_pgn_files() {
   // read_pgn_file("/home/vas/repos/matemancpp/database/pgn/Stein.pgn");
-  read_pgn_file("/home/vas/repos/matemancpp/database/pgn/zzztest.pgn");
+  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
 
   if (true) {
     return;

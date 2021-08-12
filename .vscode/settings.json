@@ -70,7 +70,8 @@
     "strstream": "cpp",
     "cfenv": "cpp",
     "valarray": "cpp",
-    "*.ipp": "cpp"
+    "*.ipp": "cpp",
+    "filesystem": "cpp"
   },
   "cmake.configureSettings": {
     "DCMAKE_TOOLCHAIN_FILE": "/home/vas/repos/vcpkg/scripts/buildsystems/vcpkg.cmake"

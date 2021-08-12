@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/main",
+            "program": "${workspaceFolder}/build/matemancpp",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -30,7 +30,7 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "program": "${workspaceFolder}/output/main",
+            "program": "${workspaceFolder}/build/matemancpp",
             "linux": {
                 "MIMode": "gdb",
                 "miDebuggerPath": "gdb",
@@ -39,7 +39,7 @@
             "osx": {
                 "MIMode": "lldb",
                 "miDebuggerPath": "lldb-mi",
-                "program": "${workspaceFolder}/output/main"
+                "program": "${workspaceFolder}/build/matemancpp"
             },
             "windows": {
                 "MIMode": "gdb",

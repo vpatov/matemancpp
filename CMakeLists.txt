@@ -5,6 +5,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+set(BOOST_ROOT /usr/local/boost_1_76_0)
+
+find_package(Boost 1.76.0 COMPONENTS algorithm format) 
+
+
+#find_package( Boost REQUIRED COMPONENTS algorithm format )
+include_directories( ${Boost_INCLUDE_DIRS} )
+
 set(SOURCES
     src/main.cpp
     src/cli.cpp
@@ -28,13 +39,10 @@ set(SOURCES
 
 add_executable(matemancpp ${SOURCES})
 
-find_path(BOOST_ALGORITHM_INCLUDE_DIRS "boost/algorithm/algorithm.hpp")
-target_include_directories(matemancpp PRIVATE ${BOOST_ALGORITHM_INCLUDE_DIRS})
-find_path(BOOST_FORMAT_INCLUDE_DIRS "boost/format.hpp")
-target_include_directories(matemancpp PRIVATE ${BOOST_FORMAT_INCLUDE_DIRS})
-
-find_package(pegtl CONFIG REQUIRED)
-target_link_libraries(matemancpp PRIVATE taocpp::pegtl)
+# find_path(BOOST_ALGORITHM_INCLUDE_DIRS "boost/algorithm/algorithm.hpp")
+# target_include_directories(matemancpp PRIVATE ${BOOST_ALGORITHM_INCLUDE_DIRS})
+# find_path(BOOST_FORMAT_INCLUDE_DIRS "boost/format.hpp")
+# target_include_directories(matemancpp PRIVATE ${BOOST_FORMAT_INCLUDE_DIRS})
 
 target_include_directories(matemancpp PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
