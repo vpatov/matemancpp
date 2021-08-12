@@ -255,6 +255,8 @@ struct Game
       // TODO:
       // if there is a src_rank or src_file, this should help disambiguate.
       // if one of the knights is blocking check, it cannot move.
+      // use new function legal_position to assist with this.
+      // LASTLEFTOFF
       else
       {
         std::cout << "Found more than one knight:" << std::endl;

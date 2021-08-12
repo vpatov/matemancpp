@@ -226,3 +226,105 @@ uint8_t find_king(Position *position, bool white)
   }
   return 127;
 }
+
+bool check_diagonal_or_file_or_rank(Position *position, uint8_t king_square, int offset, uint8_t target1, uint8_t target2)
+{
+  for (uint8_t candidate = king_square; VALID_SQUARE(candidate); candidate += offset)
+  {
+    uint8_t piece = position->mailbox[candidate];
+    // square is empty so we need to keep looking.
+    if (piece == 0)
+    {
+      continue;
+    }
+
+    // square contains either the enemy bishop or queen.
+    if (position->mailbox[candidate] == target1 || position->mailbox[candidate] == target2)
+    {
+      return false;
+    }
+
+    // square is not empty, and contains something other than an enemy bishop or queen, therefore it will
+    // block attacks along this diagonal, we can break.
+    else
+    {
+      break;
+    }
+  }
+  return true;
+}
+
+// king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
+bool legal_position(Position *position, bool whites_turn)
+{
+  Color enemy_color = whites_turn ? Color::BLACK : Color::WHITE;
+
+  // If it is white's turn to move, we have to make sure the black king is not in check (and vice-versa)
+  uint8_t king_square = find_king(position, !whites_turn);
+
+  // look for pawns attacking king
+  uint8_t target = whites_turn ? B_PAWN : W_PAWN;
+  uint8_t candidate = PREV_FILE(FORWARD_RANK(enemy_color, king_square));
+  if (candidate == target)
+  {
+    return false;
+  }
+  candidate = NEXT_FILE(FORWARD_RANK(enemy_color, king_square));
+  if (candidate == target)
+  {
+    return false;
+  }
+
+  // look for knights attacking king
+  std::vector<uint8_t> knights;
+  target = whites_turn ? B_KNIGHT : W_KNIGHT;
+  for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
+  {
+    candidate = *it + king_square;
+    if (INVALID_SQUARE(candidate))
+    {
+      continue;
+    }
+    if (position->mailbox[candidate] == target)
+    {
+      return false;
+    }
+  }
+
+  //look for bishops/queens attacking king on diagonals
+  target = whites_turn ? B_BISHOP : W_BISHOP;
+  uint8_t target2 = whites_turn ? B_QUEEN : W_QUEEN;
+  const int bishop_offsets[4] = {15, 17, -15, -17};
+  for (int i = 0; i < 4; i++)
+  {
+    if (!check_diagonal_or_file_or_rank(position, king_square, bishop_offsets[i], target, target2))
+    {
+      return false;
+    }
+  }
+
+  // look for rooks/queens attacking king on files+ranks;
+  target = whites_turn ? B_ROOK : W_ROOK;
+  const int rook_offsets[4] = {16, 1, -16, -1};
+
+  for (int i = 0; i < 4; i++)
+  {
+    if (!check_diagonal_or_file_or_rank(position, king_square, rook_offsets[i], target, target2))
+    {
+      return false;
+    }
+  }
+
+  // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.
+  target = whites_turn ? B_KING : W_KING;
+  for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
+  {
+    candidate = king_square + direction_offset(*it);
+    if (position->mailbox[candidate] == target)
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
