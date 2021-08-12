@@ -31,7 +31,11 @@ const std::vector<Direction> directions_vector = {
     Direction::DOWNLEFT,
     Direction::DOWNRIGHT};
 
-constexpr bool white_mgen(Color C) { return C == Color::WHITE; }
+constexpr bool
+white_mgen(Color C)
+{
+  return C == Color::WHITE;
+}
 
 #define PAWNC(C) (white_mgen(C) ? W_PAWN : B_PAWN)
 #define ROOKC(C) (white_mgen(C) ? W_ROOK : B_ROOK)
@@ -98,6 +102,16 @@ constexpr uint8_t direction_offset(Direction D)
     __builtin_unreachable();
   }
 }
+
+const std::vector<int> knight_move_offsets = {
+    RANK_OFFSET + RANK_OFFSET + FILE_OFFSET,
+    RANK_OFFSET + RANK_OFFSET - FILE_OFFSET,
+    -RANK_OFFSET - RANK_OFFSET + FILE_OFFSET,
+    -RANK_OFFSET - RANK_OFFSET - FILE_OFFSET,
+    FILE_OFFSET + FILE_OFFSET + RANK_OFFSET,
+    FILE_OFFSET + FILE_OFFSET - RANK_OFFSET,
+    -FILE_OFFSET - FILE_OFFSET + RANK_OFFSET,
+    -FILE_OFFSET - FILE_OFFSET - RANK_OFFSET};
 
 #define STEP_DIRECTION(D, square) (direction_offset(D) + square)
 

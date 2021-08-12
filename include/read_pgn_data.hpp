@@ -119,7 +119,7 @@ struct Game
   }
 
   // This function calculates and returns the move key, which is a concatenation
-  // of the source square, destination square, and promotion peice (complete
+  // of the source square, destination square, and promotion piece (complete
   // information necessary to understand a move). Non-trivial because this
   // involves a minimal amount of move logic in order to calculate correctly.
   // For instance assume you have an empty board except for two white rooks on
@@ -221,8 +221,49 @@ struct Game
       assert(found_orig);
     }
 
+    // PGN annotation only provides src rank and file if it is necessary to disambiguate.
     else if (piece_char == KNIGHT_CHAR)
     {
+      if (src_file && src_rank)
+      {
+        src_square = an_square_to_index(src_file, src_rank);
+      }
+      // find all knights a knight move away from the dest square
+      std::vector<uint8_t> knights;
+      for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
+      {
+        uint8_t square = *it + dest_square;
+        if (INVALID_SQUARE(square))
+        {
+          continue;
+        }
+        if (position.mailbox[square] == (white ? W_KNIGHT : B_KNIGHT))
+        {
+          knights.push_back(square);
+        }
+      }
+
+      // We should always find at least one knight.
+      assert(knights.size() > 0);
+
+      // if there was only one knight, we're done
+      if (knights.size() == 1)
+      {
+        src_square = knights.at(0);
+      }
+
+      // TODO:
+      // if there is a src_rank or src_file, this should help disambiguate.
+      // if one of the knights is blocking check, it cannot move.
+      else
+      {
+        std::cout << "Found more than one knight:" << std::endl;
+        for (auto it = knights.begin(); it != knights.end(); it++)
+        {
+          std::cout << (int)(*it) << std::endl;
+        }
+        assert(false);
+      }
     }
 
     else if (piece_char == BISHOP_CHAR)
@@ -230,10 +271,10 @@ struct Game
     }
 
     // Very rare for both of src_file and src_rank to be present. Only for some
-    // move like Qc1c2 (when theres multiple queens that could go to c2) where
-    // both src file and src rank are necessary for the move not to be ambigous.
-    // An example of this is move 54 in the custom lichess game in the test pgn
-    // data.
+    // moves like Qc1c2 or Nf3d4 where there are multiple pieces of the same type
+    // that could go to the same square, and both src file and src rank are necessary
+    // for the move not to be ambigous. An example of this is move 54 in the custom
+    // lichess game in the test pgn data.
     if (src_file && src_rank)
     {
       src_square = an_square_to_index(src_file, src_rank);
