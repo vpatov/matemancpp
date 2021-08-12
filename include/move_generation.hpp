@@ -4,8 +4,32 @@
 #include <cstdint>
 #include <vector>
 
-enum class Color { WHITE, BLACK };
-enum Direction { UP, DOWN, LEFT, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT };
+enum class Color
+{
+  WHITE,
+  BLACK
+};
+enum Direction
+{
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+  UPLEFT,
+  UPRIGHT,
+  DOWNLEFT,
+  DOWNRIGHT
+};
+
+const std::vector<Direction> directions_vector = {
+    Direction::UP,
+    Direction::DOWN,
+    Direction::LEFT,
+    Direction::RIGHT,
+    Direction::UPLEFT,
+    Direction::UPRIGHT,
+    Direction::DOWNLEFT,
+    Direction::DOWNRIGHT};
 
 constexpr bool white_mgen(Color C) { return C == Color::WHITE; }
 
@@ -16,9 +40,9 @@ constexpr bool white_mgen(Color C) { return C == Color::WHITE; }
 #define QUEENC(C) (white_mgen(C) ? W_QUEEN : B_QUEEN)
 #define KINGC(C) (white_mgen(C) ? W_KING : B_KING)
 
-#define KING_ROOK_SQUARE_C(C)                                                  \
+#define KING_ROOK_SQUARE_C(C) \
   (white_mgen(C) ? W_KING_ROOK_SQUARE : B_KING_ROOK_SQUARE)
-#define QUEEN_ROOK_SQUARE_C(C)                                                 \
+#define QUEEN_ROOK_SQUARE_C(C) \
   (white_mgen(C) ? W_QUEEN_ROOK_SQUARE : B_QUEEN_ROOK_SQUARE)
 
 #define RANK_OFFSET 16
@@ -34,24 +58,26 @@ constexpr bool white_mgen(Color C) { return C == Color::WHITE; }
 #define FILEC_TO_FILE(filec) (filec - 'a')
 
 // Returns the rank that is forward relative to the player
-#define FORWARD_RANK(C, square)                                                \
+#define FORWARD_RANK(C, square) \
   (white_mgen(C) ? NEXT_RANK(square) : PREV_RANK(square))
 
-#define BACKWARD_RANK(C, square)                                               \
+#define BACKWARD_RANK(C, square) \
   (white_mgen(C) ? PREV_RANK(square) : NEXT_RANK(square))
 
 #define IN_SECOND_RANK(sq) (sq >= 16 && sq <= 23)
 #define IN_SEVENTH_RANK(sq) (sq >= 96 && sq <= 103)
-#define IN_START_PAWN_RANK(C, square)                                          \
+#define IN_START_PAWN_RANK(C, square) \
   (white_mgen(C) ? IN_SECOND_RANK(square) : IN_SEVENTH_RANK(square))
 
-#define IS_YOUR_PIECE(C, piece)                                                \
+#define IS_YOUR_PIECE(C, piece) \
   (white_mgen(C) ? IS_WHITE_PIECE(piece) : IS_BLACK_PIECE(piece))
-#define IS_OPPONENT_PIECE(C, piece)                                            \
+#define IS_OPPONENT_PIECE(C, piece) \
   (white_mgen(C) ? IS_BLACK_PIECE(piece) : IS_WHITE_PIECE(piece))
 
-constexpr uint8_t direction_offset(Direction D) {
-  switch (D) {
+constexpr uint8_t direction_offset(Direction D)
+{
+  switch (D)
+  {
   case Direction::UP:
     return NEXT_RANK(0);
   case Direction::DOWN:

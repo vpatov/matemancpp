@@ -66,8 +66,8 @@
 #define B_KING (KING | BLACK_PIECE_MASK)
 
 const char PIECE_CHAR_MAP[24] = {'-', 'P', 'R', 'N', 'B', 'Q', 'K', 0,
-                                 0,   0,   0,   0,   0,   0,   0,   0,
-                                 0,   'p', 'r', 'n', 'b', 'q', 'k', 0};
+                                 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 'p', 'r', 'n', 'b', 'q', 'k', 0};
 
 #define MAX_PIECE B_KING
 
@@ -78,7 +78,8 @@ const char PIECE_CHAR_MAP[24] = {'-', 'P', 'R', 'N', 'B', 'Q', 'K', 0,
 #define IS_BLACK_PIECE(piece) (piece & BLACK_PIECE_MASK)
 #define IS_WHITE_PIECE(piece) (piece && !(IS_BLACK_PIECE(piece)))
 
-struct Position {
+struct Position
+{
   uint8_t mailbox[128]; // x88 mailbox flat array
   bool turn;            // true if white's turn
   bool white_kingside_castle;
@@ -91,7 +92,8 @@ struct Position {
                              // otherwise
 };
 
-class PositionC {
+class PositionC
+{
   uint8_t mailbox[128]; // x88 mailbox flat array
   bool turn;            // true if white's turn
   bool white_kingside_castle;
@@ -113,5 +115,7 @@ void populate_starting_position(Position *position);
 
 void adjust_position(Position *position, uint8_t src_square,
                      uint8_t dest_square, uint8_t promotion_piece);
+
+uint8_t find_king(Position *position, bool white);
 
 #endif

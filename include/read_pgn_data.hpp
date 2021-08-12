@@ -20,12 +20,14 @@
 
 struct Game;
 
-struct metadata_entry {
+struct metadata_entry
+{
   std::string key;
   std::string value;
 };
 
-struct move_edge {
+struct move_edge
+{
   uint64_t dest_hash;
   uint32_t times_played;
   // move key is bit-wise concatenation of
@@ -33,12 +35,14 @@ struct move_edge {
   uint32_t move_key;
 };
 
-struct OpeningTablebase {
+struct OpeningTablebase
+{
   Game *current_game;
   std::unordered_map<uint64_t, std::vector<move_edge>> opening_tablebase;
 };
 
-struct Game {
+struct Game
+{
   std::vector<metadata_entry> metadata;
   Position position;
   bool eloOverThreshold;
@@ -46,12 +50,14 @@ struct Game {
   std::string result;
   std::vector<uint32_t> move_list;
 
-  bool read_metadata_line(std::string &line) {
+  bool read_metadata_line(std::string &line)
+  {
     const std::string metadata_line_regex =
         "^\\s*\\[(\\w+)\\s\"(.*?)\"\\]\\s*$";
 
     std::smatch matches;
-    if (std::regex_match(line, matches, std::regex(metadata_line_regex))) {
+    if (std::regex_match(line, matches, std::regex(metadata_line_regex)))
+    {
       metadata_entry entry;
       entry.key = std::string(matches[1]);
       entry.value = std::string(matches[2]);
@@ -62,7 +68,8 @@ struct Game {
     return false;
   }
 
-  void process_player_move(std::string player_move, bool white) {
+  void process_player_move(std::string player_move, bool white)
+  {
     uint32_t move_key;
 
     const std::string non_castling_move_regex =
@@ -71,33 +78,41 @@ struct Game {
     const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
     boost::algorithm::trim(player_move);
 
-    if (player_move.size() == 0) {
+    if (player_move.size() == 0)
+    {
       return;
     }
 
     std::smatch matches;
     if (std::regex_match(player_move, matches,
-                         std::regex(non_castling_move_regex))) {
+                         std::regex(non_castling_move_regex)))
+    {
 
       move_key = non_castling_move(matches, white);
-
-    } else if (std::regex_match(player_move, matches,
-                                std::regex(castling_move_regex))) {
+    }
+    else if (std::regex_match(player_move, matches,
+                              std::regex(castling_move_regex)))
+    {
 
       std::string kingside_castle = matches[1];
       std::string queenside_castle = matches[2];
       std::string check_or_mate = matches[3];
-    } else {
+    }
+    else
+    {
       std::cout << "no match: " << player_move << std::endl;
     }
 
     // push the parsed move key to the move list
-    std::cout << "Pushing: " << std::hex << move_key << std::endl << std::dec;
+    std::cout << "Pushing: " << std::hex << move_key << std::endl
+              << std::dec;
     move_list.push_back(move_key);
   }
 
-  char getc(int i, std::smatch &matches) {
-    if (matches[i].length()) {
+  char getc(int i, std::smatch &matches)
+  {
+    if (matches[i].length())
+    {
       return matches[i].str().at(0);
     }
     return 0;
@@ -119,7 +134,8 @@ struct Game {
   // TODO: refactor into several smaller functions
   // TODO: create function that asserts that a given chess position is legal
   // (includes turn to move)
-  uint32_t non_castling_move(std::smatch &matches, bool white) {
+  uint32_t non_castling_move(std::smatch &matches, bool white)
+  {
     std::cout << "PGN move: " << matches[0] << std::endl;
 
     uint8_t src_square = 0x7f;
@@ -137,7 +153,8 @@ struct Game {
     char check_or_mate = getc(8, matches);
 
     // Get the promotion piece
-    if (promotion.size()) {
+    if (promotion.size())
+    {
       std::cout << "PROMOTION: (" << promotion << ")" << std::endl;
       promotion_piece = char_to_piece(promotion.at(1));
       // piece should always be uppercase
@@ -149,23 +166,30 @@ struct Game {
     dest_square = an_square_to_index(dest_file, dest_rank);
 
     bool is_pawn_move = !piece_char;
-    if (is_pawn_move) {
+    if (is_pawn_move)
+    {
       // there should never be a src_rank when it's a pawn move
       assert(!src_rank);
       uint8_t target = white ? W_PAWN : B_PAWN;
 
-      if (capture) {
+      if (capture)
+      {
         // if we are capturing, the src_file should be present
         assert(src_file);
         src_rank = white ? dest_rank - 1 : dest_rank + 1;
         src_square = an_square_to_index(src_file, src_rank);
         assert(position.mailbox[src_square] == target);
-      } else {
+      }
+      else
+      {
         Direction direction = white ? Direction::DOWN : Direction::UP;
         uint8_t candidate_square = STEP_DIRECTION(direction, dest_square);
-        if (position.mailbox[candidate_square] == target) {
+        if (position.mailbox[candidate_square] == target)
+        {
           src_square = candidate_square;
-        } else {
+        }
+        else
+        {
           // If the pawn didn't come from the square we just checked, that
           // square must be empty
           assert(position.mailbox[candidate_square] == 0);
@@ -178,15 +202,31 @@ struct Game {
 
     // There is only one king per side so this should be simple
     // There should never be ambiguity.
-    else if (piece_char == KING_CHAR) {
+    else if (piece_char == KING_CHAR)
+    {
+      src_square = find_king(&position, white);
+      assert(VALID_SQUARE(src_square));
 
+      // assert that the square that we found the king at, is one square away from the square he supposedly moved to.
+      bool found_orig = false;
+      for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
+      {
+        uint8_t check = dest_square + direction_offset(*it);
+        if (check == src_square)
+        {
+          found_orig = true;
+          break;
+        }
+      }
+      assert(found_orig);
     }
 
-    else if (piece_char == KNIGHT_CHAR) {
-
+    else if (piece_char == KNIGHT_CHAR)
+    {
     }
 
-    else if (piece_char == BISHOP_CHAR) {
+    else if (piece_char == BISHOP_CHAR)
+    {
     }
 
     // Very rare for both of src_file and src_rank to be present. Only for some
@@ -194,11 +234,16 @@ struct Game {
     // both src file and src rank are necessary for the move not to be ambigous.
     // An example of this is move 54 in the custom lichess game in the test pgn
     // data.
-    if (src_file && src_rank) {
+    if (src_file && src_rank)
+    {
       src_square = an_square_to_index(src_file, src_rank);
-    } else if (src_file) {
+    }
+    else if (src_file)
+    {
       // TODO: implement
-    } else {
+    }
+    else
+    {
       // TODO: implement
     }
 
@@ -209,15 +254,20 @@ struct Game {
         (src_square << 16) + (dest_square << 8) + promotion_piece;
 
     assert(!INVALID_SQUARE(dest_square));
-    if (INVALID_SQUARE(src_square)) {
+    if (INVALID_SQUARE(src_square))
+    {
       std::cout << "Impl incomplete for move: " << matches[0] << std::endl;
-    } else {
+    }
+    else
+    {
       std::cout << "Generated move: " << index_to_an_square(src_square)
                 << " -> " << index_to_an_square(dest_square);
-      if (promotion_piece) {
+      if (promotion_piece)
+      {
         std::cout << " Promotion: " << piece_to_char(promotion_piece);
       }
-      std::cout << std::endl << std::endl;
+      std::cout << std::endl
+                << std::endl;
 
       adjust_position(&this->position, src_square, dest_square,
                       promotion_piece);
@@ -228,12 +278,14 @@ struct Game {
     return move_key;
   }
 
-  void process_result(std::string resultstr) {
+  void process_result(std::string resultstr)
+  {
     result = std::move(resultstr);
     finishedReading = true;
   }
 
-  bool read_game_move_line(std::string &line) {
+  bool read_game_move_line(std::string &line)
+  {
 
     const std::string result_regex_str =
         R"((((?:1\/2|1|0)\s*\-\s*(?:1\/2|1|0)\s*$)|\*)?)";
@@ -243,11 +295,13 @@ struct Game {
 
     bool is_game_line = false;
     std::smatch matches;
-    while (std::regex_search(line, matches, game_line_regex)) {
+    while (std::regex_search(line, matches, game_line_regex))
+    {
       is_game_line = true;
       process_player_move(matches[1], true);
       process_player_move(matches[2], false);
-      if (matches[3].length() > 1) {
+      if (matches[3].length() > 1)
+      {
         process_result(matches[3]);
       }
       line = matches.suffix().str();
