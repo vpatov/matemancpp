@@ -89,7 +89,13 @@
     "__tuple": "cpp",
     "ios": "cpp",
     "locale": "cpp",
-    "stack": "cpp"
+    "stack": "cpp",
+    "compare": "cpp",
+    "concepts": "cpp",
+    "numbers": "cpp",
+    "queue": "cpp",
+    "semaphore": "cpp",
+    "stop_token": "cpp"
   },
   "cmake.configureSettings": {
     "DCMAKE_TOOLCHAIN_FILE": "/home/vas/repos/vcpkg/scripts/buildsystems/vcpkg.cmake"

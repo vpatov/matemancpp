@@ -104,9 +104,13 @@ struct Game
     }
 
     // push the parsed move key to the move list
+    std::cout << "Move: " << position.plies << std::endl;
     std::cout << "Pushing: " << std::hex << move_key << std::endl
               << std::dec;
     move_list.push_back(move_key);
+
+    // TODO remove this!!!
+    position.plies++;
   }
 
   char getc(int i, std::smatch &matches)
@@ -221,6 +225,16 @@ struct Game
       assert(found_orig);
     }
 
+    // Very rare for both of src_file and src_rank to be present. Only for some
+    // moves like Qc1c2 or Nf3d4 where there are multiple pieces of the same type
+    // that could go to the same square, and both src file and src rank are necessary
+    // for the move not to be ambigous. An example of this is move 54 in the custom
+    // lichess game in the test pgn data.
+    if (src_file && src_rank)
+    {
+      src_square = an_square_to_index(src_file, src_rank);
+    }
+
     // PGN annotation only provides src rank and file if it is necessary to disambiguate.
     else if (piece_char == KNIGHT_CHAR)
     {
@@ -259,35 +273,35 @@ struct Game
       // LASTLEFTOFF
       else
       {
+        if (matches[0].compare("Nge7") == 0)
+        {
+          std::cout << "breakpoint" << std::endl;
+        }
+
         std::cout << "Found more than one knight:" << std::endl;
         for (auto it = knights.begin(); it != knights.end(); it++)
         {
-          std::cout << (int)(*it) << std::endl;
+          if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
+          {
+            // ensure the position is legal
+            adjust_position(&position, *it, dest_square, 0);
+            if (legal_position(&position, white))
+            {
+              src_square = *it;
+              adjust_position(&position, dest_square, src_square, 0);
+              break;
+            }
+            else
+            {
+              adjust_position(&position, dest_square, *it, 0);
+            }
+          }
         }
-        assert(false);
       }
     }
 
     else if (piece_char == BISHOP_CHAR)
     {
-    }
-
-    // Very rare for both of src_file and src_rank to be present. Only for some
-    // moves like Qc1c2 or Nf3d4 where there are multiple pieces of the same type
-    // that could go to the same square, and both src file and src rank are necessary
-    // for the move not to be ambigous. An example of this is move 54 in the custom
-    // lichess game in the test pgn data.
-    if (src_file && src_rank)
-    {
-      src_square = an_square_to_index(src_file, src_rank);
-    }
-    else if (src_file)
-    {
-      // TODO: implement
-    }
-    else
-    {
-      // TODO: implement
     }
 
     // src_square and dest_square should be sufficiently populated at this point
@@ -315,8 +329,9 @@ struct Game
       adjust_position(&this->position, src_square, dest_square,
                       promotion_piece);
 
-      print_position(&this->position);
-    }
+      // print_position(&this->position);
+      print_position_with_borders(&this->position);
+        }
 
     return move_key;
   }

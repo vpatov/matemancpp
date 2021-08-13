@@ -105,6 +105,16 @@ std::string index_to_an_square(uint8_t index)
          (char)((index / 0x10) + '1');
 }
 
+char index_to_an_file(uint8_t index)
+{
+  return (char)((index % 0x10) + 'a');
+}
+
+char index_to_an_rank(uint8_t index)
+{
+  return (char)((index / 0x10) + '1');
+}
+
 uint8_t char_to_piece(char piece)
 {
   bool white = piece >= 'A' && piece <= 'Z';
@@ -188,7 +198,7 @@ void adjust_position(Position *position, uint8_t src_square,
 
 void print_position(Position *position)
 {
-  int i = 0x70;
+  int i = 0x70; //0x70 is the top-left corner of the board
   while (1)
   {
     std::cout << piece_to_char(position->mailbox[i]) << " ";
@@ -205,6 +215,51 @@ void print_position(Position *position)
       std::cout << std::endl;
     }
   }
+}
+
+void print_position_with_borders(Position *position)
+{
+  int i = 0x70;
+  char rank = '8';
+
+  std::cout << "   ";
+  for (char file = 'a'; file <= 'h'; file++)
+  {
+    // bold (or black?)
+    // std::cout << "\e[1m" << file << "\e[0m"
+    //           << " ";
+    std::cout << file << " ";
+  }
+  std::cout << std::endl
+            << std::endl;
+
+  while (1)
+  {
+    if (i % 16 == 0)
+    {
+      std::cout << rank << "  ";
+    }
+    std::cout << piece_to_char(position->mailbox[i]) << " ";
+    i++;
+
+    if (i & 0x88)
+    {
+      i -= 0x18;
+      std::cout << "  " << rank-- << std::endl;
+    }
+    if (i == (8 - 0x18))
+    {
+      break;
+    }
+  }
+  std::cout << std::endl;
+  std::cout << "   ";
+  for (char file = 'a'; file <= 'h'; file++)
+  {
+    std::cout << file << " ";
+  }
+  std::cout << std::endl
+            << std::endl;
 }
 
 /*
@@ -260,7 +315,7 @@ bool legal_position(Position *position, bool whites_turn)
   Color enemy_color = whites_turn ? Color::BLACK : Color::WHITE;
 
   // If it is white's turn to move, we have to make sure the black king is not in check (and vice-versa)
-  uint8_t king_square = find_king(position, !whites_turn);
+  uint8_t king_square = find_king(position, whites_turn);
 
   // look for pawns attacking king
   uint8_t target = whites_turn ? B_PAWN : W_PAWN;
