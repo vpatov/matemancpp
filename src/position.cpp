@@ -139,9 +139,22 @@ uint8_t char_to_piece(char piece)
 
 char piece_to_char(uint8_t piece) { return PIECE_CHAR_MAP[piece]; }
 
+std::string piece_to_color_coded_char(uint8_t piece)
+{
+  char chr = PIECE_CHAR_MAP[piece];
+  bool white = IS_WHITE_PIECE(piece);
+
+  if (chr == '-')
+  {
+    return std::string("-");
+  }
+
+  return (white ? std::string("\u001b[38;5;231m") : std::string("\u001b[38;5;94m")) + chr + std::string("\u001b[0m");
+}
+
 char old_piece_to_char(uint8_t piece)
 {
-  bool white = piece & BLACK_PIECE_MASK;
+  bool white = IS_WHITE_PIECE(piece);
   char piece_char;
   switch (piece & PIECE_MASK)
   {
@@ -239,7 +252,7 @@ void print_position_with_borders(Position *position)
     {
       std::cout << rank << "  ";
     }
-    std::cout << piece_to_char(position->mailbox[i]) << " ";
+    std::cout << piece_to_color_coded_char(position->mailbox[i]) << " ";
     i++;
 
     if (i & 0x88)

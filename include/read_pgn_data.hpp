@@ -161,8 +161,13 @@ struct Game
     {
       std::cout << "PROMOTION: (" << promotion << ")" << std::endl;
       promotion_piece = char_to_piece(promotion.at(1));
-      // piece should always be uppercase
+      // piece should always be uppercase because pieces are uppercase in PGN.
       assert(promotion_piece < PIECE_MASK);
+
+      if (!white)
+      {
+        promotion_piece &= BLACK_PIECE_MASK;
+      }
     }
 
     // destination file and rank should be present in every non-castling move
@@ -183,6 +188,7 @@ struct Game
         src_rank = white ? dest_rank - 1 : dest_rank + 1;
         src_square = an_square_to_index(src_file, src_rank);
         assert(position.mailbox[src_square] == target);
+        assert(IS_PIECE(position.mailbox[dest_square]));
       }
       else
       {
@@ -304,6 +310,14 @@ struct Game
     {
     }
 
+    else if (piece_char == ROOK_CHAR)
+    {
+    }
+
+    else if (piece_char == QUEEN_CHAR)
+    {
+    }
+
     // src_square and dest_square should be sufficiently populated at this point
     // move key is bit-wise concatenation of
     // 0x00 + start_square + end_square + promotion_piece
@@ -331,7 +345,7 @@ struct Game
 
       // print_position(&this->position);
       print_position_with_borders(&this->position);
-        }
+    }
 
     return move_key;
   }
