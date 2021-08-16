@@ -109,7 +109,7 @@ struct Game
     }
 
     // push the parsed move key to the move list
-    std::cout << "Move: " << position.plies << std::endl;
+    std::cout << "Ply: " << position.plies << std::endl;
     std::cout << "Pushing: " << std::hex << move_key << std::endl
               << std::dec;
     std::cout << std::endl
@@ -131,17 +131,16 @@ struct Game
 
   uint32_t castling_move(std::smatch &matches, bool white)
   {
-    std::cout << "=================================" << std::endl;
-    std::cout << metadata.at(0).value << std::endl;
     std::cout << (white ? "White's turn." : "Black's turn.") << std::endl;
     std::cout << "PGN move: " << matches[0] << std::endl;
-    std::string kingside_castle = matches[1];
+
+    std::string whichever_castle = matches[1];
     std::string queenside_castle = matches[2];
-    std::string whichever_castle = matches[3];
+    std::string kingside_castle = matches[3];
     std::string check_or_mate = matches[4];
-    std::cout << "kingside_castle: " << kingside_castle << std::endl;
-    std::cout << "queenside_castle: " << queenside_castle << std::endl;
     std::cout << "whichever_castle: " << whichever_castle << std::endl;
+    std::cout << "queenside_castle: " << queenside_castle << std::endl;
+    std::cout << "kingside_castle: " << kingside_castle << std::endl;
     std::cout << "check_or_mate: " << check_or_mate << std::endl;
 
     uint8_t src_square = 0x7f;
@@ -205,8 +204,6 @@ struct Game
   // TODO: consider rewriting this but with using piece lists (would probably be much easier)
   uint32_t non_castling_move(std::smatch &matches, bool white)
   {
-    std::cout << "=================================" << std::endl;
-    std::cout << metadata.at(0).value << std::endl;
     std::cout << (white ? "White's turn." : "Black's turn") << std::endl;
     std::cout << "PGN move: " << matches[0] << std::endl;
 
@@ -534,6 +531,9 @@ struct Game
     while (std::regex_search(line, matches, game_line_regex))
     {
       is_game_line = true;
+      std::cout << "=================================" << std::endl;
+      std::cout << metadata.at(0).value << std::endl;
+      std::cout << matches[0] << std::endl;
       process_player_move(matches[1], true);
       process_player_move(matches[2], false);
       if (matches[3].length() > 1)

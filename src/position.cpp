@@ -269,8 +269,8 @@ void perform_castle(Position *position, bool white, bool short_castle)
       assert(position->mailbox[B_KING_LONG_CASTLE_SQUARE] == 0);
       assert(position->mailbox[B_ROOK_LONG_CASTLE_SQUARE] == 0);
 
-      position->mailbox[B_KING_LONG_CASTLE_SQUARE] = W_KING;
-      position->mailbox[B_ROOK_LONG_CASTLE_SQUARE] = W_ROOK;
+      position->mailbox[B_KING_LONG_CASTLE_SQUARE] = B_KING;
+      position->mailbox[B_ROOK_LONG_CASTLE_SQUARE] = B_ROOK;
     }
   }
 }
