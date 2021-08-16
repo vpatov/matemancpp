@@ -140,17 +140,34 @@ uint8_t char_to_piece(char piece)
 
 char piece_to_char(uint8_t piece) { return PIECE_CHAR_MAP[piece]; }
 
-std::string piece_to_color_coded_char(uint8_t piece)
+std::string piece_to_color_coded_char(uint8_t piece, bool highlight)
 {
-  char chr = PIECE_CHAR_MAP[piece];
+  // char chr = PIECE_CHAR_MAP[piece];
+  // with color output, all of them can be made uppercase
+  char chr = PIECE_CHAR_MAP[piece & PIECE_MASK];
   bool white = IS_WHITE_PIECE(piece);
 
+  std::string white_color = "\u001b[38;5;231";
+  std::string black_color = "\u001b[38;5;94";
+  std::string highlight_code = ";48;5;";
+  std::string highlight_color = "233";
+  std::string escape = "\u001b[0m";
+
+  // "\u001b[38;5;231;48;5;81m TEST \u001b[0m"
+  // 81 is light blue
+  // 244 is slate grey
   if (chr == '-')
   {
+    if (highlight)
+    {
+      return std::string("\u001b[48;5;") + highlight_color + "m" + "-" + escape;
+    }
     return std::string("-");
   }
 
-  return (white ? std::string("\u001b[38;5;231m") : std::string("\u001b[38;5;94m")) + chr + std::string("\u001b[0m");
+  return (white ? white_color : black_color) +
+         (highlight ? highlight_code + highlight_color : "") + "m" +
+         chr + escape;
 }
 
 std::string piece_to_unicode_char(uint8_t piece)
@@ -306,9 +323,6 @@ void print_position_with_borders(Position *position)
   std::cout << "   ";
   for (char file = 'a'; file <= 'h'; file++)
   {
-    // bold (or black?)
-    // std::cout << "\e[1m" << file << "\e[0m"
-    //           << " ";
     std::cout << file << " ";
   }
   std::cout << std::endl
@@ -320,7 +334,60 @@ void print_position_with_borders(Position *position)
     {
       std::cout << rank << "  ";
     }
-    std::cout << piece_to_color_coded_char(position->mailbox[i]) << " ";
+    std::cout << piece_to_color_coded_char(position->mailbox[i], false) << " ";
+    i++;
+
+    if (i & 0x88)
+    {
+      i -= 0x18;
+      std::cout << "  " << rank-- << std::endl;
+    }
+    if (i == (8 - 0x18))
+    {
+      break;
+    }
+  }
+  std::cout << std::endl;
+  std::cout << "   ";
+  for (char file = 'a'; file <= 'h'; file++)
+  {
+    std::cout << file << " ";
+  }
+  std::cout << std::endl
+            << std::endl;
+}
+
+void print_position_with_borders_highlight_squares(Position *position, uint8_t src_square, uint8_t dest_square)
+{
+  int i = 0x70;
+  char rank = '8';
+
+  std::cout << "   ";
+  for (char file = 'a'; file <= 'h'; file++)
+  {
+    std::cout << file << " ";
+  }
+  std::cout << std::endl
+            << std::endl;
+
+  while (1)
+  {
+    if (i % 16 == 0)
+    {
+      std::cout << rank << "  ";
+    }
+    if (i == src_square)
+    {
+      std::cout << piece_to_color_coded_char(position->mailbox[i], true) << " ";
+    }
+    else if (i == dest_square)
+    {
+      std::cout << piece_to_color_coded_char(position->mailbox[i], true) << " ";
+    }
+    else
+    {
+      std::cout << piece_to_color_coded_char(position->mailbox[i], false) << " ";
+    }
     i++;
 
     if (i & 0x88)

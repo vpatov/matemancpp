@@ -117,13 +117,14 @@ uint8_t an_square_to_index(std::string square);
 uint8_t an_square_to_index(char src_file, char src_rank);
 uint8_t char_to_piece(char piece);
 char piece_to_char(uint8_t piece);
-std::string piece_to_color_coded_char(uint8_t piece);
+std::string piece_to_color_coded_char(uint8_t piece, bool highlight);
 std::string piece_to_unicode_char(uint8_t piece);
 std::string index_to_an_square(uint8_t index);
 char index_to_an_file(uint8_t index);
 char index_to_an_rank(uint8_t index);
 void print_position(Position *position);
 void print_position_with_borders(Position *position);
+void print_position_with_borders_highlight_squares(Position *position, uint8_t src_square, uint8_t dest_square);
 std::shared_ptr<Position> starting_position();
 void populate_starting_position(Position *position);
 

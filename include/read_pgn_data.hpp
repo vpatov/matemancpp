@@ -183,7 +183,7 @@ struct Game
     {
       move_key = short_castle ? 3 : 4;
     }
-    print_position_with_borders(&this->position);
+    print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
 
     return move_key;
   }
@@ -351,8 +351,13 @@ struct Game
           // they are blocking check. PGN annotation in this case does not add the file/rank to disambiguate in this case,
           // because it is not necessary. This code covers that case.
 
-          // if either just the file or just the rank is present.
-          if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
+          // if either just the file or just the rank is present, and one of them is equal to the src_file
+          // or src_rank from the pgn move OR
+          // neither of src_file or src_rank are present
+          if (
+              ((src_file && index_to_an_file(*it) == src_file) ||
+               (src_rank && src_rank == index_to_an_rank(*it))) ||
+              (!src_file && !src_rank))
           {
 
             // temporarily assume the move
@@ -500,6 +505,7 @@ struct Game
     if (IS_INVALID_SQUARE(src_square))
     {
       std::cout << "Impl incomplete for move: " << matches[0] << std::endl;
+      assert(false);
     }
     else
     {
@@ -516,7 +522,7 @@ struct Game
                       promotion_piece, en_passant_square);
 
       // print_position(&this->position);
-      print_position_with_borders(&this->position);
+      print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
     }
 
     return move_key;
