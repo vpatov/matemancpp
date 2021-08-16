@@ -224,6 +224,12 @@ struct Game
     std::string promotion = matches[7];
     char check_or_mate = getc(8, matches);
 
+    std::cout << dest_file << dest_rank << piece_char << std::endl;
+    if (dest_file == 'a' && dest_rank == '3' && piece_char == 'R')
+    {
+      std::cout << "breakpoint" << std::endl;
+    }
+
     // Get the promotion piece
     if (promotion.size())
     {
@@ -394,8 +400,13 @@ struct Game
         for (auto it = bishops.begin(); it != bishops.end(); it++)
         {
 
-          // if either just the file or just the rank is present.
-          if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
+          // if either just the file or just the rank is present, and one of them is equal to the src_file
+          // or src_rank from the pgn move OR
+          // neither of src_file or src_rank are present
+          if (
+              ((src_file && index_to_an_file(*it) == src_file) ||
+               (src_rank && src_rank == index_to_an_rank(*it))) ||
+              (!src_file && !src_rank))
           {
 
             // temporarily assume the move
@@ -433,7 +444,10 @@ struct Game
         {
 
           // if either just the file or just the rank is present.
-          if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
+          if (
+              ((src_file && index_to_an_file(*it) == src_file) ||
+               (src_rank && src_rank == index_to_an_rank(*it))) ||
+              (!src_file && !src_rank))
           {
 
             // temporarily assume the move
@@ -469,9 +483,13 @@ struct Game
       {
         for (auto it = queens.begin(); it != queens.end(); it++)
         {
-
-          // if either just the file or just the rank is present.
-          if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
+          // if either just the file or just the rank is present, and one of them is equal to the src_file
+          // or src_rank from the pgn move OR
+          // neither of src_file or src_rank are present
+          if (
+              ((src_file && index_to_an_file(*it) == src_file) ||
+               (src_rank && src_rank == index_to_an_rank(*it))) ||
+              (!src_file && !src_rank))
           {
 
             // temporarily assume the move

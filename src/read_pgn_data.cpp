@@ -124,6 +124,7 @@ void read_pgn_file(std::string file_path)
         // push a new game to the back of the games vector
         games.emplace_back();
         populate_starting_position(&(games.back().position));
+        // exit(0);
         reading_game = false;
       }
     }

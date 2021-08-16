@@ -219,16 +219,18 @@ void adjust_position(Position *position, uint8_t src_square,
   assert(IS_VALID_SQUARE(src_square));
   assert(IS_VALID_SQUARE(dest_square));
 
+  Color color = position->turn ? Color::WHITE : Color::BLACK;
+
   position->mailbox[dest_square] =
       promotion_piece ? promotion_piece : position->mailbox[src_square];
 
   if (position->en_passant_square &&
-      position->en_passant_square == dest_square)
+      position->en_passant_square == dest_square &&
+      ((position->turn ? is_w_pawn : is_b_pawn)(position->mailbox[src_square])))
   {
     // If we are capturing en-passant there should never be a promotion piece
     assert(!promotion_piece);
 
-    Color color = position->turn ? Color::WHITE : Color::BLACK;
     // Remove the pawn that is being captured
     uint8_t square_of_pawn_being_captured = BACKWARD_RANK(color, dest_square);
     assert(position->mailbox[square_of_pawn_being_captured] == position->turn

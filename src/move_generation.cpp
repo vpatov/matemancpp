@@ -328,6 +328,15 @@ bool black_attacks_files_ranks(uint8_t piece)
   return is_b_rook(piece) || is_b_queen(piece);
 }
 
+bool is_w_pawn(uint8_t piece)
+{
+  return piece == W_PAWN;
+}
+bool is_b_pawn(uint8_t piece)
+{
+  return piece == B_PAWN;
+}
+
 bool is_w_bishop(uint8_t piece)
 {
   return piece == W_BISHOP;

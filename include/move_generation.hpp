@@ -89,6 +89,8 @@ bool black_attacks_diagonally(uint8_t piece);
 bool white_attacks_files_ranks(uint8_t piece);
 bool black_attacks_files_ranks(uint8_t piece);
 
+bool is_w_pawn(uint8_t piece);
+bool is_b_pawn(uint8_t piece);
 bool is_w_bishop(uint8_t piece);
 bool is_w_rook(uint8_t piece);
 bool is_w_queen(uint8_t piece);
