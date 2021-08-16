@@ -71,8 +71,9 @@ const char PIECE_CHAR_MAP[24] = {'-', 'P', 'R', 'N', 'B', 'Q', 'K', 0,
 
 #define MAX_PIECE B_KING
 
-#define INVALID_SQUARE(sq) (sq & 0x88)
-#define VALID_SQUARE(sq) (!(INVALID_SQUARE(sq)))
+#define INVALID_SQUARE 127
+#define IS_INVALID_SQUARE(sq) (sq & 0x88)
+#define IS_VALID_SQUARE(sq) (!(IS_INVALID_SQUARE(sq)))
 
 #define IS_PIECE(piece) (piece & PIECE_MASK)
 #define IS_BLACK_PIECE(piece) (piece & BLACK_PIECE_MASK)
@@ -124,5 +125,12 @@ uint8_t find_king(Position *position, bool white);
 
 // king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
 bool legal_position(Position *position, bool whites_turn);
+
+uint8_t check_line(Position *position, uint8_t target, int offset, bool (*piece_type_function)(uint8_t));
+std::vector<uint8_t> check_files_ranks(Position *position, uint8_t target_square, bool color_of_attackers);
+std::vector<uint8_t> check_diagonals(Position *position, uint8_t target_square, bool color_of_attackers);
+std::vector<uint8_t> find_attacking_bishops(Position *position, uint8_t target_square, bool color_of_attackers);
+std::vector<uint8_t> find_attacking_rooks(Position *position, uint8_t target_square, bool color_of_attackers);
+std::vector<uint8_t> find_attacking_queens(Position *position, uint8_t target_square, bool color_of_attackers);
 
 #endif

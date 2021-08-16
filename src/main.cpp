@@ -7,7 +7,10 @@
 #include "zobrist.hpp"
 #include <iostream>
 
-int main(int argc, char *argv[]) { read_all_pgn_files(); }
+int main(int argc, char *argv[])
+{
+   read_all_pgn_files();
+}
 
 /*
     Tasks

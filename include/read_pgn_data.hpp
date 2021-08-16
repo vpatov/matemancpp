@@ -136,8 +136,7 @@ struct Game
   // discovered check, then the move notation does not include the source
   // file/rank.
   // TODO: refactor into several smaller functions
-  // TODO: create function that asserts that a given chess position is legal
-  // (includes turn to move)
+  // TODO: consider rewriting this but with using piece lists (would probably be much easier)
   uint32_t non_castling_move(std::smatch &matches, bool white)
   {
     std::cout << "PGN move: " << matches[0] << std::endl;
@@ -166,7 +165,7 @@ struct Game
 
       if (!white)
       {
-        promotion_piece &= BLACK_PIECE_MASK;
+        promotion_piece |= BLACK_PIECE_MASK;
       }
     }
 
@@ -215,7 +214,7 @@ struct Game
     else if (piece_char == KING_CHAR)
     {
       src_square = find_king(&position, white);
-      assert(VALID_SQUARE(src_square));
+      assert(IS_VALID_SQUARE(src_square));
 
       // assert that the square that we found the king at, is one square away from the square he supposedly moved to.
       bool found_orig = false;
@@ -236,7 +235,7 @@ struct Game
     // that could go to the same square, and both src file and src rank are necessary
     // for the move not to be ambigous. An example of this is move 54 in the custom
     // lichess game in the test pgn data.
-    if (src_file && src_rank)
+    else if (src_file && src_rank)
     {
       src_square = an_square_to_index(src_file, src_rank);
     }
@@ -244,16 +243,13 @@ struct Game
     // PGN annotation only provides src rank and file if it is necessary to disambiguate.
     else if (piece_char == KNIGHT_CHAR)
     {
-      if (src_file && src_rank)
-      {
-        src_square = an_square_to_index(src_file, src_rank);
-      }
+      assert(!(src_file & src_rank));
       // find all knights a knight move away from the dest square
       std::vector<uint8_t> knights;
       for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
       {
         uint8_t square = *it + dest_square;
-        if (INVALID_SQUARE(square))
+        if (IS_INVALID_SQUARE(square))
         {
           continue;
         }
@@ -272,33 +268,35 @@ struct Game
         src_square = knights.at(0);
       }
 
-      // TODO:
-      // if there is a src_rank or src_file, this should help disambiguate.
-      // if one of the knights is blocking check, it cannot move.
-      // use new function legal_position to assist with this.
-      // LASTLEFTOFF
       else
       {
-        if (matches[0].compare("Nge7") == 0)
-        {
-          std::cout << "breakpoint" << std::endl;
-        }
-
-        std::cout << "Found more than one knight:" << std::endl;
         for (auto it = knights.begin(); it != knights.end(); it++)
         {
+          // We have already covered the case where src_file and src_rank are present. Now we just need to cover
+          // the case where either just the file or just the rank is present. In most positions, with a move like Nge7,
+          // that means that there are two knights that could go to e7, but only one of them is on the g file.
+          // if there were two knights were on the g file, then the move would be something like Ng6e7. However, we
+          // must cover the case where two knights could go to the same square, but it is illegal for one to do so because
+          // they are blocking check. PGN annotation in this case does not add the file/rank to disambiguate in this case,
+          // because it is not necessary. This code covers that case.
+
+          // if either just the file or just the rank is present.
           if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
           {
-            // ensure the position is legal
+
+            // temporarily assume the move
             adjust_position(&position, *it, dest_square, 0);
+            // ensure the position is legal (king is not in check)
             if (legal_position(&position, white))
             {
+              // set the src_square and undo the move.
               src_square = *it;
               adjust_position(&position, dest_square, src_square, 0);
               break;
             }
             else
             {
+              // undo the move
               adjust_position(&position, dest_square, *it, 0);
             }
           }
@@ -308,14 +306,116 @@ struct Game
 
     else if (piece_char == BISHOP_CHAR)
     {
+      std::vector<uint8_t> bishops = find_attacking_bishops(&position, dest_square, white);
+      assert(!bishops.empty());
+
+      if (bishops.size() == 1)
+      {
+        src_square = bishops.at(0);
+      }
+      else
+      {
+        for (auto it = bishops.begin(); it != bishops.end(); it++)
+        {
+
+          // if either just the file or just the rank is present.
+          if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
+          {
+
+            // temporarily assume the move
+            adjust_position(&position, *it, dest_square, 0);
+            // ensure the position is legal (king is not in check)
+            if (legal_position(&position, white))
+            {
+              // set the src_square and undo the move.
+              src_square = *it;
+              adjust_position(&position, dest_square, src_square, 0);
+              break;
+            }
+            else
+            {
+              // undo the move
+              adjust_position(&position, dest_square, *it, 0);
+            }
+          }
+        }
+      }
     }
 
     else if (piece_char == ROOK_CHAR)
     {
+      std::vector<uint8_t> rooks = find_attacking_rooks(&position, dest_square, white);
+      assert(!rooks.empty());
+
+      if (rooks.size() == 1)
+      {
+        src_square = rooks.at(0);
+      }
+      else
+      {
+        for (auto it = rooks.begin(); it != rooks.end(); it++)
+        {
+
+          // if either just the file or just the rank is present.
+          if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
+          {
+
+            // temporarily assume the move
+            adjust_position(&position, *it, dest_square, 0);
+            // ensure the position is legal (king is not in check)
+            if (legal_position(&position, white))
+            {
+              // set the src_square and undo the move.
+              src_square = *it;
+              adjust_position(&position, dest_square, src_square, 0);
+              break;
+            }
+            else
+            {
+              // undo the move
+              adjust_position(&position, dest_square, *it, 0);
+            }
+          }
+        }
+      }
     }
 
     else if (piece_char == QUEEN_CHAR)
     {
+      std::vector<uint8_t> queens = find_attacking_queens(&position, dest_square, white);
+      assert(!queens.empty());
+
+      if (queens.size() == 1)
+      {
+        src_square = queens.at(0);
+      }
+      else
+      {
+        for (auto it = queens.begin(); it != queens.end(); it++)
+        {
+
+          // if either just the file or just the rank is present.
+          if ((src_file && index_to_an_file(*it) == src_file) || (src_rank && src_rank == index_to_an_rank(*it)))
+          {
+
+            // temporarily assume the move
+            adjust_position(&position, *it, dest_square, 0);
+            // ensure the position is legal (king is not in check)
+            if (legal_position(&position, white))
+            {
+              // set the src_square and undo the move.
+              src_square = *it;
+              adjust_position(&position, dest_square, src_square, 0);
+              break;
+            }
+            else
+            {
+              // undo the move
+              adjust_position(&position, dest_square, *it, 0);
+            }
+          }
+        }
+      }
     }
 
     // src_square and dest_square should be sufficiently populated at this point
@@ -324,8 +424,8 @@ struct Game
     uint32_t move_key =
         (src_square << 16) + (dest_square << 8) + promotion_piece;
 
-    assert(!INVALID_SQUARE(dest_square));
-    if (INVALID_SQUARE(src_square))
+    assert(!IS_INVALID_SQUARE(dest_square));
+    if (IS_INVALID_SQUARE(src_square))
     {
       std::cout << "Impl incomplete for move: " << matches[0] << std::endl;
     }

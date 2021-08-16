@@ -1,6 +1,7 @@
 #include "position.hpp"
 #include "move_generation.hpp"
 #include <iostream>
+#include <algorithm>
 #include <memory>
 
 std::shared_ptr<Position> starting_position()
@@ -185,8 +186,8 @@ char old_piece_to_char(uint8_t piece)
 void adjust_position(Position *position, uint8_t src_square,
                      uint8_t dest_square, uint8_t promotion_piece)
 {
-  assert(VALID_SQUARE(src_square));
-  assert(VALID_SQUARE(dest_square));
+  assert(IS_VALID_SQUARE(src_square));
+  assert(IS_VALID_SQUARE(dest_square));
 
   position->mailbox[dest_square] =
       promotion_piece ? promotion_piece : position->mailbox[src_square];
@@ -292,12 +293,148 @@ uint8_t find_king(Position *position, bool white)
       }
     }
   }
-  return 127;
+  return INVALID_SQUARE;
+}
+
+// returns a vector containing all the squares of enemy pieces that diagonally attack the target square.
+// TODO define separate types for squares and pieces, because uint8_t everywhere is confusing.
+std::vector<uint8_t> check_diagonals(Position *position, uint8_t target_square, bool color_of_attackers)
+{
+  std::vector<uint8_t> squares;
+  //look for bishops/queens attacking square on diagonals
+  for (int i = 0; i < 4; i++)
+  {
+    uint8_t square = check_line(
+        position,
+        target_square,
+        bishop_offsets[i],
+        color_of_attackers ? &white_attacks_diagonally : &black_attacks_diagonally);
+    if (IS_VALID_SQUARE(square))
+    {
+      squares.push_back(square);
+    }
+  }
+
+  return squares;
+}
+
+std::vector<uint8_t> find_attacking_bishops(Position *position, uint8_t target_square, bool color_of_attackers)
+{
+  std::vector<uint8_t> squares;
+  //look for bishops attacking square on diagonals
+  for (int i = 0; i < 4; i++)
+  {
+    uint8_t square = check_line(
+        position,
+        target_square,
+        bishop_offsets[i],
+        color_of_attackers ? &is_w_bishop : &is_b_bishop);
+    if (IS_VALID_SQUARE(square))
+    {
+      squares.push_back(square);
+    }
+  }
+
+  return squares;
+}
+
+std::vector<uint8_t> find_attacking_rooks(Position *position, uint8_t target_square, bool color_of_attackers)
+{
+  std::vector<uint8_t> squares;
+  //look for rooks attacking square on diagonals
+  for (int i = 0; i < 4; i++)
+  {
+    uint8_t square = check_line(position, target_square, rook_offsets[i], color_of_attackers ? &is_w_rook : &is_b_rook);
+    if (IS_VALID_SQUARE(square))
+    {
+      squares.push_back(square);
+    }
+  }
+
+  return squares;
+}
+
+std::vector<uint8_t> find_attacking_queens(Position *position, uint8_t target_square, bool color_of_attackers)
+{
+  std::vector<uint8_t> squares;
+  //look for queens attacking square on diagonals
+  for (int i = 0; i < 4; i++)
+  {
+    uint8_t square = check_line(
+        position,
+        target_square,
+        bishop_offsets[i],
+        color_of_attackers ? &is_w_queen : &is_b_queen);
+    if (IS_VALID_SQUARE(square))
+    {
+      squares.push_back(square);
+    }
+    square = check_line(
+        position,
+        target_square,
+        rook_offsets[i],
+        color_of_attackers ? &is_w_queen : &is_b_queen);
+    if (IS_VALID_SQUARE(square))
+    {
+      squares.push_back(square);
+    }
+  }
+
+  return squares;
+}
+
+// returns a vector containing all the squares of enemy pieces that diagonally attack the target square.
+// TODO define separate types for squares and pieces, because uint8_t everywhere is confusing.
+std::vector<uint8_t> check_files_ranks(Position *position, uint8_t target_square, bool color_of_attackers)
+{
+  std::vector<uint8_t> squares;
+  //look for rooks/queens attacking square on files and ranks
+  for (int i = 0; i < 4; i++)
+  {
+    uint8_t square = check_line(
+        position,
+        target_square,
+        rook_offsets[i],
+        color_of_attackers ? &white_attacks_files_ranks : &black_attacks_files_ranks);
+    if (IS_VALID_SQUARE(square))
+    {
+      squares.push_back(square);
+    }
+  }
+
+  return squares;
+}
+
+// returns the square of the first piece that attacks the target along the line.
+uint8_t check_line(Position *position, uint8_t target, int offset, bool (*piece_type_function)(uint8_t))
+{
+  for (uint8_t candidate = target + offset; IS_VALID_SQUARE(candidate); candidate += offset)
+  {
+    uint8_t piece = position->mailbox[candidate];
+    // square is empty so we need to keep looking.
+    if (piece == 0)
+    {
+      continue;
+    }
+
+    // square contains an enemy piece that can attack along this line
+    if (piece_type_function(position->mailbox[candidate]))
+    {
+      return candidate;
+    }
+    // square is not empty and contains something that doesn't attack the target, and thus blocks the line.
+    else
+    {
+      return INVALID_SQUARE;
+    }
+  }
+  // This is reached if all squares in the line were empty.
+  return INVALID_SQUARE;
 }
 
 bool check_diagonal_or_file_or_rank(Position *position, uint8_t king_square, int offset, uint8_t target1, uint8_t target2)
 {
-  for (uint8_t candidate = king_square; VALID_SQUARE(candidate); candidate += offset)
+  for (uint8_t candidate = king_square + offset; IS_VALID_SQUARE(candidate); candidate += offset)
   {
     uint8_t piece = position->mailbox[candidate];
     // square is empty so we need to keep looking.
@@ -349,7 +486,7 @@ bool legal_position(Position *position, bool whites_turn)
   for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
   {
     candidate = *it + king_square;
-    if (INVALID_SQUARE(candidate))
+    if (IS_INVALID_SQUARE(candidate))
     {
       continue;
     }
@@ -359,28 +496,15 @@ bool legal_position(Position *position, bool whites_turn)
     }
   }
 
-  //look for bishops/queens attacking king on diagonals
-  target = whites_turn ? B_BISHOP : W_BISHOP;
-  uint8_t target2 = whites_turn ? B_QUEEN : W_QUEEN;
-  const int bishop_offsets[4] = {15, 17, -15, -17};
-  for (int i = 0; i < 4; i++)
+  if (!check_diagonals(position, king_square, !whites_turn).empty())
   {
-    if (!check_diagonal_or_file_or_rank(position, king_square, bishop_offsets[i], target, target2))
-    {
-      return false;
-    }
+    return false;
   }
 
-  // look for rooks/queens attacking king on files+ranks;
-  target = whites_turn ? B_ROOK : W_ROOK;
-  const int rook_offsets[4] = {16, 1, -16, -1};
-
-  for (int i = 0; i < 4; i++)
+  //look for bishops/queens attacking king on diagonals
+  if (!check_files_ranks(position, king_square, !whites_turn).empty())
   {
-    if (!check_diagonal_or_file_or_rank(position, king_square, rook_offsets[i], target, target2))
-    {
-      return false;
-    }
+    return false;
   }
 
   // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.

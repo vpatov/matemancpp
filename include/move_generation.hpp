@@ -78,6 +78,32 @@ white_mgen(Color C)
 #define IS_OPPONENT_PIECE(C, piece) \
   (white_mgen(C) ? IS_BLACK_PIECE(piece) : IS_WHITE_PIECE(piece))
 
+#define ATTACKS_DIAGONALLY(piece) \
+  (((piece & PIECE_MASK) == BISHOP) || (piece & PIECE_MASK) == QUEEN)
+
+#define ATTACKS_FILES_RANKS(piece) \
+  (((piece & PIECE_MASK) == ROOK) || (piece & PIECE_MASK) == QUEEN)
+
+bool white_attacks_diagonally(uint8_t piece);
+bool black_attacks_diagonally(uint8_t piece);
+bool white_attacks_files_ranks(uint8_t piece);
+bool black_attacks_files_ranks(uint8_t piece);
+
+bool is_w_bishop(uint8_t piece);
+bool is_w_rook(uint8_t piece);
+bool is_w_queen(uint8_t piece);
+bool is_b_bishop(uint8_t piece);
+bool is_b_rook(uint8_t piece);
+bool is_b_queen(uint8_t piece);
+
+const int bishop_offsets[4] = {15, 17, -15, -17};
+const int rook_offsets[4] = {16, 1, -16, -1};
+
+// const std::vector<uint8_t> w_diagonal_attackers = {W_BISHOP, W_QUEEN};
+// const std::vector<uint8_t> b_diagonal_attackers = {B_BISHOP, B_QUEEN};
+// const std::vector<uint8_t> w_file_rank_attackers = {ROOK, QUEEN};
+// const std::vector<uint8_t> b_file_rank_attackers = {B_ROOK, B_QUEEN};
+
 constexpr uint8_t direction_offset(Direction D)
 {
   switch (D)
