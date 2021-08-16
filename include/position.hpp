@@ -22,6 +22,8 @@
 
   In hex
 
+a   b   c   d   e   f   g   h
+
 70  71  72  73  74  75  76  77  |   78  79  7a  7b  7c  7d  7e  7f
 60  61  62  63  64  65  66  67  |   68  69  6a  6b  6c  6d  6e  6f
 50  51  52  53  54  55  56  57  |   58  59  5a  5b  5c  5d  5e  5f
@@ -30,6 +32,8 @@
 20  21  22  23  24  25  26  27  |   28  29  2a  2b  2c  2d  2e  2f
 10  11  12  13  14  15  16  17  |   18  19  1a  1b  1c  1d  1e  1f
 00  01  02  03  04  05  06  07  |   08  09  0a  0b  0c  0d  0e  0f
+
+a   b   c   d   e   f   g   h
 */
 
 #define VOID_PIECE 0
@@ -124,7 +128,7 @@ std::shared_ptr<Position> starting_position();
 void populate_starting_position(Position *position);
 
 void adjust_position(Position *position, uint8_t src_square,
-                     uint8_t dest_square, uint8_t promotion_piece);
+                     uint8_t dest_square, uint8_t promotion_piece, uint8_t en_passant_square);
 
 uint8_t find_king(Position *position, bool white);
 

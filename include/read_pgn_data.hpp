@@ -133,6 +133,7 @@ struct Game
   {
     std::cout << (white ? "White's turn." : "Black's turn.") << std::endl;
     std::cout << "PGN move: " << matches[0] << std::endl;
+    position.turn = white;
 
     std::string whichever_castle = matches[1];
     std::string queenside_castle = matches[2];
@@ -206,10 +207,12 @@ struct Game
   {
     std::cout << (white ? "White's turn." : "Black's turn") << std::endl;
     std::cout << "PGN move: " << matches[0] << std::endl;
+    position.turn = white;
 
     uint8_t src_square = 0x7f;
     uint8_t dest_square = 0x7f;
     uint8_t promotion_piece = 0;
+    uint8_t en_passant_square = 0;
     Color color = white ? Color::WHITE : Color::BLACK;
 
     char piece_char = getc(1, matches);
@@ -253,12 +256,13 @@ struct Game
         src_rank = white ? dest_rank - 1 : dest_rank + 1;
         src_square = an_square_to_index(src_file, src_rank);
         assert(position.mailbox[src_square] == target);
-        assert(IS_PIECE(position.mailbox[dest_square]));
+        assert(IS_PIECE(position.mailbox[dest_square]) || position.en_passant_square == dest_square);
       }
       else
       {
         Direction direction = white ? Direction::DOWN : Direction::UP;
         uint8_t candidate_square = STEP_DIRECTION(direction, dest_square);
+        uint8_t candidate_en_passant_square = candidate_square;
         if (position.mailbox[candidate_square] == target)
         {
           src_square = candidate_square;
@@ -271,6 +275,7 @@ struct Game
           candidate_square = STEP_DIRECTION(direction, candidate_square);
           assert(position.mailbox[candidate_square] == target);
           src_square = candidate_square;
+          en_passant_square = candidate_en_passant_square;
         }
       }
     }
@@ -351,19 +356,19 @@ struct Game
           {
 
             // temporarily assume the move
-            adjust_position(&position, *it, dest_square, 0);
+            adjust_position(&position, *it, dest_square, 0, 0);
             // ensure the position is legal (king is not in check)
             if (legal_position(&position, white))
             {
               // set the src_square and undo the move.
               src_square = *it;
-              adjust_position(&position, dest_square, src_square, 0);
+              adjust_position(&position, dest_square, src_square, 0, 0);
               break;
             }
             else
             {
               // undo the move
-              adjust_position(&position, dest_square, *it, 0);
+              adjust_position(&position, dest_square, *it, 0, 0);
             }
           }
         }
@@ -389,19 +394,19 @@ struct Game
           {
 
             // temporarily assume the move
-            adjust_position(&position, *it, dest_square, 0);
+            adjust_position(&position, *it, dest_square, 0, 0);
             // ensure the position is legal (king is not in check)
             if (legal_position(&position, white))
             {
               // set the src_square and undo the move.
               src_square = *it;
-              adjust_position(&position, dest_square, src_square, 0);
+              adjust_position(&position, dest_square, src_square, 0, 0);
               break;
             }
             else
             {
               // undo the move
-              adjust_position(&position, dest_square, *it, 0);
+              adjust_position(&position, dest_square, *it, 0, 0);
             }
           }
         }
@@ -427,19 +432,19 @@ struct Game
           {
 
             // temporarily assume the move
-            adjust_position(&position, *it, dest_square, 0);
+            adjust_position(&position, *it, dest_square, 0, 0);
             // ensure the position is legal (king is not in check)
             if (legal_position(&position, white))
             {
               // set the src_square and undo the move.
               src_square = *it;
-              adjust_position(&position, dest_square, src_square, 0);
+              adjust_position(&position, dest_square, src_square, 0, 0);
               break;
             }
             else
             {
               // undo the move
-              adjust_position(&position, dest_square, *it, 0);
+              adjust_position(&position, dest_square, *it, 0, 0);
             }
           }
         }
@@ -465,19 +470,19 @@ struct Game
           {
 
             // temporarily assume the move
-            adjust_position(&position, *it, dest_square, 0);
+            adjust_position(&position, *it, dest_square, 0, 0);
             // ensure the position is legal (king is not in check)
             if (legal_position(&position, white))
             {
               // set the src_square and undo the move.
               src_square = *it;
-              adjust_position(&position, dest_square, src_square, 0);
+              adjust_position(&position, dest_square, src_square, 0, 0);
               break;
             }
             else
             {
               // undo the move
-              adjust_position(&position, dest_square, *it, 0);
+              adjust_position(&position, dest_square, *it, 0, 0);
             }
           }
         }
@@ -508,7 +513,7 @@ struct Game
                 << std::endl;
 
       adjust_position(&this->position, src_square, dest_square,
-                      promotion_piece);
+                      promotion_piece, en_passant_square);
 
       // print_position(&this->position);
       print_position_with_borders(&this->position);

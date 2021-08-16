@@ -197,7 +197,7 @@ char old_piece_to_char(uint8_t piece)
 }
 
 void adjust_position(Position *position, uint8_t src_square,
-                     uint8_t dest_square, uint8_t promotion_piece)
+                     uint8_t dest_square, uint8_t promotion_piece, uint8_t en_passant_square)
 {
   assert(IS_VALID_SQUARE(src_square));
   assert(IS_VALID_SQUARE(dest_square));
@@ -219,6 +219,7 @@ void adjust_position(Position *position, uint8_t src_square,
                : W_PAWN);
     position->mailbox[square_of_pawn_being_captured] = 0;
   }
+  position->en_passant_square = en_passant_square;
 
   position->mailbox[src_square] = 0;
 }
@@ -273,6 +274,7 @@ void perform_castle(Position *position, bool white, bool short_castle)
       position->mailbox[B_ROOK_LONG_CASTLE_SQUARE] = B_ROOK;
     }
   }
+  position->en_passant_square = 0;
 }
 
 void print_position(Position *position)
