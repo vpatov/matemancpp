@@ -58,7 +58,8 @@ struct node {
       }
 */
 
-void read_pgn_file(std::string file_path) {
+void read_pgn_file(std::string file_path)
+{
 
   std::ifstream infile(file_path);
   std::vector<Game> games;
@@ -66,32 +67,41 @@ void read_pgn_file(std::string file_path) {
   populate_starting_position(&(games.back().position));
   bool reading_game = false;
   bool elo_calc_done = false;
-  int whiteElo;
-  int blackElo;
+  int whiteElo = 0;
+  int blackElo = 0;
 
-  for (std::string line; getline(infile, line);) {
-    if (line.length() < 2) {
+  for (std::string line; getline(infile, line);)
+  {
+    if (line.length() < 2)
+    {
       continue;
     }
 
     // read the metadata until there are no more metadata lines left
-    if (!reading_game && !games.back().read_metadata_line(line)) {
+    if (!reading_game && !games.back().read_metadata_line(line))
+    {
       reading_game = true;
     }
 
     // before we start reading the game, find the elo of the players
-    if (reading_game && !elo_calc_done) {
+    if (reading_game && !elo_calc_done)
+    {
 
       // Iterate through metadata key-value pairs
       auto metadata = games.back().metadata;
-      for (auto it = metadata.begin(); it != metadata.end(); it++) {
-        if (it->value.length() < 2) {
+      for (auto it = metadata.begin(); it != metadata.end(); it++)
+      {
+        if (it->value.length() < 2)
+        {
           continue;
         }
-        if ((it->key).compare("WhiteElo") == 0) {
+        if ((it->key).compare("WhiteElo") == 0)
+        {
           whiteElo = std::stoi(it->value);
           std::cout << "WhiteElo: " << whiteElo << std::endl;
-        } else if ((it->key).compare("BlackElo") == 0) {
+        }
+        else if ((it->key).compare("BlackElo") == 0)
+        {
           blackElo = std::stoi(it->value);
           std::cout << "BlackElo: " << blackElo << std::endl;
         }
@@ -99,11 +109,13 @@ void read_pgn_file(std::string file_path) {
       elo_calc_done = true;
     }
 
-    if (reading_game) {
+    if (reading_game)
+    {
 
       bool is_game_line = games.back().read_game_move_line(line);
       // assert(is_game_line);
-      if (games.back().finishedReading) {
+      if (games.back().finishedReading)
+      {
         std::cout << " Place back game: " << games.back().result << std::endl;
 
         games.back().eloOverThreshold =
@@ -111,6 +123,7 @@ void read_pgn_file(std::string file_path) {
 
         // push a new game to the back of the games vector
         games.emplace_back();
+        populate_starting_position(&(games.back().position));
         reading_game = false;
       }
     }
@@ -118,7 +131,8 @@ void read_pgn_file(std::string file_path) {
   std::cout << "Done" << std::endl;
 }
 
-void print_matches(std::smatch &matches) {
+void print_matches(std::smatch &matches)
+{
   std::cout << matches[0] << std::endl;
   std::cout << "1: " << matches[1] << std::endl;
   std::cout << "2: " << matches[2] << std::endl;
@@ -130,15 +144,18 @@ void print_matches(std::smatch &matches) {
   std::cout << "8: " << matches[8] << std::endl;
 }
 
-void read_all_pgn_files() {
+void read_all_pgn_files()
+{
   // read_pgn_file("/home/vas/repos/matemancpp/database/pgn/Stein.pgn");
   read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
 
-  if (true) {
+  if (true)
+  {
     return;
   }
   std::string path = "/home/vas/repos/matemancpp/database/pgn";
-  for (const auto &entry : std::filesystem::directory_iterator(path)) {
+  for (const auto &entry : std::filesystem::directory_iterator(path))
+  {
     std::cout << entry.path() << std::endl;
     read_pgn_file(entry.path());
   }

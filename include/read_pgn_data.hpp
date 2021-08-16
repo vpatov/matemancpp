@@ -41,6 +41,12 @@ struct OpeningTablebase
   std::unordered_map<uint64_t, std::vector<move_edge>> opening_tablebase;
 };
 
+const std::string result_regex_str =
+    R"((((?:1\/2|1|0)\s*\-\s*(?:1\/2|1|0)\s*$)|\*)?)";
+
+const std::regex game_line_regex(
+    R"(\d+\.\s*([\w\-\+\#\=]+)\s([\w\-\+\#\=]+)?\s*)" + result_regex_str);
+
 struct Game
 {
   std::vector<metadata_entry> metadata;
@@ -94,19 +100,20 @@ struct Game
                               std::regex(castling_move_regex)))
     {
 
-      std::string kingside_castle = matches[1];
-      std::string queenside_castle = matches[2];
-      std::string check_or_mate = matches[3];
+      move_key = castling_move(matches, white);
     }
     else
     {
       std::cout << "no match: " << player_move << std::endl;
+      return;
     }
 
     // push the parsed move key to the move list
     std::cout << "Move: " << position.plies << std::endl;
     std::cout << "Pushing: " << std::hex << move_key << std::endl
               << std::dec;
+    std::cout << std::endl
+              << std::endl;
     move_list.push_back(move_key);
 
     // TODO remove this!!!
@@ -120,6 +127,65 @@ struct Game
       return matches[i].str().at(0);
     }
     return 0;
+  }
+
+  uint32_t castling_move(std::smatch &matches, bool white)
+  {
+    std::cout << "=================================" << std::endl;
+    std::cout << metadata.at(0).value << std::endl;
+    std::cout << (white ? "White's turn." : "Black's turn.") << std::endl;
+    std::cout << "PGN move: " << matches[0] << std::endl;
+    std::string kingside_castle = matches[1];
+    std::string queenside_castle = matches[2];
+    std::string whichever_castle = matches[3];
+    std::string check_or_mate = matches[4];
+    std::cout << "kingside_castle: " << kingside_castle << std::endl;
+    std::cout << "queenside_castle: " << queenside_castle << std::endl;
+    std::cout << "whichever_castle: " << whichever_castle << std::endl;
+    std::cout << "check_or_mate: " << check_or_mate << std::endl;
+
+    uint8_t src_square = 0x7f;
+    uint8_t dest_square = 0x7f;
+    uint8_t promotion_piece = 0;
+    Color color = white ? Color::WHITE : Color::BLACK;
+    bool short_castle = false;
+
+    src_square = white ? W_KING_SQUARE : B_KING_SQUARE;
+
+    if (kingside_castle.size())
+    {
+      dest_square = white ? W_KING_SHORT_CASTLE_SQUARE : B_KING_SHORT_CASTLE_SQUARE;
+      short_castle = true;
+    }
+    else if (queenside_castle.size())
+    {
+      dest_square = white ? W_KING_LONG_CASTLE_SQUARE : B_KING_LONG_CASTLE_SQUARE;
+    }
+    // should always be one of the two castling types
+    else
+    {
+      assert(false);
+    }
+
+    perform_castle(&position, white, short_castle);
+
+    // 0 = no castle
+    // 1 = white kingside
+    // 2 = white queenside
+    // 3 = black kingside
+    // 4 = black queenside
+    uint32_t move_key = 0;
+    if (white)
+    {
+      move_key = short_castle ? 1 : 2;
+    }
+    else
+    {
+      move_key = short_castle ? 3 : 4;
+    }
+    print_position_with_borders(&this->position);
+
+    return move_key;
   }
 
   // This function calculates and returns the move key, which is a concatenation
@@ -139,6 +205,9 @@ struct Game
   // TODO: consider rewriting this but with using piece lists (would probably be much easier)
   uint32_t non_castling_move(std::smatch &matches, bool white)
   {
+    std::cout << "=================================" << std::endl;
+    std::cout << metadata.at(0).value << std::endl;
+    std::cout << (white ? "White's turn." : "Black's turn") << std::endl;
     std::cout << "PGN move: " << matches[0] << std::endl;
 
     uint8_t src_square = 0x7f;
@@ -420,7 +489,8 @@ struct Game
 
     // src_square and dest_square should be sufficiently populated at this point
     // move key is bit-wise concatenation of
-    // 0x00 + start_square + end_square + promotion_piece
+    // (castle) + start_square + end_square + promotion_piece
+    // 8 bits     8 bits         8 bits       8 bits
     uint32_t move_key =
         (src_square << 16) + (dest_square << 8) + promotion_piece;
 
@@ -458,12 +528,6 @@ struct Game
 
   bool read_game_move_line(std::string &line)
   {
-
-    const std::string result_regex_str =
-        R"((((?:1\/2|1|0)\s*\-\s*(?:1\/2|1|0)\s*$)|\*)?)";
-
-    const std::regex game_line_regex(
-        R"(\d+\.\s*([\w\-\+\#\=]+)\s([\w\-\+\#\=]+)?\s*)" + result_regex_str);
 
     bool is_game_line = false;
     std::smatch matches;

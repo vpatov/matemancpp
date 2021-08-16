@@ -128,6 +128,8 @@ void adjust_position(Position *position, uint8_t src_square,
 
 uint8_t find_king(Position *position, bool white);
 
+void perform_castle(Position *position, bool white, bool short_castle);
+
 // king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
 bool legal_position(Position *position, bool whites_turn);
 

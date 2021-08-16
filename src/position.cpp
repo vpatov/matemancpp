@@ -223,6 +223,58 @@ void adjust_position(Position *position, uint8_t src_square,
   position->mailbox[src_square] = 0;
 }
 
+void perform_castle(Position *position, bool white, bool short_castle)
+{
+  assert(position->mailbox[white ? W_KING_SQUARE : B_KING_SQUARE] == white ? W_KING : B_KING);
+  position->mailbox[white ? W_KING_SQUARE : B_KING_SQUARE] = 0;
+  if (white)
+  {
+    if (short_castle)
+    {
+      position->mailbox[W_KING_ROOK_SQUARE] = 0;
+
+      assert(position->mailbox[W_KING_SHORT_CASTLE_SQUARE] == 0);
+      assert(position->mailbox[W_ROOK_SHORT_CASTLE_SQUARE] == 0);
+
+      position->mailbox[W_KING_SHORT_CASTLE_SQUARE] = W_KING;
+      position->mailbox[W_ROOK_SHORT_CASTLE_SQUARE] = W_ROOK;
+    }
+    else
+    {
+      position->mailbox[W_QUEEN_ROOK_SQUARE] = 0;
+
+      assert(position->mailbox[W_KING_LONG_CASTLE_SQUARE] == 0);
+      assert(position->mailbox[W_ROOK_LONG_CASTLE_SQUARE] == 0);
+
+      position->mailbox[W_KING_LONG_CASTLE_SQUARE] = W_KING;
+      position->mailbox[W_ROOK_LONG_CASTLE_SQUARE] = W_ROOK;
+    }
+  }
+  else
+  {
+    if (short_castle)
+    {
+      position->mailbox[B_KING_ROOK_SQUARE] = 0;
+
+      assert(position->mailbox[B_KING_SHORT_CASTLE_SQUARE] == 0);
+      assert(position->mailbox[B_ROOK_SHORT_CASTLE_SQUARE] == 0);
+
+      position->mailbox[B_KING_SHORT_CASTLE_SQUARE] = B_KING;
+      position->mailbox[B_ROOK_SHORT_CASTLE_SQUARE] = B_ROOK;
+    }
+    else
+    {
+      position->mailbox[B_QUEEN_ROOK_SQUARE] = 0;
+
+      assert(position->mailbox[B_KING_LONG_CASTLE_SQUARE] == 0);
+      assert(position->mailbox[B_ROOK_LONG_CASTLE_SQUARE] == 0);
+
+      position->mailbox[B_KING_LONG_CASTLE_SQUARE] = W_KING;
+      position->mailbox[B_ROOK_LONG_CASTLE_SQUARE] = W_ROOK;
+    }
+  }
+}
+
 void print_position(Position *position)
 {
   int i = 0x70; //0x70 is the top-left corner of the board
