@@ -153,6 +153,19 @@ std::string piece_to_color_coded_char(uint8_t piece)
   return (white ? std::string("\u001b[38;5;231m") : std::string("\u001b[38;5;94m")) + chr + std::string("\u001b[0m");
 }
 
+std::string piece_to_unicode_char(uint8_t piece)
+{
+  std::string unicode_str = UNICODE_PIECE_CHAR_MAP[piece];
+  bool white = IS_WHITE_PIECE(piece);
+
+  if (!unicode_str.compare("-"))
+  {
+    return std::string("-");
+  }
+
+  return (white ? std::string("\u001b[38;5;231m") : std::string("\u001b[38;5;94m")) + unicode_str + std::string("\u001b[0m");
+}
+
 char old_piece_to_char(uint8_t piece)
 {
   bool white = IS_WHITE_PIECE(piece);
