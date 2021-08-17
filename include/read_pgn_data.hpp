@@ -183,7 +183,7 @@ struct Game
     {
       move_key = short_castle ? 3 : 4;
     }
-    print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
+    // print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
 
     return move_key;
   }
@@ -533,7 +533,7 @@ struct Game
       adjust_position(&this->position, src_square, dest_square,
                       promotion_piece, en_passant_square);
 
-      print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
+      // print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
     }
 
     return move_key;
@@ -558,7 +558,7 @@ struct Game
       std::cout << matches[0] << std::endl;
       process_player_move(matches[1], true);
       process_player_move(matches[2], false);
-      if (matches[3].length() > 1)
+      if (matches[3].length() > 0)
       {
         process_result(matches[3]);
       }

@@ -147,15 +147,15 @@ void print_matches(std::smatch &matches)
 
 void read_all_pgn_files()
 {
-  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzz_cur_test.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzz_cur_test.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/PetroffOther3.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Stein.pgn");
 
-  if (true)
-  {
-    return;
-  }
+  // if (true)
+  // {
+  //   return;
+  // }
   std::string path = "/Users/vas/repos/matemancpp/database/pgn";
   for (const auto &entry : std::filesystem::directory_iterator(path))
   {
