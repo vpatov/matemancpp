@@ -147,8 +147,8 @@ void print_matches(std::smatch &matches)
 
 void read_all_pgn_files()
 {
-  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Stein.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
+  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Stein.pgn");
 
   if (true)
   {

@@ -606,12 +606,12 @@ bool legal_position(Position *position, bool whites_turn)
   // look for pawns attacking king
   uint8_t target = whites_turn ? B_PAWN : W_PAWN;
   uint8_t candidate = PREV_FILE(FORWARD_RANK(enemy_color, king_square));
-  if (candidate == target)
+  if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == target)
   {
     return false;
   }
   candidate = NEXT_FILE(FORWARD_RANK(enemy_color, king_square));
-  if (candidate == target)
+  if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == target)
   {
     return false;
   }
