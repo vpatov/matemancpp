@@ -224,12 +224,6 @@ struct Game
     std::string promotion = matches[7];
     char check_or_mate = getc(8, matches);
 
-    std::cout << dest_file << dest_rank << piece_char << std::endl;
-    if (dest_file == 'a' && dest_rank == '3' && piece_char == 'R')
-    {
-      std::cout << "breakpoint" << std::endl;
-    }
-
     // Get the promotion piece
     if (promotion.size())
     {
@@ -539,7 +533,6 @@ struct Game
       adjust_position(&this->position, src_square, dest_square,
                       promotion_piece, en_passant_square);
 
-      // print_position(&this->position);
       print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
     }
 

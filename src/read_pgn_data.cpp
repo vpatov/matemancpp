@@ -60,7 +60,6 @@ struct node {
 
 void read_pgn_file(std::string file_path)
 {
-
   std::ifstream infile(file_path);
   std::vector<Game> games;
   games.emplace_back();
@@ -123,6 +122,7 @@ void read_pgn_file(std::string file_path)
 
         // push a new game to the back of the games vector
         games.emplace_back();
+        std::cout << "\u001b[31m " << file_path << "\u001b[0m" << std::endl;
         populate_starting_position(&(games.back().position));
         // exit(0);
         reading_game = false;
@@ -147,17 +147,19 @@ void print_matches(std::smatch &matches)
 
 void read_all_pgn_files()
 {
+  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzz_cur_test.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
-  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Stein.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/PetroffOther3.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Stein.pgn");
 
   if (true)
   {
     return;
   }
-  std::string path = "/home/vas/repos/matemancpp/database/pgn";
+  std::string path = "/Users/vas/repos/matemancpp/database/pgn";
   for (const auto &entry : std::filesystem::directory_iterator(path))
   {
-    std::cout << entry.path() << std::endl;
+    std::cout << "\u001b[31m " << entry.path() << "\u001b[0m" << std::endl;
     read_pgn_file(entry.path());
   }
 }
