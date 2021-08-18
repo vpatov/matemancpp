@@ -1,5 +1,6 @@
 #include "read_pgn_data.hpp"
 #include <fstream>
+#include <set>
 
 /*
 uint8_t start_square
@@ -68,9 +69,12 @@ void read_pgn_file(std::string file_path)
   bool elo_calc_done = false;
   int whiteElo = 0;
   int blackElo = 0;
+  int linecount = 0;
 
   for (std::string line; getline(infile, line);)
   {
+    linecount++;
+    std::cout << file_path << ":" << linecount << std::endl;
     if (line.length() < 2)
     {
       continue;
@@ -125,14 +129,18 @@ void read_pgn_file(std::string file_path)
 
         // push a new game to the back of the games vector
         games.emplace_back();
-        std::cout << "\u001b[31m " << file_path << "\u001b[0m" << std::endl;
+        // std::cerr << "Games processed:" << games.size() - 1 << "\r";
+        std::cerr << "\r"
+                  << std::left << std::setw(7)
+                  << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
+
         populate_starting_position(&(games.back().position));
         // exit(0);
         reading_game = false;
       }
     }
   }
-  std::cout << "Done" << std::endl;
+  std::cerr << std::endl;
 }
 
 void print_matches(std::smatch &matches)
@@ -150,6 +158,7 @@ void print_matches(std::smatch &matches)
 
 void read_all_pgn_files()
 {
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Sic2Nc6-4Qc7-4Qb6.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzz_cur_test.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/RuyLopezOpen.pgn");
@@ -159,10 +168,35 @@ void read_all_pgn_files()
   // {
   //   return;
   // }
+  std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
+
+  std::ifstream infile(completed_files_filepath);
+  std::set<std::string> completed_files;
+  for (std::string line; getline(infile, line);)
+  {
+    completed_files.insert(line);
+  }
+
   std::string path = "/Users/vas/repos/matemancpp/database/pgn";
   for (const auto &entry : std::filesystem::directory_iterator(path))
   {
+    if (completed_files.find(entry.path()) != completed_files.end())
+    {
+      std::cout << "Skipping: " << entry.path() << std::endl;
+      continue;
+    }
+
     std::cout << "\u001b[31m " << entry.path() << "\u001b[0m" << std::endl;
     read_pgn_file(entry.path());
+
+    // Update set of completed files
+    std::cerr << "Completed: " << entry.path() << std::endl;
+    std::ofstream ofs(completed_files_filepath, std::ofstream::trunc);
+    completed_files.insert(entry.path());
+    for (auto it = completed_files.begin(); it != completed_files.end(); it++)
+    {
+      ofs << *it << std::endl;
+    }
+    ofs.close();
   }
 }

@@ -1,0 +1,20 @@
+Sic2Nc6-4Qc7-4Qb6.pgn:124711
+37.Kf2 Nd3+ 38.Ke3 Nxb2 39.Kd4 Nc4 40.Bg3 d5 41.Qh4  0-1
+37.Kf2 Nd3+ 38.Ke3 Nxb2 39.Kd4 Nc4 40.Bg3 d5  0-1
+
+Sic2Nc6-4Qc7-4Qb6.pgn:128418
+45.Re7 Kd5 46.Ng8+  0-1
+45.Re7 Kd5  0-1
+
+PircOtherWhite4.pgn:223525
+16.Bg5 Nb6 17.Qf2 Ka7 18.Qb3  1/2-1/2
+16.Bg5 Nb6 17.Qf2 Ka7  1/2-1/2
+
+QGDOther34.pgn:444347
+23.a5 Qb7 24.f3 Rg5 25.e4 Rxg2 26.Rc1 Bb5 27.g1 Rxg1+ 28.Rxg1 Bxc4 29.Qxc4 Qa6  0-1
+23.a5 Qb7 24.f3 Rg5 25.e4 Rxg2 26.Rc1 Bb5  0-1
+
+Nimzowitsch-Larsen.pgn:189586
+22.Nf3 Be4 23.R1d2 b4 24.c4 Bxb2+ 25.Kxb2 Bxf3 26.Bxf3  0-1
+22.Nf3 Be4 23.R1d2 b4 24.c4 Bxb2+ 25.Kxb2 Bxf3  0-1
+
