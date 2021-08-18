@@ -112,6 +112,9 @@ void read_pgn_file(std::string file_path)
     {
 
       bool is_game_line = games.back().read_game_move_line(line);
+      std::cout << "\u001b[32m"
+                << "#games: " << games.size() << "\u001b[0m" << std::endl;
+
       // assert(is_game_line);
       if (games.back().finishedReading)
       {
@@ -149,7 +152,7 @@ void read_all_pgn_files()
 {
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzz_cur_test.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/PetroffOther3.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/RuyLopezOpen.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Stein.pgn");
 
   // if (true)

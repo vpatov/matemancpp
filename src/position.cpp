@@ -51,6 +51,8 @@ std::shared_ptr<Position> starting_position()
 
 void populate_starting_position(Position *position)
 {
+  std::fill(position->mailbox, (position->mailbox) + 128, 0);
+
   /** White pieces*/
   position->mailbox[0x0] = W_ROOK;
   position->mailbox[0x1] = W_KNIGHT;
@@ -139,6 +141,42 @@ uint8_t char_to_piece(char piece)
 }
 
 char piece_to_char(uint8_t piece) { return PIECE_CHAR_MAP[piece]; }
+
+const std::string piece_to_name(uint8_t piece)
+{
+
+  switch (piece & PIECE_MASK)
+  {
+  case PAWN:
+  {
+    return "PAWN";
+  }
+  case ROOK:
+  {
+    return "ROOK";
+  }
+  case KNIGHT:
+  {
+    return "KNIGHT";
+  }
+  case BISHOP:
+  {
+    return "BISHOP";
+  }
+  case QUEEN:
+  {
+    return "QUEEN";
+  }
+  case KING:
+  {
+    return "KING";
+  }
+  default:
+  {
+    return "INVALID_PIECE";
+  }
+  }
+}
 
 std::string piece_to_color_coded_char(uint8_t piece, bool highlight)
 {
@@ -608,11 +646,13 @@ bool legal_position(Position *position, bool whites_turn)
   uint8_t candidate = PREV_FILE(BACKWARD_RANK(enemy_color, king_square));
   if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == target)
   {
+    std::cout << "pawn attacking king first condition." << std::endl;
     return false;
   }
   candidate = NEXT_FILE(BACKWARD_RANK(enemy_color, king_square));
   if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == target)
   {
+    std::cout << "illegal_position: found pawn attacking king second condition." << std::endl;
     return false;
   }
 
@@ -628,18 +668,21 @@ bool legal_position(Position *position, bool whites_turn)
     }
     if (position->mailbox[candidate] == target)
     {
+      std::cout << "illegal_position: found knight attacking king" << std::endl;
       return false;
     }
   }
 
   if (!check_diagonals(position, king_square, !whites_turn).empty())
   {
+    std::cout << "illegal_position: found diagonal attacking king" << std::endl;
     return false;
   }
 
   //look for bishops/queens attacking king on diagonals
   if (!check_files_ranks(position, king_square, !whites_turn).empty())
   {
+    std::cout << "illegal_position: found files/ranks attacking king" << std::endl;
     return false;
   }
 
@@ -648,8 +691,10 @@ bool legal_position(Position *position, bool whites_turn)
   for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
   {
     candidate = king_square + direction_offset(*it);
-    if (position->mailbox[candidate] == target)
+    if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == target)
     {
+      std::cout << "candidate: " << candidate << "position->mailbox[candidate]:" << position->mailbox[candidate] << std::endl;
+      std::cout << "illegal_position: found kings?? attacking king" << std::endl;
       return false;
     }
   }

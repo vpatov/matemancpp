@@ -110,10 +110,10 @@ struct Game
 
     // push the parsed move key to the move list
     std::cout << "Ply: " << position.plies << std::endl;
-    std::cout << "Pushing: " << std::hex << move_key << std::endl
-              << std::dec;
-    std::cout << std::endl
-              << std::endl;
+    // std::cout << "Pushing: " << std::hex << move_key << std::endl
+    //           << std::dec;
+    // std::cout << std::endl
+    //           << std::endl;
     move_list.push_back(move_key);
 
     // TODO remove this!!!
@@ -131,18 +131,14 @@ struct Game
 
   uint32_t castling_move(std::smatch &matches, bool white)
   {
-    std::cout << (white ? "White's turn." : "Black's turn.") << std::endl;
-    std::cout << "PGN move: " << matches[0] << std::endl;
+    // std::cout << (white ? "White's turn." : "Black's turn.") << std::endl;
+    // std::cout << "PGN move: " << matches[0] << std::endl;
     position.turn = white;
 
     std::string whichever_castle = matches[1];
     std::string queenside_castle = matches[2];
     std::string kingside_castle = matches[3];
     std::string check_or_mate = matches[4];
-    std::cout << "whichever_castle: " << whichever_castle << std::endl;
-    std::cout << "queenside_castle: " << queenside_castle << std::endl;
-    std::cout << "kingside_castle: " << kingside_castle << std::endl;
-    std::cout << "check_or_mate: " << check_or_mate << std::endl;
 
     uint8_t src_square = 0x7f;
     uint8_t dest_square = 0x7f;
@@ -183,7 +179,7 @@ struct Game
     {
       move_key = short_castle ? 3 : 4;
     }
-    // print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
+    print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
 
     return move_key;
   }
@@ -205,8 +201,8 @@ struct Game
   // TODO: consider rewriting this but with using piece lists (would probably be much easier)
   uint32_t non_castling_move(std::smatch &matches, bool white)
   {
-    std::cout << (white ? "White's turn." : "Black's turn") << std::endl;
-    std::cout << "PGN move: " << matches[0] << std::endl;
+    // std::cout << (white ? "White's turn." : "Black's turn") << std::endl;
+    // std::cout << "PGN move: " << matches[0] << std::endl;
     position.turn = white;
 
     uint8_t src_square = 0x7f;
@@ -227,7 +223,7 @@ struct Game
     // Get the promotion piece
     if (promotion.size())
     {
-      std::cout << "PROMOTION: (" << promotion << ")" << std::endl;
+      // std::cout << "PROMOTION: (" << promotion << ")" << std::endl;
       promotion_piece = char_to_piece(promotion.at(1));
       // piece should always be uppercase because pieces are uppercase in PGN.
       assert(promotion_piece < PIECE_MASK);
@@ -378,10 +374,98 @@ struct Game
           }
         }
       }
+
+      if (IS_INVALID_SQUARE(src_square))
+      {
+        std::cout << "couldn't find legal knight move." << std::endl;
+      }
     }
 
+    // LASTLEFTOFF
+    // Writing a generic version of this function, to make life easier before doing more debugging.
+    // Print output, such as what attack pieces were found, which moves were found to be illegal,
+    // what was the board state when that was determined. Write that to a file, and then grep it,
+    // because it's impractical to do with stdout rn.
+
+    else if (piece_char == BISHOP_CHAR || piece_char == ROOK_CHAR || piece_char == QUEEN_CHAR)
+    {
+      std::vector<uint8_t> attacking_pieces;
+
+      switch (piece_char)
+      {
+      case BISHOP_CHAR:
+      {
+        attacking_pieces = find_attacking_bishops(&position, dest_square, white);
+        break;
+      }
+      case ROOK_CHAR:
+      {
+        attacking_pieces = find_attacking_rooks(&position, dest_square, white);
+        break;
+      }
+      case QUEEN_CHAR:
+      {
+        attacking_pieces = find_attacking_queens(&position, dest_square, white);
+        break;
+      }
+      }
+      assert(!attacking_pieces.empty());
+
+      if (attacking_pieces.size() == 1)
+      {
+        src_square = attacking_pieces.at(0);
+      }
+      else
+      {
+        for (auto it = attacking_pieces.begin(); it != attacking_pieces.end(); it++)
+        {
+          // std::cout << piece_to_char()
+          // if either just the file or just the rank is present, and one of them is equal to the src_file
+          // or src_rank from the pgn move OR
+          // neither of src_file or src_rank are present
+          if (
+              ((src_file && index_to_an_file(*it) == src_file) ||
+               (src_rank && src_rank == index_to_an_rank(*it))) ||
+              (!src_file && !src_rank))
+          {
+
+            // temporarily assume the move
+            adjust_position(&position, *it, dest_square, 0, 0);
+            std::cout << "\u001b[31m "
+                      << "Testing legality of position:"
+                      << "\u001b[0m" << std::endl;
+            print_position_with_borders_highlight_squares(&position, *it, dest_square);
+
+            // ensure the position is legal (king is not in check)
+            if (legal_position(&position, white))
+            {
+              // set the src_square and undo the move.
+              src_square = *it;
+              adjust_position(&position, dest_square, src_square, 0, 0);
+              break;
+            }
+            else
+            {
+              std::cout << "\u001b[31m "
+                        << "not legal position. adjusting back"
+                        << "\u001b[0m" << std::endl;
+
+              // undo the move
+              adjust_position(&position, dest_square, *it, 0, 0);
+            }
+          }
+        }
+      }
+      if (IS_INVALID_SQUARE(src_square))
+      {
+        std::cout << "couldn't find_legal " << piece_char << " move." << std::endl;
+      }
+    }
+
+    /*
     else if (piece_char == BISHOP_CHAR)
     {
+
       std::vector<uint8_t> bishops = find_attacking_bishops(&position, dest_square, white);
       assert(!bishops.empty());
 
@@ -393,7 +477,6 @@ struct Game
       {
         for (auto it = bishops.begin(); it != bishops.end(); it++)
         {
-
           // if either just the file or just the rank is present, and one of them is equal to the src_file
           // or src_rank from the pgn move OR
           // neither of src_file or src_rank are present
@@ -420,6 +503,10 @@ struct Game
             }
           }
         }
+      }
+      if (IS_INVALID_SQUARE(src_square))
+      {
+        std::cout << "couldn't find legal bishop move." << std::endl;
       }
     }
 
@@ -461,6 +548,10 @@ struct Game
             }
           }
         }
+      }
+      if (IS_INVALID_SQUARE(src_square))
+      {
+        std::cout << "couldn't find legal rook move." << std::endl;
       }
     }
 
@@ -504,7 +595,13 @@ struct Game
           }
         }
       }
+      if (IS_INVALID_SQUARE(src_square))
+      {
+        std::cout << "couldn't find legal queen move." << std::endl;
+      }
     }
+
+  */
 
     // src_square and dest_square should be sufficiently populated at this point
     // move key is bit-wise concatenation of
@@ -521,19 +618,19 @@ struct Game
     }
     else
     {
-      std::cout << "Generated move: " << index_to_an_square(src_square)
-                << " -> " << index_to_an_square(dest_square);
+      // std::cout << "Generated move: " << index_to_an_square(src_square)
+      // << " -> " << index_to_an_square(dest_square);
       if (promotion_piece)
       {
-        std::cout << " Promotion: " << piece_to_char(promotion_piece);
+        // std::cout << " Promotion: " << piece_to_char(promotion_piece);
       }
-      std::cout << std::endl
-                << std::endl;
+      // std::cout << std::endl
+      //           << std::endl;
 
       adjust_position(&this->position, src_square, dest_square,
                       promotion_piece, en_passant_square);
 
-      // print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
+      print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
     }
 
     return move_key;
