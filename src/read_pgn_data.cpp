@@ -104,6 +104,8 @@ void populateMetadata(Game *game)
       }
     }
   }
+  game->eloOverThreshold =
+      game->whiteElo >= ELO_THRESHOLD && game->blackElo >= ELO_THRESHOLD;
 }
 
 void read_pgn_file(std::string file_path)
@@ -142,8 +144,6 @@ void read_pgn_file(std::string file_path)
       {
 
         populateMetadata(&games.back());
-        games.back().eloOverThreshold =
-            games.back().whiteElo >= ELO_THRESHOLD && games.back().blackElo >= ELO_THRESHOLD;
 
         // push a new game to the back of the games vector
         games.emplace_back();
