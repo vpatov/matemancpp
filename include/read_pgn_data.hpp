@@ -666,6 +666,8 @@ struct Game
   }
 };
 
+void try_threading();
+
 void print_matches(std::smatch &matches);
 
 #define ELO_THRESHOLD 2200

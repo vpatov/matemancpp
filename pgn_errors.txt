@@ -18,3 +18,8 @@ Nimzowitsch-Larsen.pgn:189586
 22.Nf3 Be4 23.R1d2 b4 24.c4 Bxb2+ 25.Kxb2 Bxf3 26.Bxf3  0-1
 22.Nf3 Be4 23.R1d2 b4 24.c4 Bxb2+ 25.Kxb2 Bxf3  0-1
 
+Modern3Nf3.pgn:21600
+58.Nf2 Rg2 59.d6 Rxb4  1-0
+58.Nf2 Rg2  1-0
+
+

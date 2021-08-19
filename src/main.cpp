@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 
 {
    read_all_pgn_files();
+   // try_threading();
 }
 
 /*

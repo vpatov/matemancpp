@@ -1,6 +1,18 @@
 #include "read_pgn_data.hpp"
 #include <fstream>
 #include <set>
+#include <thread>
+
+const std::string test_files[8] = {
+    "/Users/vas/repos/matemancpp/database/pgn/Berliner.pgn",
+    "/Users/vas/repos/matemancpp/database/pgn/DeLaBourdonnais.pgn",
+    "/Users/vas/repos/matemancpp/database/pgn/McDonnell.pgn",
+    "/Users/vas/repos/matemancpp/database/pgn/Horwitz.pgn",
+    "/Users/vas/repos/matemancpp/database/pgn/Breyer.pgn",
+    "/Users/vas/repos/matemancpp/database/pgn/Morphy.pgn",
+    "/Users/vas/repos/matemancpp/database/pgn/MacKenzie.pgn",
+    "/Users/vas/repos/matemancpp/database/pgn/Winawer.pgn",
+};
 
 /*
 uint8_t start_square
@@ -156,18 +168,24 @@ void print_matches(std::smatch &matches)
   std::cout << "8: " << matches[8] << std::endl;
 }
 
+void try_threading()
+{
+  std::thread threads[8];
+  for (int i = 0; i < 8; i++)
+  {
+    threads[i] = std::thread(read_pgn_file, test_files[i]);
+  }
+  for (int i = 0; i < 8; i++)
+  {
+    threads[i].join();
+    std::cerr << i << " complete.";
+  }
+  // std::thread thread_obj(foo, params);
+}
+
 void read_all_pgn_files()
 {
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Sic2Nc6-4Qc7-4Qb6.pgn");
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzz_cur_test.pgn");
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/RuyLopezOpen.pgn");
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Stein.pgn");
 
-  // if (true)
-  // {
-  //   return;
-  // }
   std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
 
   std::ifstream infile(completed_files_filepath);
