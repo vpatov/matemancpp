@@ -141,6 +141,7 @@ bool legal_position(Position *position, bool whites_turn);
 uint8_t check_line(Position *position, uint8_t target, int offset, bool (*piece_type_function)(uint8_t));
 std::vector<uint8_t> check_files_ranks(Position *position, uint8_t target_square, bool color_of_attackers);
 std::vector<uint8_t> check_diagonals(Position *position, uint8_t target_square, bool color_of_attackers);
+std::vector<uint8_t> find_attacking_knights(Position *position, uint8_t target_square, bool color_of_attackers);
 std::vector<uint8_t> find_attacking_bishops(Position *position, uint8_t target_square, bool color_of_attackers);
 std::vector<uint8_t> find_attacking_rooks(Position *position, uint8_t target_square, bool color_of_attackers);
 std::vector<uint8_t> find_attacking_queens(Position *position, uint8_t target_square, bool color_of_attackers);

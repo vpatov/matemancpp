@@ -492,6 +492,24 @@ std::vector<uint8_t> check_diagonals(Position *position, uint8_t target_square, 
   return squares;
 }
 
+std::vector<uint8_t> find_attacking_knights(Position *position, uint8_t target_square, bool color_of_attackers)
+{
+  std::vector<uint8_t> squares;
+  for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
+  {
+    uint8_t square = *it + target_square;
+    if (IS_INVALID_SQUARE(square))
+    {
+      continue;
+    }
+    if (position->mailbox[square] == (color_of_attackers ? W_KNIGHT : B_KNIGHT))
+    {
+      squares.push_back(square);
+    }
+  }
+  return squares;
+}
+
 std::vector<uint8_t> find_attacking_bishops(Position *position, uint8_t target_square, bool color_of_attackers)
 {
   std::vector<uint8_t> squares;

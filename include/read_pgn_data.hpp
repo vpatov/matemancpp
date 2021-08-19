@@ -307,92 +307,17 @@ struct Game
       src_square = an_square_to_index(src_file, src_rank);
     }
 
-    // PGN annotation only provides src rank and file if it is necessary to disambiguate.
-    else if (piece_char == KNIGHT_CHAR)
-    {
-      assert(!(src_file & src_rank));
-      // find all knights a knight move away from the dest square
-      std::vector<uint8_t> knights;
-      for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
-      {
-        uint8_t square = *it + dest_square;
-        if (IS_INVALID_SQUARE(square))
-        {
-          continue;
-        }
-        if (position.mailbox[square] == (white ? W_KNIGHT : B_KNIGHT))
-        {
-          knights.push_back(square);
-        }
-      }
-
-      // We should always find at least one knight.
-      assert(knights.size() > 0);
-
-      // if there was only one knight, we're done
-      if (knights.size() == 1)
-      {
-        src_square = knights.at(0);
-      }
-
-      else
-      {
-        for (auto it = knights.begin(); it != knights.end(); it++)
-        {
-          // We have already covered the case where src_file and src_rank are present. Now we just need to cover
-          // the case where either just the file or just the rank is present. In most positions, with a move like Nge7,
-          // that means that there are two knights that could go to e7, but only one of them is on the g file.
-          // if there were two knights were on the g file, then the move would be something like Ng6e7. However, we
-          // must cover the case where two knights could go to the same square, but it is illegal for one to do so because
-          // they are blocking check. PGN annotation in this case does not add the file/rank to disambiguate in this case,
-          // because it is not necessary. This code covers that case.
-
-          // if either just the file or just the rank is present, and one of them is equal to the src_file
-          // or src_rank from the pgn move OR
-          // neither of src_file or src_rank are present
-          if (
-              ((src_file && index_to_an_file(*it) == src_file) ||
-               (src_rank && src_rank == index_to_an_rank(*it))) ||
-              (!src_file && !src_rank))
-          {
-
-            // temporarily assume the move
-            adjust_position(&position, *it, dest_square, 0, 0);
-            // ensure the position is legal (king is not in check)
-            if (legal_position(&position, white))
-            {
-              // set the src_square and undo the move.
-              src_square = *it;
-              adjust_position(&position, dest_square, src_square, 0, 0);
-              break;
-            }
-            else
-            {
-              // undo the move
-              adjust_position(&position, dest_square, *it, 0, 0);
-            }
-          }
-        }
-      }
-
-      if (IS_INVALID_SQUARE(src_square))
-      {
-        std::cout << "couldn't find legal knight move." << std::endl;
-      }
-    }
-
-    // LASTLEFTOFF
-    // Writing a generic version of this function, to make life easier before doing more debugging.
-    // Print output, such as what attack pieces were found, which moves were found to be illegal,
-    // what was the board state when that was determined. Write that to a file, and then grep it,
-    // because it's impractical to do with stdout rn.
-
-    else if (piece_char == BISHOP_CHAR || piece_char == ROOK_CHAR || piece_char == QUEEN_CHAR)
+    else if (piece_char == KNIGHT_CHAR || piece_char == BISHOP_CHAR || piece_char == ROOK_CHAR || piece_char == QUEEN_CHAR)
     {
       std::vector<uint8_t> attacking_pieces;
 
       switch (piece_char)
       {
+      case KNIGHT_CHAR:
+      {
+        attacking_pieces = find_attacking_knights(&position, dest_square, white);
+        break;
+      }
       case BISHOP_CHAR:
       {
         attacking_pieces = find_attacking_bishops(&position, dest_square, white);
@@ -419,7 +344,6 @@ struct Game
       {
         for (auto it = attacking_pieces.begin(); it != attacking_pieces.end(); it++)
         {
-          // std::cout << piece_to_char()
           // if either just the file or just the rank is present, and one of them is equal to the src_file
           // or src_rank from the pgn move OR
           // neither of src_file or src_rank are present
@@ -461,147 +385,6 @@ struct Game
         std::cout << "couldn't find_legal " << piece_char << " move." << std::endl;
       }
     }
-
-    /*
-    else if (piece_char == BISHOP_CHAR)
-    {
-
-      std::vector<uint8_t> bishops = find_attacking_bishops(&position, dest_square, white);
-      assert(!bishops.empty());
-
-      if (bishops.size() == 1)
-      {
-        src_square = bishops.at(0);
-      }
-      else
-      {
-        for (auto it = bishops.begin(); it != bishops.end(); it++)
-        {
-          // if either just the file or just the rank is present, and one of them is equal to the src_file
-          // or src_rank from the pgn move OR
-          // neither of src_file or src_rank are present
-          if (
-              ((src_file && index_to_an_file(*it) == src_file) ||
-               (src_rank && src_rank == index_to_an_rank(*it))) ||
-              (!src_file && !src_rank))
-          {
-
-            // temporarily assume the move
-            adjust_position(&position, *it, dest_square, 0, 0);
-            // ensure the position is legal (king is not in check)
-            if (legal_position(&position, white))
-            {
-              // set the src_square and undo the move.
-              src_square = *it;
-              adjust_position(&position, dest_square, src_square, 0, 0);
-              break;
-            }
-            else
-            {
-              // undo the move
-              adjust_position(&position, dest_square, *it, 0, 0);
-            }
-          }
-        }
-      }
-      if (IS_INVALID_SQUARE(src_square))
-      {
-        std::cout << "couldn't find legal bishop move." << std::endl;
-      }
-    }
-
-    else if (piece_char == ROOK_CHAR)
-    {
-      std::vector<uint8_t> rooks = find_attacking_rooks(&position, dest_square, white);
-      assert(!rooks.empty());
-
-      if (rooks.size() == 1)
-      {
-        src_square = rooks.at(0);
-      }
-      else
-      {
-        for (auto it = rooks.begin(); it != rooks.end(); it++)
-        {
-
-          // if either just the file or just the rank is present.
-          if (
-              ((src_file && index_to_an_file(*it) == src_file) ||
-               (src_rank && src_rank == index_to_an_rank(*it))) ||
-              (!src_file && !src_rank))
-          {
-
-            // temporarily assume the move
-            adjust_position(&position, *it, dest_square, 0, 0);
-            // ensure the position is legal (king is not in check)
-            if (legal_position(&position, white))
-            {
-              // set the src_square and undo the move.
-              src_square = *it;
-              adjust_position(&position, dest_square, src_square, 0, 0);
-              break;
-            }
-            else
-            {
-              // undo the move
-              adjust_position(&position, dest_square, *it, 0, 0);
-            }
-          }
-        }
-      }
-      if (IS_INVALID_SQUARE(src_square))
-      {
-        std::cout << "couldn't find legal rook move." << std::endl;
-      }
-    }
-
-    else if (piece_char == QUEEN_CHAR)
-    {
-      std::vector<uint8_t> queens = find_attacking_queens(&position, dest_square, white);
-      assert(!queens.empty());
-
-      if (queens.size() == 1)
-      {
-        src_square = queens.at(0);
-      }
-      else
-      {
-        for (auto it = queens.begin(); it != queens.end(); it++)
-        {
-          // if either just the file or just the rank is present, and one of them is equal to the src_file
-          // or src_rank from the pgn move OR
-          // neither of src_file or src_rank are present
-          if (
-              ((src_file && index_to_an_file(*it) == src_file) ||
-               (src_rank && src_rank == index_to_an_rank(*it))) ||
-              (!src_file && !src_rank))
-          {
-
-            // temporarily assume the move
-            adjust_position(&position, *it, dest_square, 0, 0);
-            // ensure the position is legal (king is not in check)
-            if (legal_position(&position, white))
-            {
-              // set the src_square and undo the move.
-              src_square = *it;
-              adjust_position(&position, dest_square, src_square, 0, 0);
-              break;
-            }
-            else
-            {
-              // undo the move
-              adjust_position(&position, dest_square, *it, 0, 0);
-            }
-          }
-        }
-      }
-      if (IS_INVALID_SQUARE(src_square))
-      {
-        std::cout << "couldn't find legal queen move." << std::endl;
-      }
-    }
-
-  */
 
     // src_square and dest_square should be sufficiently populated at this point
     // move key is bit-wise concatenation of
