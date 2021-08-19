@@ -77,10 +77,8 @@ void read_pgn_file(std::string file_path)
   std::vector<Game> games;
   games.emplace_back();
   populate_starting_position(&(games.back().position));
-  bool reading_game = false;
+  bool reading_game_moves = false;
   bool elo_calc_done = false;
-  int whiteElo = 0;
-  int blackElo = 0;
   int linecount = 0;
 
   for (std::string line; getline(infile, line);)
@@ -93,13 +91,13 @@ void read_pgn_file(std::string file_path)
     }
 
     // read the metadata until there are no more metadata lines left
-    if (!reading_game && !games.back().read_metadata_line(line))
+    if (!reading_game_moves && !games.back().read_metadata_line(line))
     {
-      reading_game = true;
+      reading_game_moves = true;
     }
 
     // before we start reading the game, find the elo of the players
-    if (reading_game && !elo_calc_done)
+    if (reading_game_moves && !elo_calc_done)
     {
 
       // Iterate through metadata key-value pairs
@@ -112,19 +110,19 @@ void read_pgn_file(std::string file_path)
         }
         if ((it->key).compare("WhiteElo") == 0)
         {
-          whiteElo = std::stoi(it->value);
-          std::cout << "WhiteElo: " << whiteElo << std::endl;
+          games.back().whiteElo = std::stoi(it->value);
+          std::cout << "WhiteElo: " << games.back().whiteElo << std::endl;
         }
         else if ((it->key).compare("BlackElo") == 0)
         {
-          blackElo = std::stoi(it->value);
-          std::cout << "BlackElo: " << blackElo << std::endl;
+          games.back().blackElo = std::stoi(it->value);
+          std::cout << "BlackElo: " << games.back().blackElo << std::endl;
         }
       }
       elo_calc_done = true;
     }
 
-    if (reading_game)
+    if (reading_game_moves)
     {
 
       bool is_game_line = games.back().read_game_move_line(line);
@@ -137,7 +135,7 @@ void read_pgn_file(std::string file_path)
         std::cout << " Place back game: " << games.back().result << std::endl;
 
         games.back().eloOverThreshold =
-            whiteElo >= ELO_THRESHOLD && blackElo >= ELO_THRESHOLD;
+            games.back().whiteElo >= ELO_THRESHOLD && games.back().blackElo >= ELO_THRESHOLD;
 
         // push a new game to the back of the games vector
         games.emplace_back();
@@ -148,7 +146,8 @@ void read_pgn_file(std::string file_path)
 
         populate_starting_position(&(games.back().position));
         // exit(0);
-        reading_game = false;
+        reading_game_moves = false;
+        elo_calc_done = false;
       }
     }
   }
@@ -194,6 +193,9 @@ void try_threading()
 
 void read_all_pgn_files()
 {
+
+  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
+  exit(0);
 
   std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
 

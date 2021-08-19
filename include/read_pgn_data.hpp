@@ -53,6 +53,8 @@ struct Game
 {
   std::vector<metadata_entry> metadata;
   Position position;
+  int whiteElo;
+  int blackElo;
   bool eloOverThreshold;
   bool finishedReading;
   std::string result;
