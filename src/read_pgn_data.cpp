@@ -14,6 +14,9 @@ const std::string test_files[8] = {
     "/Users/vas/repos/matemancpp/database/pgn/Winawer.pgn",
 };
 
+const std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
+const std::string pgn_database_path = "/Users/vas/repos/matemancpp/database/pgn";
+
 /*
 uint8_t start_square
 uint8_t end_square
@@ -71,6 +74,38 @@ struct node {
       }
 */
 
+// Reads the elo, and other metadata.
+void populateMetadata(Game *game)
+{
+  int elo;
+
+  // Iterate through metadata key-value pairs
+  auto metadata = game->metadata;
+  for (auto it = metadata.begin(); it != metadata.end(); it++)
+  {
+    if (it->value.length() < 2)
+    {
+      continue;
+    }
+    if ((it->key).compare("WhiteElo") == 0)
+    {
+      elo = std::stoi(it->value);
+      if (elo >= 0)
+      {
+        game->whiteElo = elo;
+      }
+    }
+    else if ((it->key).compare("BlackElo") == 0)
+    {
+      elo = std::stoi(it->value);
+      if (elo >= 0)
+      {
+        game->blackElo = elo;
+      }
+    }
+  }
+}
+
 void read_pgn_file(std::string file_path)
 {
   std::ifstream infile(file_path);
@@ -78,7 +113,6 @@ void read_pgn_file(std::string file_path)
   games.emplace_back();
   populate_starting_position(&(games.back().position));
   bool reading_game_moves = false;
-  bool elo_calc_done = false;
   int linecount = 0;
 
   for (std::string line; getline(infile, line);)
@@ -96,32 +130,6 @@ void read_pgn_file(std::string file_path)
       reading_game_moves = true;
     }
 
-    // before we start reading the game, find the elo of the players
-    if (reading_game_moves && !elo_calc_done)
-    {
-
-      // Iterate through metadata key-value pairs
-      auto metadata = games.back().metadata;
-      for (auto it = metadata.begin(); it != metadata.end(); it++)
-      {
-        if (it->value.length() < 2)
-        {
-          continue;
-        }
-        if ((it->key).compare("WhiteElo") == 0)
-        {
-          games.back().whiteElo = std::stoi(it->value);
-          std::cout << "WhiteElo: " << games.back().whiteElo << std::endl;
-        }
-        else if ((it->key).compare("BlackElo") == 0)
-        {
-          games.back().blackElo = std::stoi(it->value);
-          std::cout << "BlackElo: " << games.back().blackElo << std::endl;
-        }
-      }
-      elo_calc_done = true;
-    }
-
     if (reading_game_moves)
     {
 
@@ -132,39 +140,23 @@ void read_pgn_file(std::string file_path)
       // assert(is_game_line);
       if (games.back().finishedReading)
       {
-        std::cout << " Place back game: " << games.back().result << std::endl;
 
+        populateMetadata(&games.back());
         games.back().eloOverThreshold =
             games.back().whiteElo >= ELO_THRESHOLD && games.back().blackElo >= ELO_THRESHOLD;
 
         // push a new game to the back of the games vector
         games.emplace_back();
-        // std::cerr << "Games processed:" << games.size() - 1 << "\r";
         std::cerr << "\r"
                   << std::left << std::setw(7)
                   << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
 
         populate_starting_position(&(games.back().position));
-        // exit(0);
         reading_game_moves = false;
-        elo_calc_done = false;
       }
     }
   }
   std::cerr << std::endl;
-}
-
-void print_matches(std::smatch &matches)
-{
-  std::cout << matches[0] << std::endl;
-  std::cout << "1: " << matches[1] << std::endl;
-  std::cout << "2: " << matches[2] << std::endl;
-  std::cout << "3: " << matches[3] << std::endl;
-  std::cout << "4: " << matches[4] << std::endl;
-  std::cout << "5: " << matches[5] << std::endl;
-  std::cout << "6: " << matches[6] << std::endl;
-  std::cout << "7: " << matches[7] << std::endl;
-  std::cout << "8: " << matches[8] << std::endl;
 }
 
 char getc(int i, std::smatch &matches)
@@ -191,23 +183,37 @@ void try_threading()
   // std::thread thread_obj(foo, params);
 }
 
-void read_all_pgn_files()
+std::set<std::string> get_completed_files_set()
 {
-
-  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
-  exit(0);
-
-  std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
-
   std::ifstream infile(completed_files_filepath);
   std::set<std::string> completed_files;
   for (std::string line; getline(infile, line);)
   {
     completed_files.insert(line);
   }
+  return completed_files;
+}
 
-  std::string path = "/Users/vas/repos/matemancpp/database/pgn";
-  for (const auto &entry : std::filesystem::directory_iterator(path))
+void update_completed_files_set(std::string filename, std::set<std::string> *completed_files)
+{
+  std::ofstream ofs(completed_files_filepath, std::ofstream::trunc);
+  completed_files->insert(filename);
+  for (auto it = completed_files->begin(); it != completed_files->end(); it++)
+  {
+    ofs << *it << std::endl;
+  }
+  ofs.close();
+}
+
+void read_all_pgn_files()
+{
+
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
+  // exit(0);
+
+  std::set completed_files = get_completed_files_set();
+
+  for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
   {
     if (completed_files.find(entry.path()) != completed_files.end())
     {
@@ -220,12 +226,6 @@ void read_all_pgn_files()
 
     // Update set of completed files
     std::cerr << "Completed: " << entry.path() << std::endl;
-    std::ofstream ofs(completed_files_filepath, std::ofstream::trunc);
-    completed_files.insert(entry.path());
-    for (auto it = completed_files.begin(); it != completed_files.end(); it++)
-    {
-      ofs << *it << std::endl;
-    }
-    ofs.close();
+    update_completed_files_set(entry.path(), &completed_files);
   }
 }
