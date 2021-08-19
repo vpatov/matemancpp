@@ -47,6 +47,8 @@ const std::string result_regex_str =
 const std::regex game_line_regex(
     R"(\d+\.\s*([\w\-\+\#\=]+)\s([\w\-\+\#\=]+)?\s*)" + result_regex_str);
 
+char getc(int i, std::smatch &matches);
+
 struct Game
 {
   std::vector<metadata_entry> metadata;
@@ -118,15 +120,6 @@ struct Game
 
     // TODO remove this!!!
     position.plies++;
-  }
-
-  char getc(int i, std::smatch &matches)
-  {
-    if (matches[i].length())
-    {
-      return matches[i].str().at(0);
-    }
-    return 0;
   }
 
   uint32_t castling_move(std::smatch &matches, bool white)

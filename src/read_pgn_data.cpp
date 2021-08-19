@@ -168,6 +168,15 @@ void print_matches(std::smatch &matches)
   std::cout << "8: " << matches[8] << std::endl;
 }
 
+char getc(int i, std::smatch &matches)
+{
+  if (matches[i].length())
+  {
+    return matches[i].str().at(0);
+  }
+  return 0;
+}
+
 void try_threading()
 {
   std::thread threads[8];
