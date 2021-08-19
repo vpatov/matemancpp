@@ -90,7 +90,7 @@ const std::string UNICODE_PIECE_CHAR_MAP[24] = {"-", "♙", "♖", "♘", "♗",
 struct Position
 {
   uint8_t mailbox[128]; // x88 mailbox flat array
-  bool turn;            // true if white's turn
+  bool whites_turn;     // true if white's turn
   bool white_kingside_castle;
   bool white_queenside_castle;
   bool black_kingside_castle;

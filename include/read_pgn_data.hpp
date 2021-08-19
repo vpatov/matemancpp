@@ -35,19 +35,25 @@ struct move_edge
   uint32_t move_key;
 };
 
+const std::string result_regex_str =
+    R"((((?:1\/2|1|0)\s*\-\s*(?:1\/2|1|0)\s*$)|\*)?)";
+const std::regex game_line_regex(
+    R"(\d+\.\s*([\w\-\+\#\=]+)\s([\w\-\+\#\=]+)?\s*)" + result_regex_str);
+const std::string metadata_line_regex =
+    "^\\s*\\[(\\w+)\\s\"(.*?)\"\\]\\s*$";
+const std::string non_castling_move_regex =
+    "([RNBKQ])?([a-h])?([1-8])?(x)?([a-h])"
+    "([1-8])(=[RNBKQ])?([\\+\\#])?";
+const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
+
+char getc(int i, std::smatch &matches);
+uint32_t generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t promotion_piece);
+
 struct OpeningTablebase
 {
   Game *current_game;
   std::unordered_map<uint64_t, std::vector<move_edge>> opening_tablebase;
 };
-
-const std::string result_regex_str =
-    R"((((?:1\/2|1|0)\s*\-\s*(?:1\/2|1|0)\s*$)|\*)?)";
-
-const std::regex game_line_regex(
-    R"(\d+\.\s*([\w\-\+\#\=]+)\s([\w\-\+\#\=]+)?\s*)" + result_regex_str);
-
-char getc(int i, std::smatch &matches);
 
 struct Game
 {
@@ -62,9 +68,6 @@ struct Game
 
   bool read_metadata_line(std::string &line)
   {
-    const std::string metadata_line_regex =
-        "^\\s*\\[(\\w+)\\s\"(.*?)\"\\]\\s*$";
-
     std::smatch matches;
     if (std::regex_match(line, matches, std::regex(metadata_line_regex)))
     {
@@ -72,7 +75,6 @@ struct Game
       entry.key = std::string(matches[1]);
       entry.value = std::string(matches[2]);
       metadata.push_back(entry);
-
       return true;
     }
     return false;
@@ -81,11 +83,6 @@ struct Game
   void process_player_move(std::string player_move, bool white)
   {
     uint32_t move_key;
-
-    const std::string non_castling_move_regex =
-        "([RNBKQ])?([a-h])?([1-8])?(x)?([a-h])"
-        "([1-8])(=[RNBKQ])?([\\+\\#])?";
-    const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
     boost::algorithm::trim(player_move);
 
     if (player_move.size() == 0)
@@ -97,27 +94,20 @@ struct Game
     if (std::regex_match(player_move, matches,
                          std::regex(non_castling_move_regex)))
     {
-
       move_key = non_castling_move(matches, white);
     }
     else if (std::regex_match(player_move, matches,
                               std::regex(castling_move_regex)))
     {
-
       move_key = castling_move(matches, white);
     }
     else
     {
-      std::cout << "no match: " << player_move << std::endl;
-      return;
+      assert(false);
     }
 
     // push the parsed move key to the move list
     std::cout << "Ply: " << position.plies << std::endl;
-    // std::cout << "Pushing: " << std::hex << move_key << std::endl
-    //           << std::dec;
-    // std::cout << std::endl
-    //           << std::endl;
     move_list.push_back(move_key);
 
     // TODO remove this!!!
@@ -126,19 +116,15 @@ struct Game
 
   uint32_t castling_move(std::smatch &matches, bool white)
   {
-    // std::cout << (white ? "White's turn." : "Black's turn.") << std::endl;
-    // std::cout << "PGN move: " << matches[0] << std::endl;
-    position.turn = white;
+    position.whites_turn = white;
 
     std::string whichever_castle = matches[1];
     std::string queenside_castle = matches[2];
     std::string kingside_castle = matches[3];
     std::string check_or_mate = matches[4];
 
-    uint8_t src_square = 0x7f;
-    uint8_t dest_square = 0x7f;
-    uint8_t promotion_piece = 0;
-    Color color = white ? Color::WHITE : Color::BLACK;
+    uint8_t src_square = INVALID_SQUARE;
+    uint8_t dest_square = INVALID_SQUARE;
     bool short_castle = false;
 
     src_square = white ? W_KING_SQUARE : B_KING_SQUARE;
@@ -152,31 +138,15 @@ struct Game
     {
       dest_square = white ? W_KING_LONG_CASTLE_SQUARE : B_KING_LONG_CASTLE_SQUARE;
     }
-    // should always be one of the two castling types
     else
     {
       assert(false);
     }
 
     perform_castle(&position, white, short_castle);
-
-    // 0 = no castle
-    // 1 = white kingside
-    // 2 = white queenside
-    // 3 = black kingside
-    // 4 = black queenside
-    uint32_t move_key = 0;
-    if (white)
-    {
-      move_key = short_castle ? 1 : 2;
-    }
-    else
-    {
-      move_key = short_castle ? 3 : 4;
-    }
     print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
 
-    return move_key;
+    return generate_move_key(src_square, dest_square, 0);
   }
 
   // This function calculates and returns the move key, which is a concatenation
@@ -194,11 +164,10 @@ struct Game
   // file/rank.
   // TODO: refactor into several smaller functions
   // TODO: consider rewriting this but with using piece lists (would probably be much easier)
+  // TODO: make it such that it has no side effects.
   uint32_t non_castling_move(std::smatch &matches, bool white)
   {
-    // std::cout << (white ? "White's turn." : "Black's turn") << std::endl;
-    // std::cout << "PGN move: " << matches[0] << std::endl;
-    position.turn = white;
+    position.whites_turn = white;
 
     uint8_t src_square = 0x7f;
     uint8_t dest_square = 0x7f;
@@ -381,14 +350,8 @@ struct Game
       }
     }
 
-    // src_square and dest_square should be sufficiently populated at this point
-    // move key is bit-wise concatenation of
-    // (castle) + start_square + end_square + promotion_piece
-    // 8 bits     8 bits         8 bits       8 bits
-    uint32_t move_key =
-        (src_square << 16) + (dest_square << 8) + promotion_piece;
+    assert_correct_player_turn(&position, src_square, dest_square);
 
-    assert(!IS_INVALID_SQUARE(dest_square));
     if (IS_INVALID_SQUARE(src_square))
     {
       std::cout << "Impl incomplete for move: " << matches[0] << std::endl;
@@ -396,22 +359,20 @@ struct Game
     }
     else
     {
-      // std::cout << "Generated move: " << index_to_an_square(src_square)
-      // << " -> " << index_to_an_square(dest_square);
-      if (promotion_piece)
-      {
-        // std::cout << " Promotion: " << piece_to_char(promotion_piece);
-      }
-      // std::cout << std::endl
-      //           << std::endl;
-
       adjust_position(&this->position, src_square, dest_square,
                       promotion_piece, en_passant_square);
-
       print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
     }
 
-    return move_key;
+    return generate_move_key(src_square, dest_square, promotion_piece);
+  }
+
+  void assert_correct_player_turn(Position *position, uint8_t src_square, uint8_t dest_square)
+  {
+    assert(IS_VALID_SQUARE(src_square));
+    assert(IS_VALID_SQUARE(dest_square));
+    uint8_t moving_piece = position->mailbox[src_square];
+    assert(position->whites_turn ? IS_WHITE_PIECE(moving_piece) : IS_BLACK_PIECE(moving_piece));
   }
 
   void process_result(std::string resultstr)

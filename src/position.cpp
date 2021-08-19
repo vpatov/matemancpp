@@ -44,7 +44,7 @@ std::shared_ptr<Position> starting_position()
   position->plies = 0;
   position->moves = 1;
   position->en_passant_square = 0;
-  position->turn = true;
+  position->whites_turn = true;
 
   return position;
 }
@@ -89,7 +89,7 @@ void populate_starting_position(Position *position)
   position->plies = 0;
   position->moves = 1;
   position->en_passant_square = 0;
-  position->turn = true;
+  position->whites_turn = true;
 }
 
 uint8_t an_square_to_index(std::string square)
@@ -257,21 +257,21 @@ void adjust_position(Position *position, uint8_t src_square,
   assert(IS_VALID_SQUARE(src_square));
   assert(IS_VALID_SQUARE(dest_square));
 
-  Color color = position->turn ? Color::WHITE : Color::BLACK;
+  Color color = position->whites_turn ? Color::WHITE : Color::BLACK;
 
   position->mailbox[dest_square] =
       promotion_piece ? promotion_piece : position->mailbox[src_square];
 
   if (position->en_passant_square &&
       position->en_passant_square == dest_square &&
-      ((position->turn ? is_w_pawn : is_b_pawn)(position->mailbox[src_square])))
+      ((position->whites_turn ? is_w_pawn : is_b_pawn)(position->mailbox[src_square])))
   {
     // If we are capturing en-passant there should never be a promotion piece
     assert(!promotion_piece);
 
     // Remove the pawn that is being captured
     uint8_t square_of_pawn_being_captured = BACKWARD_RANK(color, dest_square);
-    assert(position->mailbox[square_of_pawn_being_captured] == position->turn
+    assert(position->mailbox[square_of_pawn_being_captured] == position->whites_turn
                ? B_PAWN
                : W_PAWN);
     position->mailbox[square_of_pawn_being_captured] = 0;

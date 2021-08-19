@@ -159,6 +159,15 @@ void read_pgn_file(std::string file_path)
   std::cerr << std::endl;
 }
 
+// if it's a castling move, the src_square and dst_square will be of the king.
+uint32_t generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t promotion_piece)
+{
+  // move key is bit-wise concatenation of
+  // (empty/reserved) + start_square + end_square + promotion_piece
+  // 8 bits             8 bits         8 bits       8 bits
+  return (src_square << 16) + (dest_square << 8) + promotion_piece;
+}
+
 char getc(int i, std::smatch &matches)
 {
   if (matches[i].length())
