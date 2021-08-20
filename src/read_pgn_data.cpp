@@ -108,10 +108,16 @@ void populateMetadata(Game *game)
       game->whiteElo >= ELO_THRESHOLD && game->blackElo >= ELO_THRESHOLD;
 }
 
+// std::vector<Game> read_pgn_file(std::string file_path)
 void read_pgn_file(std::string file_path)
 {
   std::ifstream infile(file_path);
   std::vector<Game> games;
+
+  // Adding this gets rid of the errors I was seeing that were happening because of
+  // reallocation
+  // games.reserve(sizeof(Game) * 10000);
+
   games.emplace_back();
   populate_starting_position(&(games.back().position));
   bool reading_game_moves = false;
@@ -157,6 +163,7 @@ void read_pgn_file(std::string file_path)
     }
   }
   std::cerr << std::endl;
+  // return games;
 }
 
 // if it's a castling move, the src_square and dst_square will be of the king.
@@ -217,12 +224,13 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
 void read_all_pgn_files()
 {
 
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/subtest/McDonnell.pgn");
   // exit(0);
 
   std::set completed_files = get_completed_files_set();
 
   for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
+  // for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
   {
     if (completed_files.find(entry.path()) != completed_files.end())
     {

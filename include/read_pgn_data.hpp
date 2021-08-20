@@ -66,6 +66,12 @@ struct Game
   std::string result;
   std::vector<uint32_t> move_list;
 
+  // Adding this constructor causes problems,  because std::vector.emplace_back reallocates?
+  // Game()
+  // {
+  //   populate_starting_position(&position);
+  // }
+
   bool read_metadata_line(std::string &line)
   {
     std::smatch matches;
@@ -144,7 +150,7 @@ struct Game
     }
 
     perform_castle(&position, white, short_castle);
-    print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
+    // print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
 
     return generate_move_key(src_square, dest_square, 0);
   }
@@ -322,7 +328,6 @@ struct Game
             std::cout << "\u001b[31m "
                       << "Testing legality of position:"
                       << "\u001b[0m" << std::endl;
-            print_position_with_borders_highlight_squares(&position, *it, dest_square);
 
             // ensure the position is legal (king is not in check)
             if (legal_position(&position, white))
@@ -361,7 +366,7 @@ struct Game
     {
       adjust_position(&this->position, src_square, dest_square,
                       promotion_piece, en_passant_square);
-      print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
+      // print_position_with_borders_highlight_squares(&this->position, src_square, dest_square);
     }
 
     return generate_move_key(src_square, dest_square, promotion_piece);
@@ -390,8 +395,14 @@ struct Game
     {
       is_game_line = true;
       std::cout << "=================================" << std::endl;
-      std::cout << metadata.at(0).value << std::endl;
+      if (!metadata.size())
+      {
+        std::cerr << "No metadata!" << std::endl;
+        assert(false);
+      }
+      std::cout << (metadata.size() ? metadata.at(0).value : "No metadata") << std::endl;
       std::cout << matches[0] << std::endl;
+
       process_player_move(matches[1], true);
       process_player_move(matches[2], false);
       if (matches[3].length() > 0)
@@ -409,6 +420,7 @@ void try_threading();
 
 #define ELO_THRESHOLD 2200
 
+// std::vector<Game> read_pgn_file(std::string file_path);
 void read_pgn_file(std::string file_path);
 void read_all_pgn_files();
 
