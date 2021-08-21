@@ -77,6 +77,7 @@
 /Users/vas/repos/matemancpp/database/pgn/Dutch3Nc3.pgn
 /Users/vas/repos/matemancpp/database/pgn/DutchClassical.pgn
 /Users/vas/repos/matemancpp/database/pgn/DutchLeningrad.pgn
+/Users/vas/repos/matemancpp/database/pgn/DutchOther.pgn
 /Users/vas/repos/matemancpp/database/pgn/Dzindzichashvili.pgn
 /Users/vas/repos/matemancpp/database/pgn/Ehlvest.pgn
 /Users/vas/repos/matemancpp/database/pgn/Eljanov.pgn
@@ -101,6 +102,7 @@
 /Users/vas/repos/matemancpp/database/pgn/EnglishSymFourKnights.pgn
 /Users/vas/repos/matemancpp/database/pgn/EnglishSymHedgehog.pgn
 /Users/vas/repos/matemancpp/database/pgn/EnglishSymMain.pgn
+/Users/vas/repos/matemancpp/database/pgn/EnglishSymOtherB3.pgn
 /Users/vas/repos/matemancpp/database/pgn/Euwe.pgn
 /Users/vas/repos/matemancpp/database/pgn/Evans.pgn
 /Users/vas/repos/matemancpp/database/pgn/Fedorowicz.pgn
@@ -116,6 +118,7 @@
 /Users/vas/repos/matemancpp/database/pgn/FrWinawerMain.pgn
 /Users/vas/repos/matemancpp/database/pgn/FrWinawerOtherB4.pgn
 /Users/vas/repos/matemancpp/database/pgn/FrWinawerOtherW4.pgn
+/Users/vas/repos/matemancpp/database/pgn/FrenchAdvance.pgn
 /Users/vas/repos/matemancpp/database/pgn/FrenchBurn.pgn
 /Users/vas/repos/matemancpp/database/pgn/FrenchClassical.pgn
 /Users/vas/repos/matemancpp/database/pgn/FrenchExchange.pgn
@@ -156,6 +159,7 @@
 /Users/vas/repos/matemancpp/database/pgn/Inarkiev.pgn
 /Users/vas/repos/matemancpp/database/pgn/Ivanchuk.pgn
 /Users/vas/repos/matemancpp/database/pgn/IvanovA.pgn
+/Users/vas/repos/matemancpp/database/pgn/IvanovI.pgn
 /Users/vas/repos/matemancpp/database/pgn/Ivkov.pgn
 /Users/vas/repos/matemancpp/database/pgn/Jakovenko.pgn
 /Users/vas/repos/matemancpp/database/pgn/Janowski.pgn
@@ -167,6 +171,7 @@
 /Users/vas/repos/matemancpp/database/pgn/KIDFianchetto.pgn
 /Users/vas/repos/matemancpp/database/pgn/KIDOther56.pgn
 /Users/vas/repos/matemancpp/database/pgn/KIDOther7.pgn
+/Users/vas/repos/matemancpp/database/pgn/KIDPetrosian.pgn
 /Users/vas/repos/matemancpp/database/pgn/KIDSaemisch.pgn
 /Users/vas/repos/matemancpp/database/pgn/Kaidanov.pgn
 /Users/vas/repos/matemancpp/database/pgn/Kamsky.pgn
@@ -293,6 +298,7 @@
 /Users/vas/repos/matemancpp/database/pgn/QGDOther34.pgn
 /Users/vas/repos/matemancpp/database/pgn/QGDTarrasch.pgn
 /Users/vas/repos/matemancpp/database/pgn/QGSym-Baltic.pgn
+/Users/vas/repos/matemancpp/database/pgn/QID4Nc3.pgn
 /Users/vas/repos/matemancpp/database/pgn/QID4a3.pgn
 /Users/vas/repos/matemancpp/database/pgn/QID4e3.pgn
 /Users/vas/repos/matemancpp/database/pgn/QID4g3-Ba6.pgn
@@ -359,12 +365,14 @@
 /Users/vas/repos/matemancpp/database/pgn/Sicilian2Nc3-e6.pgn
 /Users/vas/repos/matemancpp/database/pgn/Sicilian2Nc6Other5.pgn
 /Users/vas/repos/matemancpp/database/pgn/Sicilian2Nf3Other2.pgn
+/Users/vas/repos/matemancpp/database/pgn/Sicilian2d6-4Qxd4.pgn
 /Users/vas/repos/matemancpp/database/pgn/Sicilian2f4.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianAccelDragon.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianAlapin2Nf6.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianAlapin2d5.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianAlapinOther2.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianClassicalOther6.pgn
+/Users/vas/repos/matemancpp/database/pgn/SicilianClassicalSozin.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianClosedMain.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianClosedOther3.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianDragonOther6.pgn
@@ -380,6 +388,7 @@
 /Users/vas/repos/matemancpp/database/pgn/SicilianNajdorf6Bc4.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianNajdorf6Be2.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianNajdorf6Be3.pgn
+/Users/vas/repos/matemancpp/database/pgn/SicilianNajdorf6Bg5.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianNajdorf6a4.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianNajdorf6f3.pgn
 /Users/vas/repos/matemancpp/database/pgn/SicilianNajdorf6f4.pgn
@@ -409,6 +418,7 @@
 /Users/vas/repos/matemancpp/database/pgn/Stahlberg.pgn
 /Users/vas/repos/matemancpp/database/pgn/Staunton.pgn
 /Users/vas/repos/matemancpp/database/pgn/Stefanova.pgn
+/Users/vas/repos/matemancpp/database/pgn/Stein.pgn
 /Users/vas/repos/matemancpp/database/pgn/Steinitz.pgn
 /Users/vas/repos/matemancpp/database/pgn/Suetin.pgn
 /Users/vas/repos/matemancpp/database/pgn/Sutovsky.pgn
