@@ -25,11 +25,13 @@ set(SOURCES
     src/move_generation.cpp
     src/zobrist.cpp
     src/read_pgn_data.cpp
+    src/threadpool.cpp
     include/cli.hpp
     include/position.hpp
     include/fen.hpp
     include/options.hpp
     include/move_generation.hpp
+    include/threadpool.hpp
     include/zobrist.hpp
     include/squares.hpp
     include/read_pgn_data.hpp
