@@ -111,10 +111,10 @@ void populateMetadata(Game *game)
 void read_pgn_file(std::string file_path)
 {
   std::ifstream infile(file_path);
-  std::vector<Game> games;
+  std::vector<std::unique_ptr<Game>> games;
 
-  games.emplace_back();
-  populate_starting_position(&(games.back().position));
+  games.emplace_back(std::make_unique<Game>());
+  populate_starting_position(&(games.back()->position));
   bool reading_game_moves = false;
   int linecount = 0;
 
@@ -126,14 +126,14 @@ void read_pgn_file(std::string file_path)
   for (std::string line; getline(infile, line);)
   {
     linecount++;
-    // std::cout << file_path << ":" << linecount << std::endl;
+    std::cout << file_path << ":" << linecount << std::endl;
     if (line.length() < 2)
     {
       continue;
     }
 
     // read the metadata until there are no more metadata lines left
-    if (!reading_game_moves && !games.back().read_metadata_line(line))
+    if (!reading_game_moves && !games.back()->read_metadata_line(line))
     {
       reading_game_moves = true;
     }
@@ -141,23 +141,20 @@ void read_pgn_file(std::string file_path)
     if (reading_game_moves)
     {
 
-      bool is_game_line = games.back().read_game_move_line(line);
-      // std::cout << "\u001b[32m"
-      //           << "#games: " << games.size() << "\u001b[0m" << std::endl;
-
-      // assert(is_game_line);
-      if (games.back().finishedReading)
+      bool is_game_line = games.back()->read_game_move_line(line);
+      if (games.back()->finishedReading)
       {
 
-        populateMetadata(&games.back());
+        populateMetadata(games.back().get());
 
         // push a new game to the back of the games vector
-        games.emplace_back();
+        games.emplace_back(std::make_unique<Game>());
+
         std::cerr << "\r"
                   << std::left << std::setw(7)
                   << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
 
-        populate_starting_position(&(games.back().position));
+        populate_starting_position(&(games.back()->position));
         reading_game_moves = false;
       }
     }
