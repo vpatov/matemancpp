@@ -108,25 +108,25 @@ void populateMetadata(Game *game)
       game->whiteElo >= ELO_THRESHOLD && game->blackElo >= ELO_THRESHOLD;
 }
 
-// std::vector<Game> read_pgn_file(std::string file_path)
 void read_pgn_file(std::string file_path)
 {
   std::ifstream infile(file_path);
   std::vector<Game> games;
-
-  // Adding this gets rid of the errors I was seeing that were happening because of
-  // reallocation
-  // games.reserve(sizeof(Game) * 10000);
 
   games.emplace_back();
   populate_starting_position(&(games.back().position));
   bool reading_game_moves = false;
   int linecount = 0;
 
+  if (!infile.is_open())
+  {
+    std::cerr << "Could not open " << file_path << std::endl;
+    return;
+  }
   for (std::string line; getline(infile, line);)
   {
     linecount++;
-    std::cout << file_path << ":" << linecount << std::endl;
+    // std::cout << file_path << ":" << linecount << std::endl;
     if (line.length() < 2)
     {
       continue;
@@ -142,8 +142,8 @@ void read_pgn_file(std::string file_path)
     {
 
       bool is_game_line = games.back().read_game_move_line(line);
-      std::cout << "\u001b[32m"
-                << "#games: " << games.size() << "\u001b[0m" << std::endl;
+      // std::cout << "\u001b[32m"
+      //           << "#games: " << games.size() << "\u001b[0m" << std::endl;
 
       // assert(is_game_line);
       if (games.back().finishedReading)
@@ -163,10 +163,14 @@ void read_pgn_file(std::string file_path)
     }
   }
   std::cerr << std::endl;
-  // return games;
 }
 
-// if it's a castling move, the src_square and dst_square will be of the king.
+/* 
+  This function calculates and returns the move key, which is a concatenation 
+  of the source square, destination square, and promotion piece (complete 
+  information necessary to understand a move). For castling moves, even though
+  two pieces move, the src_square and dest_square pertain only to the king.
+*/
 uint32_t generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t promotion_piece)
 {
   // move key is bit-wise concatenation of
@@ -182,21 +186,6 @@ char getc(int i, std::smatch &matches)
     return matches[i].str().at(0);
   }
   return 0;
-}
-
-void try_threading()
-{
-  std::thread threads[8];
-  for (int i = 0; i < 8; i++)
-  {
-    threads[i] = std::thread(read_pgn_file, test_files[i]);
-  }
-  for (int i = 0; i < 8; i++)
-  {
-    threads[i].join();
-    std::cerr << i << " complete.";
-  }
-  // std::thread thread_obj(foo, params);
 }
 
 std::set<std::string> get_completed_files_set()
@@ -224,25 +213,24 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
 void read_all_pgn_files()
 {
 
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/subtest/McDonnell.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
   // exit(0);
 
-  std::set completed_files = get_completed_files_set();
+  // std::set completed_files = get_completed_files_set();
 
   for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
-  // for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
   {
-    if (completed_files.find(entry.path()) != completed_files.end())
-    {
-      std::cout << "Skipping: " << entry.path() << std::endl;
-      continue;
-    }
+    // if (completed_files.find(entry.path()) != completed_files.end())
+    // {
+    //   std::cout << "Skipping: " << entry.path() << std::endl;
+    //   continue;
+    // }
 
     std::cout << "\u001b[31m " << entry.path() << "\u001b[0m" << std::endl;
     read_pgn_file(entry.path());
 
     // Update set of completed files
     std::cerr << "Completed: " << entry.path() << std::endl;
-    update_completed_files_set(entry.path(), &completed_files);
+    // update_completed_files_set(entry.path(), &completed_files);
   }
 }

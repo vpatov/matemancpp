@@ -5,11 +5,13 @@
 #include "position.hpp"
 #include "read_pgn_data.hpp"
 #include "zobrist.hpp"
+#include "threadpool.hpp"
 #include <iostream>
 
 int main(int argc, char *argv[])
 
 {
+   // test();
    read_all_pgn_files();
    // try_threading();
 }
