@@ -48,7 +48,7 @@ uint64_t zobrist_hash(std::shared_ptr<Position> position)
     {
       square += 8;
     }
-    uint8_t piece = position->mailbox[square];
+    uint8_t piece = position->m_mailbox[square];
     if (IS_PIECE(piece))
     {
       assert(piece <= MAX_PIECE);

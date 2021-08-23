@@ -20,12 +20,15 @@ set(SOURCES
     src/main.cpp
     src/cli.cpp
     src/position.cpp
+    src/pgn_position.cpp
     src/fen.cpp
     src/options.cpp
     src/move_generation.cpp
     src/zobrist.cpp
     src/read_pgn_data.cpp
     src/threadpool.cpp
+    src/tablebase.cpp
+    src/util.cpp
     include/cli.hpp
     include/position.hpp
     include/fen.hpp
@@ -35,6 +38,8 @@ set(SOURCES
     include/zobrist.hpp
     include/squares.hpp
     include/read_pgn_data.hpp
+    include/tablebase.hpp
+    include/util.hpp
 )
 
 

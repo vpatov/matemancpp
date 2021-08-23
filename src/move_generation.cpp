@@ -14,14 +14,14 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
 {
 
   assert(IS_VALID_SQUARE(square));
-  assert(position->mailbox[square] == PAWNC(C));
+  assert(position->m_mailbox[square] == PAWNC(C));
 
   uint8_t candidate;
   std::vector<uint8_t> moves;
 
   // check square in front
   candidate = FORWARD_RANK(C, square);
-  if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == VOID_PIECE)
+  if (IS_VALID_SQUARE(candidate) && position->m_mailbox[candidate] == VOID_PIECE)
   {
     moves.push_back(candidate);
 
@@ -29,7 +29,7 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
     // squares
     candidate = FORWARD_RANK(C, candidate);
     if (IN_START_PAWN_RANK(C, square) && IS_VALID_SQUARE(candidate) &&
-        position->mailbox[candidate] == VOID_PIECE)
+        position->m_mailbox[candidate] == VOID_PIECE)
     {
       moves.push_back(candidate);
     }
@@ -38,14 +38,14 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
   // check diagonals for capture
   candidate = PREV_FILE(FORWARD_RANK(C, candidate));
   if (IS_VALID_SQUARE(candidate) &&
-      IS_OPPONENT_PIECE(C, position->mailbox[candidate]))
+      IS_OPPONENT_PIECE(C, position->m_mailbox[candidate]))
   {
     moves.push_back(candidate);
   }
 
   candidate = NEXT_FILE(FORWARD_RANK(C, candidate));
   if (IS_VALID_SQUARE(candidate) &&
-      IS_OPPONENT_PIECE(C, position->mailbox[candidate]))
+      IS_OPPONENT_PIECE(C, position->m_mailbox[candidate]))
   {
     moves.push_back(candidate);
   }
@@ -60,7 +60,7 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
 {
 
   assert(IS_VALID_SQUARE(square));
-  assert(position->mailbox[square] == KINGC(C));
+  assert(position->m_mailbox[square] == KINGC(C));
 
   uint8_t candidates[8] = {
       NEXT_RANK(PREV_FILE(square)),
@@ -79,7 +79,7 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
   for (int i = 0; i < 8; i++)
   {
     uint8_t candidate = candidates[i];
-    uint8_t piece = position->mailbox[candidate];
+    uint8_t piece = position->m_mailbox[candidate];
     if (IS_VALID_SQUARE(candidate) && (!IS_BLACK_PIECE(piece)))
     {
       moves.push_back(candidate);
@@ -91,12 +91,12 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
   return moves;
 }
 
-#define KINGSIDE_CASTLE_C(C, position)             \
-  (white_mgen(C) ? position->white_kingside_castle \
-                 : position->black_kingside_castle)
-#define QUEENSIDE_CASTLE_C(C, position)             \
-  (white_mgen(C) ? position->white_queenside_castle \
-                 : position->black_queenside_castle)
+#define KINGSIDE_CASTLE_C(C, position)               \
+  (white_mgen(C) ? position->m_white_kingside_castle \
+                 : position->m_black_kingside_castle)
+#define QUEENSIDE_CASTLE_C(C, position)               \
+  (white_mgen(C) ? position->m_white_queenside_castle \
+                 : position->m_black_queenside_castle)
 
 // TODO
 template <Color C>
@@ -124,7 +124,7 @@ generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
                                   uint8_t square)
 {
   assert(IS_VALID_SQUARE(square));
-  assert(position->mailbox[square] == KNIGHTC(C));
+  assert(position->m_mailbox[square] == KNIGHTC(C));
 
   uint8_t candidates[8] = {
       NEXT_RANK(PREV_FILE(PREV_FILE(square))),
@@ -144,7 +144,7 @@ generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
   for (int i = 0; i < 8; i++)
   {
     uint8_t candidate = candidates[i];
-    uint8_t piece = position->mailbox[candidate];
+    uint8_t piece = position->m_mailbox[candidate];
     if (IS_VALID_SQUARE(candidate) && IS_OPPONENT_PIECE(C, piece))
     {
       moves.push_back(candidate);
@@ -162,7 +162,7 @@ inline void sliding_piece_walk(std::vector<uint8_t> *moves, uint8_t square,
   uint8_t candidate = STEP_DIRECTION(D, square);
   while (IS_VALID_SQUARE(candidate))
   {
-    uint8_t piece = position->mailbox[candidate];
+    uint8_t piece = position->m_mailbox[candidate];
     if (IS_OPPONENT_PIECE(C, piece))
     {
       moves->push_back(candidate);
@@ -218,7 +218,7 @@ generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
                                  uint8_t square)
 {
   assert(IS_VALID_SQUARE(square));
-  assert(position->mailbox[square] == QUEENC(C));
+  assert(position->m_mailbox[square] == QUEENC(C));
   std::vector<uint8_t> rook_moves;
   std::vector<uint8_t> bishop_moves;
 
@@ -234,7 +234,7 @@ std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
                                  uint8_t square)
 {
-  uint8_t piece = position->mailbox[square];
+  uint8_t piece = position->m_mailbox[square];
   switch (piece)
   {
   case PAWN:
@@ -258,7 +258,7 @@ std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
                                  uint8_t square)
 {
-  uint8_t piece = position->mailbox[square];
+  uint8_t piece = position->m_mailbox[square];
   return IS_WHITE_PIECE(piece)
              ? generate_pseudolegal_piece_moves<Color::WHITE>(position, square)
              : generate_pseudolegal_piece_moves<Color::BLACK>(position, square);

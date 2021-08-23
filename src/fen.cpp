@@ -51,22 +51,22 @@ std::shared_ptr<Position> fen_to_position(std::string fen)
       switch (c)
       {
       case 'r':
-        position->mailbox[index] = ROOK | mask;
+        position->m_mailbox[index] = ROOK | mask;
         break;
       case 'n':
-        position->mailbox[index] = KNIGHT | mask;
+        position->m_mailbox[index] = KNIGHT | mask;
         break;
       case 'b':
-        position->mailbox[index] = BISHOP | mask;
+        position->m_mailbox[index] = BISHOP | mask;
         break;
       case 'q':
-        position->mailbox[index] = QUEEN | mask;
+        position->m_mailbox[index] = QUEEN | mask;
         break;
       case 'k':
-        position->mailbox[index] = KING | mask;
+        position->m_mailbox[index] = KING | mask;
         break;
       case 'p':
-        position->mailbox[index] = PAWN | mask;
+        position->m_mailbox[index] = PAWN | mask;
         break;
       default:
         std::cout << "Encountered an unexpected character: " << c << std::endl;
@@ -94,22 +94,22 @@ std::shared_ptr<Position> fen_to_position(std::string fen)
                           boost::algorithm::is_any_of("\t "),
                           boost::token_compress_on);
 
-  position->whites_turn = fen_parts.at(0).at(0) == 'w';
+  position->m_whites_turn = fen_parts.at(0).at(0) == 'w';
   for (auto it = fen_parts.at(1).begin(); it != fen_parts.at(1).end(); it++)
   {
     switch (*it)
     {
     case 'K':
-      position->white_kingside_castle = true;
+      position->m_white_kingside_castle = true;
       break;
     case 'Q':
-      position->white_queenside_castle = true;
+      position->m_white_queenside_castle = true;
       break;
     case 'k':
-      position->black_kingside_castle = true;
+      position->m_black_kingside_castle = true;
       break;
     case 'q':
-      position->black_queenside_castle = true;
+      position->m_black_queenside_castle = true;
       break;
     case '-':
       break;

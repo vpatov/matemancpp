@@ -9,87 +9,87 @@ std::shared_ptr<Position> starting_position()
   auto position = std::make_shared<Position>();
 
   /** White pieces*/
-  position->mailbox[0x0] = W_ROOK;
-  position->mailbox[0x1] = W_KNIGHT;
-  position->mailbox[0x2] = W_BISHOP;
-  position->mailbox[0x3] = W_QUEEN;
-  position->mailbox[0x4] = W_KING;
-  position->mailbox[0x5] = W_BISHOP;
-  position->mailbox[0x6] = W_KNIGHT;
-  position->mailbox[0x7] = W_ROOK;
+  position->m_mailbox[0x0] = W_ROOK;
+  position->m_mailbox[0x1] = W_KNIGHT;
+  position->m_mailbox[0x2] = W_BISHOP;
+  position->m_mailbox[0x3] = W_QUEEN;
+  position->m_mailbox[0x4] = W_KING;
+  position->m_mailbox[0x5] = W_BISHOP;
+  position->m_mailbox[0x6] = W_KNIGHT;
+  position->m_mailbox[0x7] = W_ROOK;
   for (int i = 0x10; i < 0x18; i++)
   {
-    position->mailbox[i] = W_PAWN;
+    position->m_mailbox[i] = W_PAWN;
   }
 
   /** Black pieces*/
-  position->mailbox[0x70] = B_ROOK;
-  position->mailbox[0x71] = B_KNIGHT;
-  position->mailbox[0x72] = B_BISHOP;
-  position->mailbox[0x73] = B_QUEEN;
-  position->mailbox[0x74] = B_KING;
-  position->mailbox[0x75] = B_BISHOP;
-  position->mailbox[0x76] = B_KNIGHT;
-  position->mailbox[0x77] = B_ROOK;
+  position->m_mailbox[0x70] = B_ROOK;
+  position->m_mailbox[0x71] = B_KNIGHT;
+  position->m_mailbox[0x72] = B_BISHOP;
+  position->m_mailbox[0x73] = B_QUEEN;
+  position->m_mailbox[0x74] = B_KING;
+  position->m_mailbox[0x75] = B_BISHOP;
+  position->m_mailbox[0x76] = B_KNIGHT;
+  position->m_mailbox[0x77] = B_ROOK;
   for (int i = 0x60; i < 0x68; i++)
   {
-    position->mailbox[i] = B_PAWN;
+    position->m_mailbox[i] = B_PAWN;
   }
 
-  position->white_kingside_castle = true;
-  position->white_queenside_castle = true;
-  position->black_kingside_castle = true;
-  position->black_queenside_castle = true;
+  position->m_white_kingside_castle = true;
+  position->m_white_queenside_castle = true;
+  position->m_black_kingside_castle = true;
+  position->m_black_queenside_castle = true;
 
-  position->plies = 0;
-  position->moves = 1;
-  position->en_passant_square = 0;
-  position->whites_turn = true;
+  position->m_plies = 0;
+  position->m_moves = 1;
+  position->m_en_passant_square = 0;
+  position->m_whites_turn = true;
 
   return position;
 }
 
 void populate_starting_position(Position *position)
 {
-  std::fill(position->mailbox, (position->mailbox) + 128, 0);
+  std::fill(position->m_mailbox, (position->m_mailbox) + 128, 0);
 
   /** White pieces*/
-  position->mailbox[0x0] = W_ROOK;
-  position->mailbox[0x1] = W_KNIGHT;
-  position->mailbox[0x2] = W_BISHOP;
-  position->mailbox[0x3] = W_QUEEN;
-  position->mailbox[0x4] = W_KING;
-  position->mailbox[0x5] = W_BISHOP;
-  position->mailbox[0x6] = W_KNIGHT;
-  position->mailbox[0x7] = W_ROOK;
+  position->m_mailbox[0x0] = W_ROOK;
+  position->m_mailbox[0x1] = W_KNIGHT;
+  position->m_mailbox[0x2] = W_BISHOP;
+  position->m_mailbox[0x3] = W_QUEEN;
+  position->m_mailbox[0x4] = W_KING;
+  position->m_mailbox[0x5] = W_BISHOP;
+  position->m_mailbox[0x6] = W_KNIGHT;
+  position->m_mailbox[0x7] = W_ROOK;
   for (int i = 0x10; i < 0x18; i++)
   {
-    position->mailbox[i] = W_PAWN;
+    position->m_mailbox[i] = W_PAWN;
   }
 
   /** Black pieces*/
-  position->mailbox[0x70] = B_ROOK;
-  position->mailbox[0x71] = B_KNIGHT;
-  position->mailbox[0x72] = B_BISHOP;
-  position->mailbox[0x73] = B_QUEEN;
-  position->mailbox[0x74] = B_KING;
-  position->mailbox[0x75] = B_BISHOP;
-  position->mailbox[0x76] = B_KNIGHT;
-  position->mailbox[0x77] = B_ROOK;
+  position->m_mailbox[0x70] = B_ROOK;
+  position->m_mailbox[0x71] = B_KNIGHT;
+  position->m_mailbox[0x72] = B_BISHOP;
+  position->m_mailbox[0x73] = B_QUEEN;
+  position->m_mailbox[0x74] = B_KING;
+  position->m_mailbox[0x75] = B_BISHOP;
+  position->m_mailbox[0x76] = B_KNIGHT;
+  position->m_mailbox[0x77] = B_ROOK;
   for (int i = 0x60; i < 0x68; i++)
   {
-    position->mailbox[i] = B_PAWN;
+    position->m_mailbox[i] = B_PAWN;
   }
 
-  position->white_kingside_castle = true;
-  position->white_queenside_castle = true;
-  position->black_kingside_castle = true;
-  position->black_queenside_castle = true;
+  position->m_white_kingside_castle = true;
+  position->m_white_queenside_castle = true;
+  position->m_black_kingside_castle = true;
+  position->m_black_queenside_castle = true;
 
-  position->plies = 0;
-  position->moves = 1;
-  position->en_passant_square = 0;
-  position->whites_turn = true;
+  position->m_plies = 0;
+  position->m_moves = 1;
+  position->m_en_passant_square = 0;
+  position->m_whites_turn = true;
 }
 
 uint8_t an_square_to_index(std::string square)
@@ -251,95 +251,12 @@ char old_piece_to_char(uint8_t piece)
   return piece_char + (white ? 0x0 : 0x20);
 }
 
-void adjust_position(Position *position, uint8_t src_square,
-                     uint8_t dest_square, uint8_t promotion_piece, uint8_t en_passant_square)
-{
-  assert(IS_VALID_SQUARE(src_square));
-  assert(IS_VALID_SQUARE(dest_square));
-
-  Color color = position->whites_turn ? Color::WHITE : Color::BLACK;
-
-  position->mailbox[dest_square] =
-      promotion_piece ? promotion_piece : position->mailbox[src_square];
-
-  if (position->en_passant_square &&
-      position->en_passant_square == dest_square &&
-      ((position->whites_turn ? is_w_pawn : is_b_pawn)(position->mailbox[src_square])))
-  {
-    // If we are capturing en-passant there should never be a promotion piece
-    assert(!promotion_piece);
-
-    // Remove the pawn that is being captured
-    uint8_t square_of_pawn_being_captured = BACKWARD_RANK(color, dest_square);
-    assert(position->mailbox[square_of_pawn_being_captured] == position->whites_turn
-               ? B_PAWN
-               : W_PAWN);
-    position->mailbox[square_of_pawn_being_captured] = 0;
-  }
-  position->en_passant_square = en_passant_square;
-
-  position->mailbox[src_square] = 0;
-}
-
-void perform_castle(Position *position, bool white, bool short_castle)
-{
-  assert(position->mailbox[white ? W_KING_SQUARE : B_KING_SQUARE] == white ? W_KING : B_KING);
-  position->mailbox[white ? W_KING_SQUARE : B_KING_SQUARE] = 0;
-  if (white)
-  {
-    if (short_castle)
-    {
-      position->mailbox[W_KING_ROOK_SQUARE] = 0;
-
-      assert(position->mailbox[W_KING_SHORT_CASTLE_SQUARE] == 0);
-      assert(position->mailbox[W_ROOK_SHORT_CASTLE_SQUARE] == 0);
-
-      position->mailbox[W_KING_SHORT_CASTLE_SQUARE] = W_KING;
-      position->mailbox[W_ROOK_SHORT_CASTLE_SQUARE] = W_ROOK;
-    }
-    else
-    {
-      position->mailbox[W_QUEEN_ROOK_SQUARE] = 0;
-
-      assert(position->mailbox[W_KING_LONG_CASTLE_SQUARE] == 0);
-      assert(position->mailbox[W_ROOK_LONG_CASTLE_SQUARE] == 0);
-
-      position->mailbox[W_KING_LONG_CASTLE_SQUARE] = W_KING;
-      position->mailbox[W_ROOK_LONG_CASTLE_SQUARE] = W_ROOK;
-    }
-  }
-  else
-  {
-    if (short_castle)
-    {
-      position->mailbox[B_KING_ROOK_SQUARE] = 0;
-
-      assert(position->mailbox[B_KING_SHORT_CASTLE_SQUARE] == 0);
-      assert(position->mailbox[B_ROOK_SHORT_CASTLE_SQUARE] == 0);
-
-      position->mailbox[B_KING_SHORT_CASTLE_SQUARE] = B_KING;
-      position->mailbox[B_ROOK_SHORT_CASTLE_SQUARE] = B_ROOK;
-    }
-    else
-    {
-      position->mailbox[B_QUEEN_ROOK_SQUARE] = 0;
-
-      assert(position->mailbox[B_KING_LONG_CASTLE_SQUARE] == 0);
-      assert(position->mailbox[B_ROOK_LONG_CASTLE_SQUARE] == 0);
-
-      position->mailbox[B_KING_LONG_CASTLE_SQUARE] = B_KING;
-      position->mailbox[B_ROOK_LONG_CASTLE_SQUARE] = B_ROOK;
-    }
-  }
-  position->en_passant_square = 0;
-}
-
 void print_position(Position *position)
 {
   int i = 0x70; //0x70 is the top-left corner of the board
   while (1)
   {
-    std::cout << piece_to_char(position->mailbox[i]) << " ";
+    std::cout << piece_to_char(position->m_mailbox[i]) << " ";
     i++;
     if (i == 8)
     {
@@ -374,7 +291,7 @@ void print_position_with_borders(Position *position)
     {
       std::cout << rank << "  ";
     }
-    std::cout << piece_to_color_coded_char(position->mailbox[i], false) << " ";
+    std::cout << piece_to_color_coded_char(position->m_mailbox[i], false) << " ";
     i++;
 
     if (i & 0x88)
@@ -397,7 +314,7 @@ void print_position_with_borders(Position *position)
             << std::endl;
 }
 
-void print_position_with_borders_highlight_squares(Position *position, uint8_t src_square, uint8_t dest_square)
+void Position::print_with_borders_highlight_squares(uint8_t src_square, uint8_t dest_square)
 {
   int i = 0x70;
   char rank = '8';
@@ -418,15 +335,15 @@ void print_position_with_borders_highlight_squares(Position *position, uint8_t s
     }
     if (i == src_square)
     {
-      std::cout << piece_to_color_coded_char(position->mailbox[i], true) << " ";
+      std::cout << piece_to_color_coded_char(m_mailbox[i], true) << " ";
     }
     else if (i == dest_square)
     {
-      std::cout << piece_to_color_coded_char(position->mailbox[i], true) << " ";
+      std::cout << piece_to_color_coded_char(m_mailbox[i], true) << " ";
     }
     else
     {
-      std::cout << piece_to_color_coded_char(position->mailbox[i], false) << " ";
+      std::cout << piece_to_color_coded_char(m_mailbox[i], false) << " ";
     }
     i++;
 
@@ -448,26 +365,6 @@ void print_position_with_borders_highlight_squares(Position *position, uint8_t s
   }
   std::cout << std::endl
             << std::endl;
-}
-
-/*
-  Returns the square with the (white ? white : black) king. Returns 127 otherwise.
-*/
-uint8_t find_king(Position *position, bool white)
-{
-  uint8_t target = white ? W_KING : B_KING;
-  for (int rank = 0; rank < 8; rank++)
-  {
-    for (int file = 0; file < 8; file++)
-    {
-      uint8_t square = (16 * rank) + file;
-      if (position->mailbox[square] == target)
-      {
-        return square;
-      }
-    }
-  }
-  return INVALID_SQUARE;
 }
 
 // returns a vector containing all the squares of enemy pieces that diagonally attack the target square.
@@ -502,7 +399,7 @@ std::vector<uint8_t> find_attacking_knights(Position *position, uint8_t target_s
     {
       continue;
     }
-    if (position->mailbox[square] == (color_of_attackers ? W_KNIGHT : B_KNIGHT))
+    if (position->m_mailbox[square] == (color_of_attackers ? W_KNIGHT : B_KNIGHT))
     {
       squares.push_back(square);
     }
@@ -602,7 +499,7 @@ uint8_t check_line(Position *position, uint8_t target, int offset, bool (*piece_
 {
   for (uint8_t candidate = target + offset; IS_VALID_SQUARE(candidate); candidate += offset)
   {
-    uint8_t piece = position->mailbox[candidate];
+    uint8_t piece = position->m_mailbox[candidate];
     // square is empty so we need to keep looking.
     if (piece == 0)
     {
@@ -610,7 +507,7 @@ uint8_t check_line(Position *position, uint8_t target, int offset, bool (*piece_
     }
 
     // square contains an enemy piece that can attack along this line
-    if (piece_type_function(position->mailbox[candidate]))
+    if (piece_type_function(position->m_mailbox[candidate]))
     {
       return candidate;
     }
@@ -628,7 +525,7 @@ bool check_diagonal_or_file_or_rank(Position *position, uint8_t king_square, int
 {
   for (uint8_t candidate = king_square + offset; IS_VALID_SQUARE(candidate); candidate += offset)
   {
-    uint8_t piece = position->mailbox[candidate];
+    uint8_t piece = position->m_mailbox[candidate];
     // square is empty so we need to keep looking.
     if (piece == 0)
     {
@@ -636,7 +533,7 @@ bool check_diagonal_or_file_or_rank(Position *position, uint8_t king_square, int
     }
 
     // square contains either the enemy bishop or queen.
-    if (position->mailbox[candidate] == target1 || position->mailbox[candidate] == target2)
+    if (position->m_mailbox[candidate] == target1 || position->m_mailbox[candidate] == target2)
     {
       return false;
     }
@@ -648,74 +545,5 @@ bool check_diagonal_or_file_or_rank(Position *position, uint8_t king_square, int
       break;
     }
   }
-  return true;
-}
-
-// king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
-bool legal_position(Position *position, bool whites_turn)
-{
-  Color enemy_color = whites_turn ? Color::BLACK : Color::WHITE;
-
-  // If it is white's turn to move, we have to make sure the black king is not in check (and vice-versa)
-  uint8_t king_square = find_king(position, whites_turn);
-
-  // look for pawns attacking king
-  uint8_t target = whites_turn ? B_PAWN : W_PAWN;
-  uint8_t candidate = PREV_FILE(BACKWARD_RANK(enemy_color, king_square));
-  if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == target)
-  {
-    std::cout << "pawn attacking king first condition." << std::endl;
-    return false;
-  }
-  candidate = NEXT_FILE(BACKWARD_RANK(enemy_color, king_square));
-  if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == target)
-  {
-    std::cout << "illegal_position: found pawn attacking king second condition." << std::endl;
-    return false;
-  }
-
-  // look for knights attacking king
-  std::vector<uint8_t> knights;
-  target = whites_turn ? B_KNIGHT : W_KNIGHT;
-  for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
-  {
-    candidate = *it + king_square;
-    if (IS_INVALID_SQUARE(candidate))
-    {
-      continue;
-    }
-    if (position->mailbox[candidate] == target)
-    {
-      std::cout << "illegal_position: found knight attacking king" << std::endl;
-      return false;
-    }
-  }
-
-  if (!check_diagonals(position, king_square, !whites_turn).empty())
-  {
-    std::cout << "illegal_position: found diagonal attacking king" << std::endl;
-    return false;
-  }
-
-  //look for bishops/queens attacking king on diagonals
-  if (!check_files_ranks(position, king_square, !whites_turn).empty())
-  {
-    std::cout << "illegal_position: found files/ranks attacking king" << std::endl;
-    return false;
-  }
-
-  // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.
-  target = whites_turn ? B_KING : W_KING;
-  for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
-  {
-    candidate = king_square + direction_offset(*it);
-    if (IS_VALID_SQUARE(candidate) && position->mailbox[candidate] == target)
-    {
-      std::cout << "candidate: " << candidate << "position->mailbox[candidate]:" << position->mailbox[candidate] << std::endl;
-      std::cout << "illegal_position: found kings?? attacking king" << std::endl;
-      return false;
-    }
-  }
-
   return true;
 }
