@@ -1,7 +1,4 @@
 #include "read_pgn_data.hpp"
-#include <fstream>
-#include <set>
-#include <thread>
 
 const std::string test_files[8] = {
     "/Users/vas/repos/matemancpp/database/pgn/Berliner.pgn",
@@ -16,63 +13,6 @@ const std::string test_files[8] = {
 
 const std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
 const std::string pgn_database_path = "/Users/vas/repos/matemancpp/database/pgn";
-
-/*
-uint8_t start_square
-uint8_t end_square
-uint8_t promotion_piece (0 if no promotion)
-using move_key = uint32_t (concatenation of above);
-
-struct move {
-  uint64_t dest_hash
-  uint32_t times_played
-}
-
-
-struct node {
-
-  uint64_t hash (maybe not stored in node)
-  position (entire copy?, probably not)
-
-  // hash and position are technically not necessary to store, if
-  // we arrive at a position always walking from starting position
-
-  hashmap<move_key, uint64_t> move_map;
-  // might be better to use a vector and not a move_map
-}
-
-
-// TODO
-// 1) implement next_position(from_square, dest_square, promotion)
-// 2) implement get_fromsq_destsq_promotion(playerMove)
-// 3) think about threading and locks for this code below
-// 4) Think about using regex instead of a parser
-
-
-
-  For each game:
-    position = new Position in starting position:
-    current_node* = opening_tablebase[starting_position]
-    If no result or elo below threshold: skip
-    For every move in move list:
-      key = (from_square, dest_square, promotion)
-      move* = current_node.move_map.get(key, NULL);
-
-      position = next_position(key)
-
-      if (move != NULL){
-        move->times_played ++;
-        currrent_node = opening_tablebase[move.dest_hash];
-      }
-      else {
-        hash = calculate_zobrist_hash(position)
-        move = {
-          dest_hash : hash,
-          times_played : 1
-        };
-        current_node.move_map.set(key, move);
-      }
-*/
 
 // Reads the elo, and other metadata.
 void populateMetadata(Game *game)
@@ -126,7 +66,7 @@ void read_pgn_file(std::string file_path)
   for (std::string line; getline(infile, line);)
   {
     linecount++;
-    std::cout << file_path << ":" << linecount << std::endl;
+    // std::cout << file_path << ":" << linecount << std::endl;
     if (line.length() < 2)
     {
       continue;
@@ -150,16 +90,20 @@ void read_pgn_file(std::string file_path)
         // push a new game to the back of the games vector
         games.emplace_back(std::make_unique<Game>());
 
-        std::cerr << "\r"
-                  << std::left << std::setw(7)
-                  << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
+        // std::cerr << "\r"
+        //           << std::left << std::setw(7)
+        //           << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
 
         populate_starting_position(&(games.back()->position));
         reading_game_moves = false;
       }
     }
   }
-  std::cerr << std::endl;
+
+  OpeningTablebase openingTablebase;
+  openingTablebase.process_game(games.at(0).get());
+
+  // std::cerr << std::endl;
 }
 
 std::set<std::string> get_completed_files_set()
@@ -187,8 +131,8 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
 void read_all_pgn_files()
 {
 
-  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
-  // exit(0);
+  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
+  exit(0);
 
   // std::set completed_files = get_completed_files_set();
 
@@ -204,7 +148,115 @@ void read_all_pgn_files()
     read_pgn_file(entry.path());
 
     // Update set of completed files
-    std::cerr << "Completed: " << entry.path() << std::endl;
+    // std::cerr << "Completed: " << entry.path() << std::endl;
     // update_completed_files_set(entry.path(), &completed_files);
   }
+}
+
+bool Game::read_metadata_line(std::string &line)
+{
+  std::smatch matches;
+  if (std::regex_match(line, matches, std::regex(metadata_line_regex)))
+  {
+    metadata_entry entry;
+    entry.key = std::string(matches[1]);
+    entry.value = std::string(matches[2]);
+    metadata.push_back(entry);
+    return true;
+  }
+  return false;
+}
+
+void Game::process_player_move(std::string player_move, bool white)
+{
+  uint32_t move_key;
+  boost::algorithm::trim(player_move);
+
+  if (player_move.size() == 0)
+  {
+    return;
+  }
+
+  position.m_whites_turn = white;
+
+  std::smatch matches;
+  if (std::regex_match(player_move, matches,
+                       std::regex(non_castling_move_regex)))
+  {
+    char piece_char = getc(1, matches);
+    char src_file = getc(2, matches);
+    char src_rank = getc(3, matches);
+    char capture = getc(4, matches);
+    char dest_file = getc(5, matches);
+    char dest_rank = getc(6, matches);
+    std::string promotion = matches[7];
+    char promotion_piece = 0;
+    char check_or_mate = getc(8, matches);
+
+    // Get the promotion piece
+    if (promotion.size())
+    {
+      promotion_piece = char_to_piece(promotion.at(1));
+      // piece should always be uppercase because pieces are uppercase in PGN.
+      assert(promotion_piece < PIECE_MASK);
+
+      if (!white)
+      {
+        promotion_piece |= BLACK_PIECE_MASK;
+      }
+    }
+
+    move_key = position.non_castling_move(
+        piece_char, src_file, src_rank,
+        capture, dest_file, dest_rank,
+        promotion_piece, check_or_mate);
+  }
+  else if (std::regex_match(player_move, matches,
+                            std::regex(castling_move_regex)))
+  {
+    move_key = position.castling_move(matches, white);
+  }
+  else
+  {
+    // expected regex to match a move.
+    assert(false);
+  }
+  // push the parsed move key to the move list
+  move_list.push_back(move_key);
+  position.m_plies++;
+}
+
+void Game::process_result(std::string resultstr)
+{
+  result = std::move(resultstr);
+  finishedReading = true;
+}
+
+bool Game::read_game_move_line(std::string &line)
+{
+
+  bool is_game_line = false;
+  std::smatch matches;
+  while (std::regex_search(line, matches, game_line_regex))
+  {
+    is_game_line = true;
+    // std::cout << "=================================" << std::endl;
+    if (!metadata.size())
+    {
+      std::cerr << "No metadata!" << std::endl;
+      assert(false);
+    }
+    // std::cout << (metadata.size() ? metadata.at(0).value : "No metadata") << std::endl;
+    // std::cout << matches[0] << std::endl;
+
+    process_player_move(matches[1], true);
+    process_player_move(matches[2], false);
+    if (matches[3].length() > 0)
+    {
+      process_result(matches[3]);
+    }
+    line = matches.suffix().str();
+  }
+
+  return is_game_line;
 }

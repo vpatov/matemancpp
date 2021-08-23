@@ -1,3 +1,9 @@
+/*
+    Contains position-related functions that are used during the parsing of PGN files.
+    Some of them are implemented naively, so I'm not sure if I'll be using them
+    during more important things such as move generation. I've placed them separately here for now.
+*/
+
 #include "position.hpp"
 
 uint32_t Position::castling_move(std::smatch &matches, bool white)
@@ -30,7 +36,7 @@ uint32_t Position::castling_move(std::smatch &matches, bool white)
     }
 
     perform_castle(white, short_castle);
-    print_with_borders_highlight_squares(src_square, dest_square);
+    // print_with_borders_highlight_squares(src_square, dest_square);
 
     return generate_move_key(src_square, dest_square, 0);
 }
@@ -173,7 +179,7 @@ uint32_t Position::non_castling_move(
     {
         adjust_position(src_square, dest_square,
                         promotion_piece, new_en_passant_square);
-        print_with_borders_highlight_squares(src_square, dest_square);
+        // print_with_borders_highlight_squares(src_square, dest_square);
     }
 
     return generate_move_key(src_square, dest_square, promotion_piece);

@@ -249,6 +249,7 @@ uint8_t an_square_to_index(std::string square);
 uint8_t an_square_to_index(char src_file, char src_rank);
 uint8_t char_to_piece(char piece);
 char piece_to_char(uint8_t piece);
+const std::string piece_to_name(uint8_t piece);
 std::string piece_to_color_coded_char(uint8_t piece, bool highlight);
 std::string piece_to_unicode_char(uint8_t piece);
 std::string index_to_an_square(uint8_t index);
