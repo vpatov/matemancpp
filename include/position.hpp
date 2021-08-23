@@ -260,6 +260,7 @@ void print_position_with_borders(Position *position);
 void print_position_with_borders_highlight_squares(Position *position, uint8_t src_square, uint8_t dest_square);
 std::shared_ptr<Position> starting_position();
 void populate_starting_position(Position *position);
+std::unique_ptr<Position> generate_starting_position();
 
 void adjust_position(Position *position, uint8_t src_square,
                      uint8_t dest_square, uint8_t promotion_piece, uint8_t en_passant_square);

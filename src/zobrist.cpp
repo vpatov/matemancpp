@@ -16,7 +16,7 @@ uint64_t random_bitstring()
 }
 
 // Print out a zobrist intialization, so that can it be pasted into the source
-// (need to have the same initialziation across boots)
+// (need to have the same initialization across program starts otherwise tablebase has to be reconstructed each time)
 void print_zobrist()
 {
   std::cout << "{" << std::endl;
@@ -37,9 +37,9 @@ void print_zobrist()
   std::cout << "}" << std::endl;
 }
 
-uint64_t zobrist_hash(std::shared_ptr<Position> position)
+z_hash_t zobrist_hash(Position *position)
 {
-  uint64_t hash = 0;
+  z_hash_t hash = 0;
   uint8_t square = 0;
 
   while (square < 120)
@@ -52,9 +52,33 @@ uint64_t zobrist_hash(std::shared_ptr<Position> position)
     if (IS_PIECE(piece))
     {
       assert(piece <= MAX_PIECE);
-      hash ^= zobrist_table[square][piece];
+      hash ^= zobrist_piece_table[square][piece];
     }
     square++;
   }
+  if (position->m_white_kingside_castle)
+  {
+    hash ^= zobrist_castling_rights_table[0];
+  }
+  if (position->m_white_queenside_castle)
+  {
+    hash ^= zobrist_castling_rights_table[1];
+  }
+  if (position->m_black_kingside_castle)
+  {
+    hash ^= zobrist_castling_rights_table[2];
+  }
+  if (position->m_black_queenside_castle)
+  {
+    hash ^= zobrist_castling_rights_table[3];
+  }
+
+  hash ^= zobrist_turn_table[(position->m_whites_turn) ? 1 : 0];
+
+  if (position->m_en_passant_square)
+  {
+    hash ^= zobrist_en_passant_square_table[position->m_en_passant_square];
+  }
+
   return hash;
 }

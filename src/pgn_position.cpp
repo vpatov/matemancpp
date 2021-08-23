@@ -218,13 +218,13 @@ bool Position::legal_position()
     uint8_t candidate = PREV_FILE(BACKWARD_RANK(enemy_color, king_square));
     if (IS_VALID_SQUARE(candidate) && m_mailbox[candidate] == target)
     {
-        std::cout << "pawn attacking king first condition." << std::endl;
+        // std::cout << "pawn attacking king first condition." << std::endl;
         return false;
     }
     candidate = NEXT_FILE(BACKWARD_RANK(enemy_color, king_square));
     if (IS_VALID_SQUARE(candidate) && m_mailbox[candidate] == target)
     {
-        std::cout << "illegal_position: found pawn attacking king second condition." << std::endl;
+        // std::cout << "illegal_position: found pawn attacking king second condition." << std::endl;
         return false;
     }
 
@@ -240,21 +240,21 @@ bool Position::legal_position()
         }
         if (m_mailbox[candidate] == target)
         {
-            std::cout << "illegal_position: found knight attacking king" << std::endl;
+            // std::cout << "illegal_position: found knight attacking king" << std::endl;
             return false;
         }
     }
 
     if (!check_diagonals(this, king_square, !m_whites_turn).empty())
     {
-        std::cout << "illegal_position: found diagonal attacking king" << std::endl;
+        // std::cout << "illegal_position: found diagonal attacking king" << std::endl;
         return false;
     }
 
     //look for bishops/queens attacking king on diagonals
     if (!check_files_ranks(this, king_square, !m_whites_turn).empty())
     {
-        std::cout << "illegal_position: found files/ranks attacking king" << std::endl;
+        // std::cout << "illegal_position: found files/ranks attacking king" << std::endl;
         return false;
     }
 

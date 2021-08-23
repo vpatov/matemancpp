@@ -14,6 +14,8 @@ const std::string test_files[8] = {
 const std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
 const std::string pgn_database_path = "/Users/vas/repos/matemancpp/database/pgn";
 
+OpeningTablebase openingTablebase;
+
 // Reads the elo, and other metadata.
 void populateMetadata(Game *game)
 {
@@ -90,18 +92,15 @@ void read_pgn_file(std::string file_path)
         // push a new game to the back of the games vector
         games.emplace_back(std::make_unique<Game>());
 
-        // std::cerr << "\r"
-        //           << std::left << std::setw(7)
-        //           << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
+        std::cerr << "\r"
+                  << std::left << std::setw(7)
+                  << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
 
         populate_starting_position(&(games.back()->position));
         reading_game_moves = false;
       }
     }
   }
-
-  OpeningTablebase openingTablebase;
-  openingTablebase.process_game(games.at(0).get());
 
   // std::cerr << std::endl;
 }
@@ -131,7 +130,9 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
 void read_all_pgn_files()
 {
 
-  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
+  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Carlsen.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
+  openingTablebase.walk_down_most_popular_path();
   exit(0);
 
   // std::set completed_files = get_completed_files_set();
@@ -167,7 +168,7 @@ bool Game::read_metadata_line(std::string &line)
   return false;
 }
 
-void Game::process_player_move(std::string player_move, bool white)
+void Game::process_player_move(std::string player_move, bool whites_turn)
 {
   uint32_t move_key;
   boost::algorithm::trim(player_move);
@@ -177,7 +178,9 @@ void Game::process_player_move(std::string player_move, bool white)
     return;
   }
 
-  position.m_whites_turn = white;
+  position.m_whites_turn = whites_turn;
+
+  z_hash_t zhash1 = zobrist_hash(&position);
 
   std::smatch matches;
   if (std::regex_match(player_move, matches,
@@ -200,7 +203,7 @@ void Game::process_player_move(std::string player_move, bool white)
       // piece should always be uppercase because pieces are uppercase in PGN.
       assert(promotion_piece < PIECE_MASK);
 
-      if (!white)
+      if (!whites_turn)
       {
         promotion_piece |= BLACK_PIECE_MASK;
       }
@@ -214,7 +217,7 @@ void Game::process_player_move(std::string player_move, bool white)
   else if (std::regex_match(player_move, matches,
                             std::regex(castling_move_regex)))
   {
-    move_key = position.castling_move(matches, white);
+    move_key = position.castling_move(matches, whites_turn);
   }
   else
   {
@@ -224,12 +227,11 @@ void Game::process_player_move(std::string player_move, bool white)
   // push the parsed move key to the move list
   move_list.push_back(move_key);
   position.m_plies++;
-}
 
-void Game::process_result(std::string resultstr)
-{
-  result = std::move(resultstr);
-  finishedReading = true;
+  position.m_whites_turn = !whites_turn;
+  z_hash_t zhash2 = zobrist_hash(&position);
+
+  openingTablebase.update(zhash1, zhash2, move_key, std::string(player_move));
 }
 
 bool Game::read_game_move_line(std::string &line)
@@ -259,4 +261,10 @@ bool Game::read_game_move_line(std::string &line)
   }
 
   return is_game_line;
+}
+
+void Game::process_result(std::string resultstr)
+{
+  result = std::move(resultstr);
+  finishedReading = true;
 }

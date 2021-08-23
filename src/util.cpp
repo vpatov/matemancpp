@@ -14,6 +14,15 @@ uint32_t generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t prom
     return (src_square << 16) + (dest_square << 8) + promotion_piece;
 }
 
+std::ostream &operator<<(std::ostream &os, Move &move)
+{
+    os
+        << "src_square: " << move.src_square << std::endl
+        << "dest_square: " << move.dest_square << std::endl
+        << "promotion_piece: " << move.promotion_piece << std::endl;
+    return os;
+}
+
 Move unpack_move_key(uint32_t move_key)
 {
     Move move;

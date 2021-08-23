@@ -4,6 +4,13 @@
 #include <algorithm>
 #include <memory>
 
+std::unique_ptr<Position> generate_starting_position()
+{
+  std::unique_ptr<Position> position = std::make_unique<Position>();
+  populate_starting_position(position.get());
+  return std::move(position);
+}
+
 std::shared_ptr<Position> starting_position()
 {
   auto position = std::make_shared<Position>();
