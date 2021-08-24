@@ -1,89 +1,88 @@
-#ifndef __SQUARES_H__
-#define __SQUARES_H__
+#pragma once
+#include <cstdint>
 
-#define MAILBOX_LENGTH 128
+const int MAILBOX_LENGTH = 128;
+typedef uint8_t square_t;
 
-#define A1_SQ 0
-#define B1_SQ 1
-#define C1_SQ 2
-#define D1_SQ 3
-#define E1_SQ 4
-#define F1_SQ 5
-#define G1_SQ 6
-#define H1_SQ 7
-#define A2_SQ 16
-#define B2_SQ 17
-#define C2_SQ 18
-#define D2_SQ 19
-#define E2_SQ 20
-#define F2_SQ 21
-#define G2_SQ 22
-#define H2_SQ 23
-#define A3_SQ 32
-#define B3_SQ 33
-#define C3_SQ 34
-#define D3_SQ 35
-#define E3_SQ 36
-#define F3_SQ 37
-#define G3_SQ 38
-#define H3_SQ 39
-#define A4_SQ 48
-#define B4_SQ 49
-#define C4_SQ 50
-#define D4_SQ 51
-#define E4_SQ 52
-#define F4_SQ 53
-#define G4_SQ 54
-#define H4_SQ 55
-#define A5_SQ 64
-#define B5_SQ 65
-#define C5_SQ 66
-#define D5_SQ 67
-#define E5_SQ 68
-#define F5_SQ 69
-#define G5_SQ 70
-#define H5_SQ 71
-#define A6_SQ 80
-#define B6_SQ 81
-#define C6_SQ 82
-#define D6_SQ 83
-#define E6_SQ 84
-#define F6_SQ 85
-#define G6_SQ 86
-#define H6_SQ 87
-#define A7_SQ 96
-#define B7_SQ 97
-#define C7_SQ 98
-#define D7_SQ 99
-#define E7_SQ 100
-#define F7_SQ 101
-#define G7_SQ 102
-#define H7_SQ 103
-#define A8_SQ 112
-#define B8_SQ 113
-#define C8_SQ 114
-#define D8_SQ 115
-#define E8_SQ 116
-#define F8_SQ 117
-#define G8_SQ 118
-#define H8_SQ 119
+const square_t A1_SQ = 0;
+const square_t B1_SQ = 1;
+const square_t C1_SQ = 2;
+const square_t D1_SQ = 3;
+const square_t E1_SQ = 4;
+const square_t F1_SQ = 5;
+const square_t G1_SQ = 6;
+const square_t H1_SQ = 7;
+const square_t A2_SQ = 16;
+const square_t B2_SQ = 17;
+const square_t C2_SQ = 18;
+const square_t D2_SQ = 19;
+const square_t E2_SQ = 20;
+const square_t F2_SQ = 21;
+const square_t G2_SQ = 22;
+const square_t H2_SQ = 23;
+const square_t A3_SQ = 32;
+const square_t B3_SQ = 33;
+const square_t C3_SQ = 34;
+const square_t D3_SQ = 35;
+const square_t E3_SQ = 36;
+const square_t F3_SQ = 37;
+const square_t G3_SQ = 38;
+const square_t H3_SQ = 39;
+const square_t A4_SQ = 48;
+const square_t B4_SQ = 49;
+const square_t C4_SQ = 50;
+const square_t D4_SQ = 51;
+const square_t E4_SQ = 52;
+const square_t F4_SQ = 53;
+const square_t G4_SQ = 54;
+const square_t H4_SQ = 55;
+const square_t A5_SQ = 64;
+const square_t B5_SQ = 65;
+const square_t C5_SQ = 66;
+const square_t D5_SQ = 67;
+const square_t E5_SQ = 68;
+const square_t F5_SQ = 69;
+const square_t G5_SQ = 70;
+const square_t H5_SQ = 71;
+const square_t A6_SQ = 80;
+const square_t B6_SQ = 81;
+const square_t C6_SQ = 82;
+const square_t D6_SQ = 83;
+const square_t E6_SQ = 84;
+const square_t F6_SQ = 85;
+const square_t G6_SQ = 86;
+const square_t H6_SQ = 87;
+const square_t A7_SQ = 96;
+const square_t B7_SQ = 97;
+const square_t C7_SQ = 98;
+const square_t D7_SQ = 99;
+const square_t E7_SQ = 100;
+const square_t F7_SQ = 101;
+const square_t G7_SQ = 102;
+const square_t H7_SQ = 103;
+const square_t A8_SQ = 112;
+const square_t B8_SQ = 113;
+const square_t C8_SQ = 114;
+const square_t D8_SQ = 115;
+const square_t E8_SQ = 116;
+const square_t F8_SQ = 117;
+const square_t G8_SQ = 118;
+const square_t H8_SQ = 119;
 
-#define W_KING_SQUARE E1_SQ
-#define B_KING_SQUARE E8_SQ
+const square_t W_KING_SQUARE = E1_SQ;
+const square_t B_KING_SQUARE = E8_SQ;
 
-#define W_KING_SHORT_CASTLE_SQUARE G1_SQ
-#define B_KING_SHORT_CASTLE_SQUARE G8_SQ
-#define W_KING_LONG_CASTLE_SQUARE C1_SQ
-#define B_KING_LONG_CASTLE_SQUARE C8_SQ
+const square_t W_KING_SHORT_CASTLE_SQUARE = G1_SQ;
+const square_t B_KING_SHORT_CASTLE_SQUARE = G8_SQ;
+const square_t W_KING_LONG_CASTLE_SQUARE = C1_SQ;
+const square_t B_KING_LONG_CASTLE_SQUARE = C8_SQ;
 
-#define W_ROOK_SHORT_CASTLE_SQUARE F1_SQ
-#define B_ROOK_SHORT_CASTLE_SQUARE F8_SQ
-#define W_ROOK_LONG_CASTLE_SQUARE D1_SQ
-#define B_ROOK_LONG_CASTLE_SQUARE D8_SQ
+const square_t W_ROOK_SHORT_CASTLE_SQUARE = F1_SQ;
+const square_t B_ROOK_SHORT_CASTLE_SQUARE = F8_SQ;
+const square_t W_ROOK_LONG_CASTLE_SQUARE = D1_SQ;
+const square_t B_ROOK_LONG_CASTLE_SQUARE = D8_SQ;
 
-#define W_KING_ROOK_SQUARE H1_SQ
-#define W_QUEEN_ROOK_SQUARE A1_SQ
-#define B_KING_ROOK_SQUARE H8_SQ
-#define B_QUEEN_ROOK_SQUARE A8_SQ
-
-#endif
+const square_t W_KING_ROOK_SQUARE = H1_SQ;
+const square_t W_QUEEN_ROOK_SQUARE = A1_SQ;
+const square_t B_KING_ROOK_SQUARE = H8_SQ;
+const square_t B_QUEEN_ROOK_SQUARE = A8_SQ;
