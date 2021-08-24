@@ -119,8 +119,7 @@ uint32_t Position::non_castling_move(
     assert(dest_file && dest_rank);
     dest_square = an_square_to_index(dest_file, dest_rank);
 
-    bool is_pawn_move = !piece_char;
-    if (is_pawn_move)
+    if (bool is_pawn_move = !piece_char; is_pawn_move)
     {
         assert(!src_rank);
 
@@ -195,8 +194,7 @@ uint8_t Position::find_king()
     {
         for (int file = 0; file < 8; file++)
         {
-            uint8_t square = (16 * rank) + file;
-            if (m_mailbox[square] == target)
+            if (uint8_t square = (16 * rank) + file; m_mailbox[square] == target)
             {
                 return square;
             }
