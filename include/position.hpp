@@ -1,6 +1,6 @@
-#ifndef __POSITION_H__
-#define __POSITION_H__
+#pragma once
 
+#include "pieces.hpp"
 #include "squares.hpp"
 #include "util.hpp"
 #include <regex>
@@ -38,57 +38,6 @@ a   b   c   d   e   f   g   h
 
 a   b   c   d   e   f   g   h
 */
-
-#define VOID_PIECE 0
-
-#define PAWN_CHAR 'P'
-#define ROOK_CHAR 'R'
-#define KNIGHT_CHAR 'N'
-#define BISHOP_CHAR 'B'
-#define QUEEN_CHAR 'Q'
-#define KING_CHAR 'K'
-
-#define PAWN 1
-#define ROOK 2
-#define KNIGHT 3
-#define BISHOP 4
-#define QUEEN 5
-#define KING 6
-
-#define W_PAWN PAWN
-#define W_ROOK ROOK
-#define W_KNIGHT KNIGHT
-#define W_BISHOP BISHOP
-#define W_QUEEN QUEEN
-#define W_KING KING
-
-#define BLACK_PIECE_MASK 0x10
-#define PIECE_MASK 0x7
-
-#define B_PAWN (PAWN | BLACK_PIECE_MASK)
-#define B_ROOK (ROOK | BLACK_PIECE_MASK)
-#define B_KNIGHT (KNIGHT | BLACK_PIECE_MASK)
-#define B_BISHOP (BISHOP | BLACK_PIECE_MASK)
-#define B_QUEEN (QUEEN | BLACK_PIECE_MASK)
-#define B_KING (KING | BLACK_PIECE_MASK)
-
-const char PIECE_CHAR_MAP[24] = {'-', 'P', 'R', 'N', 'B', 'Q', 'K', 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 'p', 'r', 'n', 'b', 'q', 'k', 0};
-
-const std::string UNICODE_PIECE_CHAR_MAP[24] = {"-", "♙", "♖", "♘", "♗", "♕", "♔", " ",
-                                                " ", " ", " ", " ", " ", " ", " ", " ",
-                                                " ", "♟︎", "♜", "♞", "♝", "♛", "♚", " "};
-
-#define MAX_PIECE B_KING
-
-#define INVALID_SQUARE 127
-#define IS_INVALID_SQUARE(sq) (sq & 0x88)
-#define IS_VALID_SQUARE(sq) (!(IS_INVALID_SQUARE(sq)))
-
-#define IS_PIECE(piece) (piece & PIECE_MASK)
-#define IS_BLACK_PIECE(piece) (piece & BLACK_PIECE_MASK)
-#define IS_WHITE_PIECE(piece) (piece && !(IS_BLACK_PIECE(piece)))
 
 enum class Color
 {
@@ -163,9 +112,9 @@ white_mgen(Color C)
   (white_mgen(C) ? IN_SECOND_RANK(square) : IN_SEVENTH_RANK(square))
 
 #define IS_YOUR_PIECE(C, piece) \
-  (white_mgen(C) ? IS_WHITE_PIECE(piece) : IS_BLACK_PIECE(piece))
+  (white_mgen(C) ? is_white_piece(piece) : is_black_piece(piece))
 #define IS_OPPONENT_PIECE(C, piece) \
-  (white_mgen(C) ? IS_BLACK_PIECE(piece) : IS_WHITE_PIECE(piece))
+  (white_mgen(C) ? is_black_piece(piece) : is_white_piece(piece))
 
 #define ATTACKS_DIAGONALLY(piece) \
   (((piece & PIECE_MASK) == BISHOP) || (piece & PIECE_MASK) == QUEEN)
@@ -279,5 +228,3 @@ std::vector<uint8_t> find_attacking_knights(Position *position, uint8_t target_s
 std::vector<uint8_t> find_attacking_bishops(Position *position, uint8_t target_square, bool color_of_attackers);
 std::vector<uint8_t> find_attacking_rooks(Position *position, uint8_t target_square, bool color_of_attackers);
 std::vector<uint8_t> find_attacking_queens(Position *position, uint8_t target_square, bool color_of_attackers);
-
-#endif

@@ -31,6 +31,7 @@ set(SOURCES
     src/util.cpp
     include/cli.hpp
     include/position.hpp
+    include/pieces.hpp
     include/fen.hpp
     include/options.hpp
     include/move_generation.hpp

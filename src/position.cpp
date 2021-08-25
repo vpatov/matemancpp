@@ -190,7 +190,7 @@ std::string piece_to_color_coded_char(uint8_t piece, bool highlight)
   // char chr = PIECE_CHAR_MAP[piece];
   // with color output, all of them can be made uppercase
   char chr = PIECE_CHAR_MAP[piece & PIECE_MASK];
-  bool white = IS_WHITE_PIECE(piece);
+  bool white = is_white_piece(piece);
 
   std::string white_color = "\u001b[38;5;231";
   std::string black_color = "\u001b[38;5;94";
@@ -218,7 +218,7 @@ std::string piece_to_color_coded_char(uint8_t piece, bool highlight)
 std::string piece_to_unicode_char(uint8_t piece)
 {
   std::string unicode_str = UNICODE_PIECE_CHAR_MAP[piece];
-  bool white = IS_WHITE_PIECE(piece);
+  bool white = is_white_piece(piece);
 
   if (!unicode_str.compare("-"))
   {
@@ -230,7 +230,7 @@ std::string piece_to_unicode_char(uint8_t piece)
 
 char old_piece_to_char(uint8_t piece)
 {
-  bool white = IS_WHITE_PIECE(piece);
+  bool white = is_white_piece(piece);
   char piece_char;
   switch (piece & PIECE_MASK)
   {
@@ -387,7 +387,7 @@ std::vector<uint8_t> check_diagonals(Position *position, uint8_t target_square, 
         target_square,
         bishop_offsets[i],
         color_of_attackers ? &white_attacks_diagonally : &black_attacks_diagonally);
-    if (IS_VALID_SQUARE(square))
+    if (is_valid_square(square))
     {
       squares.push_back(square);
     }
@@ -402,7 +402,7 @@ std::vector<uint8_t> find_attacking_knights(Position *position, uint8_t target_s
   for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
   {
     uint8_t square = *it + target_square;
-    if (IS_INVALID_SQUARE(square))
+    if (is_invalid_square(square))
     {
       continue;
     }
@@ -425,7 +425,7 @@ std::vector<uint8_t> find_attacking_bishops(Position *position, uint8_t target_s
         target_square,
         bishop_offsets[i],
         color_of_attackers ? &is_w_bishop : &is_b_bishop);
-    if (IS_VALID_SQUARE(square))
+    if (is_valid_square(square))
     {
       squares.push_back(square);
     }
@@ -441,7 +441,7 @@ std::vector<uint8_t> find_attacking_rooks(Position *position, uint8_t target_squ
   for (int i = 0; i < 4; i++)
   {
     uint8_t square = check_line(position, target_square, rook_offsets[i], color_of_attackers ? &is_w_rook : &is_b_rook);
-    if (IS_VALID_SQUARE(square))
+    if (is_valid_square(square))
     {
       squares.push_back(square);
     }
@@ -461,7 +461,7 @@ std::vector<uint8_t> find_attacking_queens(Position *position, uint8_t target_sq
         target_square,
         bishop_offsets[i],
         color_of_attackers ? &is_w_queen : &is_b_queen);
-    if (IS_VALID_SQUARE(square))
+    if (is_valid_square(square))
     {
       squares.push_back(square);
     }
@@ -470,7 +470,7 @@ std::vector<uint8_t> find_attacking_queens(Position *position, uint8_t target_sq
         target_square,
         rook_offsets[i],
         color_of_attackers ? &is_w_queen : &is_b_queen);
-    if (IS_VALID_SQUARE(square))
+    if (is_valid_square(square))
     {
       squares.push_back(square);
     }
@@ -492,7 +492,7 @@ std::vector<uint8_t> check_files_ranks(Position *position, uint8_t target_square
         target_square,
         rook_offsets[i],
         color_of_attackers ? &white_attacks_files_ranks : &black_attacks_files_ranks);
-    if (IS_VALID_SQUARE(square))
+    if (is_valid_square(square))
     {
       squares.push_back(square);
     }
@@ -504,7 +504,7 @@ std::vector<uint8_t> check_files_ranks(Position *position, uint8_t target_square
 // returns the square of the first piece that attacks the target along the line.
 uint8_t check_line(Position *position, uint8_t target, int offset, bool (*piece_type_function)(uint8_t))
 {
-  for (uint8_t candidate = target + offset; IS_VALID_SQUARE(candidate); candidate += offset)
+  for (uint8_t candidate = target + offset; is_valid_square(candidate); candidate += offset)
   {
     uint8_t piece = position->m_mailbox[candidate];
     // square is empty so we need to keep looking.
@@ -530,7 +530,7 @@ uint8_t check_line(Position *position, uint8_t target, int offset, bool (*piece_
 
 bool check_diagonal_or_file_or_rank(Position *position, uint8_t king_square, int offset, uint8_t target1, uint8_t target2)
 {
-  for (uint8_t candidate = king_square + offset; IS_VALID_SQUARE(candidate); candidate += offset)
+  for (uint8_t candidate = king_square + offset; is_valid_square(candidate); candidate += offset)
   {
     uint8_t piece = position->m_mailbox[candidate];
     // square is empty so we need to keep looking.

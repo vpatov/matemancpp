@@ -86,3 +86,15 @@ const square_t W_KING_ROOK_SQUARE = H1_SQ;
 const square_t W_QUEEN_ROOK_SQUARE = A1_SQ;
 const square_t B_KING_ROOK_SQUARE = H8_SQ;
 const square_t B_QUEEN_ROOK_SQUARE = A8_SQ;
+
+const square_t INVALID_SQUARE = 127;
+
+inline bool is_invalid_square(square_t sq)
+{
+    return sq & 0x88;
+}
+
+inline bool is_valid_square(square_t sq)
+{
+    return !(sq & 0x88);
+}

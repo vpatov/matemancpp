@@ -44,12 +44,12 @@ z_hash_t zobrist_hash(Position *position)
 
   while (square < 120)
   {
-    if (IS_INVALID_SQUARE(square))
+    if (is_invalid_square(square))
     {
       square += 8;
     }
     uint8_t piece = position->m_mailbox[square];
-    if (IS_PIECE(piece))
+    if (is_piece(piece))
     {
       assert(piece <= MAX_PIECE);
       hash ^= zobrist_piece_table[square][piece];

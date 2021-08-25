@@ -135,7 +135,7 @@ uint32_t Position::non_castling_move(
     else if (piece_char == KING_CHAR)
     {
         src_square = find_king();
-        assert(IS_VALID_SQUARE(src_square));
+        assert(is_valid_square(src_square));
 
         // assert that the square that we found the king at, is one square away from the square he supposedly moved to.
         bool found_orig = false;
@@ -169,7 +169,7 @@ uint32_t Position::non_castling_move(
 
     assert_correct_player_turn(src_square, dest_square);
 
-    if (IS_INVALID_SQUARE(src_square))
+    if (is_invalid_square(src_square))
     {
         std::cout << "Impl incomplete for move. " << std::endl;
         assert(false);
@@ -214,13 +214,13 @@ bool Position::legal_position()
     // look for pawns attacking king
     uint8_t target = m_whites_turn ? B_PAWN : W_PAWN;
     uint8_t candidate = PREV_FILE(BACKWARD_RANK(enemy_color, king_square));
-    if (IS_VALID_SQUARE(candidate) && m_mailbox[candidate] == target)
+    if (is_valid_square(candidate) && m_mailbox[candidate] == target)
     {
         // std::cout << "pawn attacking king first condition." << std::endl;
         return false;
     }
     candidate = NEXT_FILE(BACKWARD_RANK(enemy_color, king_square));
-    if (IS_VALID_SQUARE(candidate) && m_mailbox[candidate] == target)
+    if (is_valid_square(candidate) && m_mailbox[candidate] == target)
     {
         // std::cout << "illegal_position: found pawn attacking king second condition." << std::endl;
         return false;
@@ -232,7 +232,7 @@ bool Position::legal_position()
     for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
     {
         candidate = *it + king_square;
-        if (IS_INVALID_SQUARE(candidate))
+        if (is_invalid_square(candidate))
         {
             continue;
         }
@@ -261,7 +261,7 @@ bool Position::legal_position()
     for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
     {
         candidate = king_square + direction_offset(*it);
-        if (IS_VALID_SQUARE(candidate) && m_mailbox[candidate] == target)
+        if (is_valid_square(candidate) && m_mailbox[candidate] == target)
         {
             std::cout << "candidate: " << candidate << "position->mailbox[candidate]:" << m_mailbox[candidate] << std::endl;
             std::cout << "illegal_position: found kings?? attacking king" << std::endl;
@@ -287,7 +287,7 @@ uint16_t Position::get_src_square_pawn_move(char capture, char src_file, uint8_t
         src_rank = m_whites_turn ? dest_rank - 1 : dest_rank + 1;
         src_square = an_square_to_index(src_file, src_rank);
         assert(m_mailbox[src_square] == target);
-        assert(IS_PIECE(m_mailbox[dest_square]) || m_en_passant_square == dest_square);
+        assert(is_piece(m_mailbox[dest_square]) || m_en_passant_square == dest_square);
     }
     else
     {
@@ -387,7 +387,7 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
             }
         }
     }
-    if (IS_INVALID_SQUARE(src_square))
+    if (is_invalid_square(src_square))
     {
         std::cout << "couldn't find_legal " << piece_char << " move." << std::endl;
     }
@@ -397,8 +397,8 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
 void Position::adjust_position(uint8_t src_square,
                                uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square)
 {
-    assert(IS_VALID_SQUARE(src_square));
-    assert(IS_VALID_SQUARE(dest_square));
+    assert(is_valid_square(src_square));
+    assert(is_valid_square(dest_square));
 
     Color color = m_whites_turn ? Color::WHITE : Color::BLACK;
 
@@ -426,8 +426,8 @@ void Position::adjust_position(uint8_t src_square,
 
 void Position::assert_correct_player_turn(uint8_t src_square, uint8_t dest_square)
 {
-    assert(IS_VALID_SQUARE(src_square));
-    assert(IS_VALID_SQUARE(dest_square));
+    assert(is_valid_square(src_square));
+    assert(is_valid_square(dest_square));
     uint8_t moving_piece = m_mailbox[src_square];
-    assert(m_whites_turn ? IS_WHITE_PIECE(moving_piece) : IS_BLACK_PIECE(moving_piece));
+    assert(m_whites_turn ? is_white_piece(moving_piece) : is_black_piece(moving_piece));
 }
