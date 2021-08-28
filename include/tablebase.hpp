@@ -123,19 +123,42 @@ struct OpeningTablebase
     }
   }
 
-  void initialize()
-
+  void try_all_paths()
   {
+    typedef std::__1::unordered_map<z_hash_t, std::__1::vector<MoveEdge>>::iterator tablebase_iter;
+    auto root = m_tablebase.find(m_root_hash);
+    assert(root != m_tablebase.end());
 
-    std::unique_ptr<Position> position = generate_starting_position();
-    z_hash_t hash = zobrist_hash(position.get());
-    // opening_tablebase.insert()
-    std::cout << hash << std::endl;
-  }
+    std::queue<std::pair<tablebase_iter, int>> to_visit;
+    to_visit.push(std::make_pair(root, 0));
 
-  void process_move(Position *position, uint32_t move_key)
-  {
-    z_hash_t hash = zobrist_hash(position);
+    while (!to_visit.empty())
+    {
+      auto pair = to_visit.front();
+      to_visit.pop();
+
+      auto node = pair.first;
+      int depth = pair.second;
+
+      for (auto move : node->second)
+      {
+        auto next_node = m_tablebase.find(move.dest_hash);
+        if (next_node != m_tablebase.end())
+        {
+          for (int i = 0; i < depth; i++)
+          {
+            std::cout << "\t";
+          }
+          std::cout << move.pgn_move << std::endl;
+          to_visit.push(std::make_pair(next_node, depth + 1));
+        }
+      }
+
+      if (depth == 5)
+      {
+        return;
+      }
+    }
   }
 };
 

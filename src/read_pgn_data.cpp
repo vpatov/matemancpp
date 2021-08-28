@@ -132,7 +132,7 @@ void read_all_pgn_files()
 
   read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Carlsen.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
-  openingTablebase.walk_down_most_popular_path();
+  openingTablebase.try_all_paths();
   exit(0);
 
   // std::set completed_files = get_completed_files_set();
