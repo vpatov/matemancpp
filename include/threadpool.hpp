@@ -14,11 +14,13 @@
 
 struct Task
 {
-    void (*m_fn)(void *);
-    void *m_arg;
+    void (*m_fn)(std::string arg);
+    std::string m_arg;
 
-    Task() {}
-    Task(void (*fn)(void *), void *arg) : m_fn(fn), m_arg(arg) {}
+    Task(){};
+    Task(void (*fn)(std::string arg), std::string arg) : m_fn(fn), m_arg(arg){};
+
+    // Task<Arg>(void (*fn)(Arg *arg), Arg &&arg) : m_fn(fn), m_arg(arg) {}
 };
 
 class ThreadPool
@@ -44,7 +46,8 @@ public:
     ThreadPool(int num_threads);
 
     void add_task(Task task);
-    void destroy_pool(bool abandon_unfinished_tasks);
+    void join_pool(bool abandon_unfinished_tasks);
+    void join_pool();
 };
 
 void test();

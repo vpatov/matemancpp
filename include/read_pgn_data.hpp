@@ -26,5 +26,6 @@ const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
 
 void read_pgn_file(std::string file_path);
 void read_all_pgn_files();
+void start_pgn_processing_tasks();
 
 #endif

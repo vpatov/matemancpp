@@ -1,4 +1,6 @@
 #include "read_pgn_data.hpp"
+#include "threadpool.hpp"
+#include <chrono>
 
 const std::string test_files[8] = {
     "/Users/vas/repos/matemancpp/database/pgn/Berliner.pgn",
@@ -127,13 +129,34 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
   ofs.close();
 }
 
+void start_pgn_processing_tasks()
+{
+  ThreadPool thread_pool = ThreadPool(2);
+  int i = 0;
+
+  // for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
+  for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
+  {
+    i++;
+    if (i > 5)
+    {
+      break;
+    }
+    std::cout << "\u001b[31m " << entry.path() << "\u001b[0m" << std::endl;
+    Task task = Task(&read_pgn_file, entry.path());
+    thread_pool.add_task(task);
+  }
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+  thread_pool.join_pool();
+}
+
 void read_all_pgn_files()
 {
 
-  read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Carlsen.pgn");
+  // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/Carlsen.pgn");
   // read_pgn_file("/Users/vas/repos/matemancpp/database/pgn/zzztest.pgn");
-  openingTablebase.try_all_paths();
-  exit(0);
+  // openingTablebase.walk_down_most_popular_path();
+  // exit(0);
 
   // std::set completed_files = get_completed_files_set();
 

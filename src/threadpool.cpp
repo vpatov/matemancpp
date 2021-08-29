@@ -82,7 +82,7 @@ void ThreadPool::add_task(Task task)
     cv.notify_one();
 }
 
-void ThreadPool::destroy_pool(bool abandon_unfinished_tasks)
+void ThreadPool::join_pool(bool abandon_unfinished_tasks)
 {
     if (abandon_unfinished_tasks)
     {
@@ -99,11 +99,22 @@ void ThreadPool::destroy_pool(bool abandon_unfinished_tasks)
 
     for (auto it = pool.begin(); it != pool.end(); it++)
     {
-        (*it).join();
+#ifdef THREAD_POOL_DEBUG
+        {
+            std::unique_lock<std::mutex> lock(stdout_mutex);
+            std::cout << "Waiting for thread_" << it->get_id() << "to finish." << std::endl;
+        }
+#endif
+        it->join();
     }
 }
 
-void test_task_fn(void *arg)
+void ThreadPool::join_pool()
+{
+    join_pool(false);
+}
+
+void test_task_fn(std::string arg)
 {
     int x = 0;
     for (int i = 0; i < 500; i++)
@@ -114,7 +125,7 @@ void test_task_fn(void *arg)
 
 void test()
 {
-    const Task task(&test_task_fn, NULL);
+    const Task task(&test_task_fn, "asd");
     ThreadPool thread_pool = ThreadPool(100);
 
     for (int i = 0; i < 300; i++)
@@ -122,7 +133,7 @@ void test()
         thread_pool.add_task(task);
         if (i == 100)
         {
-            thread_pool.destroy_pool(false);
+            thread_pool.join_pool(false);
         }
     }
 

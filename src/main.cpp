@@ -12,7 +12,8 @@ int main(int argc, char *argv[])
 
 {
    // test();
-   read_all_pgn_files();
+   // read_all_pgn_files();
+   start_pgn_processing_tasks();
    // try_threading();
 }
 
