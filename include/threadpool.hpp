@@ -31,15 +31,14 @@ private:
     std::mutex queue_mutex;
     std::queue<Task> task_queue;
     std::condition_variable cv;
-    bool should_destroy = false;
+    bool should_wait_for_more_tasks = true;
+    static const bool THREAD_POOL_DEBUG = false;
 
-#ifdef THREAD_POOL_DEBUG
     std::mutex stdout_mutex;
-#endif
 
     void initialize_threads();
-
     void spin();
+    bool should_thread_wait();
 
 public:
     ThreadPool();

@@ -7,6 +7,9 @@
 #include <random>
 #include <ctime>
 
+// TODO take inspiration from the threadpool impl vanya sent you, for hints on how to
+// accept more varied functions into the threads
+
 ThreadPool::ThreadPool()
 {
     m_num_threads = std::thread::hardware_concurrency();
@@ -34,6 +37,12 @@ void ThreadPool::initialize_threads()
     }
 }
 
+// predicate which returns ​false if the waiting should be continued.
+bool ThreadPool::should_thread_wait()
+{
+    return task_queue.empty() && should_wait_for_more_tasks;
+}
+
 void ThreadPool::spin()
 {
     std::thread::id id = std::this_thread::get_id();
@@ -45,17 +54,18 @@ void ThreadPool::spin()
             std::unique_lock<std::mutex> lock(queue_mutex);
 
             cv.wait(lock, [this]
-                    { return !task_queue.empty() || should_destroy; });
-            if (should_destroy)
+                    { return !should_thread_wait(); });
+
+            if (!should_wait_for_more_tasks && task_queue.empty())
             {
 
-#ifdef THREAD_POOL_DEBUG
+                if (THREAD_POOL_DEBUG)
                 {
                     std::unique_lock<std::mutex> lock(stdout_mutex);
                     std::cout << "Thread_" << id << "is exiting... " << std::endl;
                     std::cout << "Task Queue size: " << task_queue.size() << std::endl;
                 }
-#endif
+
                 return;
             }
             task = task_queue.front();
@@ -64,12 +74,11 @@ void ThreadPool::spin()
 
         task.m_fn(task.m_arg);
 
-#ifdef THREAD_POOL_DEBUG
+        if (THREAD_POOL_DEBUG)
         {
             std::unique_lock<std::mutex> lock(stdout_mutex);
             std::cout << "Thread_" << id << std::endl;
         }
-#endif
     }
 }
 
@@ -82,6 +91,10 @@ void ThreadPool::add_task(Task task)
     cv.notify_one();
 }
 
+/*
+ Waits for already started tasks to complete, and joins the threads.
+ // TODO proper destructor for the threadpool, proper shut down of threads
+*/
 void ThreadPool::join_pool(bool abandon_unfinished_tasks)
 {
     if (abandon_unfinished_tasks)
@@ -94,17 +107,16 @@ void ThreadPool::join_pool(bool abandon_unfinished_tasks)
             }
         }
     }
-    should_destroy = true;
+    should_wait_for_more_tasks = false;
     cv.notify_all();
 
     for (auto it = pool.begin(); it != pool.end(); it++)
     {
-#ifdef THREAD_POOL_DEBUG
+        if (THREAD_POOL_DEBUG)
         {
             std::unique_lock<std::mutex> lock(stdout_mutex);
             std::cout << "Waiting for thread_" << it->get_id() << "to finish." << std::endl;
         }
-#endif
         it->join();
     }
 }

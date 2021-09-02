@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tablebase.hpp"
+
 struct metadata_entry
 {
     std::string key;
@@ -16,6 +18,7 @@ struct Game
     bool finishedReading;
     std::string result;
     std::vector<uint32_t> move_list;
+    OpeningTablebase *m_opening_tablebase;
 
     bool read_metadata_line(std::string &line);
     void process_player_move(std::string player_move, bool white);

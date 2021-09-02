@@ -1,7 +1,5 @@
 #pragma once
 
-#include "read_pgn_data.hpp"
-#include "game.hpp"
 #include "util.hpp"
 #include "position.hpp"
 #include "squares.hpp"
@@ -24,11 +22,17 @@
 //      2) Add a pointer as a parameter
 //            (but then you need to pass it a few functions deep)
 //      3) Consolidate the Game and OpeningTablebase objects?
-//      4) Add pointer to opening tablebase as a field on Game, and set it for each game. (least amount of code)
+//      ** 4) Add pointer to opening tablebase as a field on Game, and set it for each game. (least amount of code)
 //            (kind of ugly, not elegant, and feels smelly)
+//      PICKED OPTION 4 because it was easiest.
 //      5) Give each thread their own pointer to an opening tablebase?
+
+// TODO MULTITHREADED LOGGING OF PROGRESS TO STDOUT
+//    well, there are no locks around the logging,
+//    but the output is rare enough that the threads havent interfered with each other
+// TODO SERIALIZATION OF OPENING TABLEBASE
+// TODO MERGING OF OPENING TABLEBASE FROM DIFFERENT THREADS
 // LASTLEFTOFF
-// Okay... we are getting double free errors. serious debugging time
 /*
   How to handle multithreaded logging
   Options:

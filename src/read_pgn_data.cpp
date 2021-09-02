@@ -16,8 +16,6 @@ const std::string test_files[8] = {
 const std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
 const std::string pgn_database_path = "/Users/vas/repos/matemancpp/database/pgn";
 
-OpeningTablebase openingTablebase;
-
 // Reads the elo, and other metadata.
 void populateMetadata(Game *game)
 {
@@ -54,11 +52,14 @@ void populateMetadata(Game *game)
 
 void read_pgn_file(std::string file_path)
 {
+  auto clock_start = std::chrono::high_resolution_clock::now();
   std::ifstream infile(file_path);
   std::vector<std::unique_ptr<Game>> games;
+  OpeningTablebase openingTablebase;
 
   games.emplace_back(std::make_unique<Game>());
   populate_starting_position(&(games.back()->position));
+  games.back()->m_opening_tablebase = &openingTablebase;
   bool reading_game_moves = false;
   int linecount = 0;
 
@@ -94,17 +95,29 @@ void read_pgn_file(std::string file_path)
         // push a new game to the back of the games vector
         games.emplace_back(std::make_unique<Game>());
 
-        std::cerr << "\r"
-                  << std::left << std::setw(7)
-                  << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
+        // std::cerr << "\r"
+        //           << std::left << std::setw(7)
+        //           << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
 
         populate_starting_position(&(games.back()->position));
+        games.back()->m_opening_tablebase = &openingTablebase;
         reading_game_moves = false;
       }
     }
   }
 
-  // std::cerr << std::endl;
+  auto clock_end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
+  std::string duration_str = std::to_string((double)duration.count() / 1000);
+  duration_str = duration_str.substr(0, duration_str.find(".") + 3);
+
+  std::cout
+      << std::left << std::setw(16) << std::this_thread::get_id()
+      << std::left << std::setw(16) << duration_str + "s"
+      << std::left << std::setw(16) << games.size() - 1
+      << "\u001b[32m"
+      << file_path.substr(file_path.find_last_of('/') + 1)
+      << "\u001b[0m" << std::endl;
 }
 
 std::set<std::string> get_completed_files_set()
@@ -132,21 +145,22 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
 void start_pgn_processing_tasks()
 {
   ThreadPool thread_pool = ThreadPool(2);
-  int i = 0;
 
-  // for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
-  for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
+  std::cout
+      << "\u001b[33m"
+      << std::left << std::setw(16) << "Thread ID"
+      << std::left << std::setw(16) << "Duration"
+      << std::left << std::setw(16) << "# of Games"
+      << std::left << std::setw(16) << "File Name"
+      << "\u001b[0m"
+      << std::endl;
+
+  for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
+  // for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
   {
-    i++;
-    if (i > 5)
-    {
-      break;
-    }
-    std::cout << "\u001b[31m " << entry.path() << "\u001b[0m" << std::endl;
     Task task = Task(&read_pgn_file, entry.path());
     thread_pool.add_task(task);
   }
-  std::this_thread::sleep_for(std::chrono::seconds(5));
   thread_pool.join_pool();
 }
 
@@ -254,7 +268,7 @@ void Game::process_player_move(std::string player_move, bool whites_turn)
   position.m_whites_turn = !whites_turn;
   z_hash_t zhash2 = zobrist_hash(&position);
 
-  openingTablebase.update(zhash1, zhash2, move_key, std::string(player_move));
+  m_opening_tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
 }
 
 bool Game::read_game_move_line(std::string &line)
