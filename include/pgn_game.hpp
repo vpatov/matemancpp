@@ -10,6 +10,18 @@ struct metadata_entry
     std::string value;
 };
 
+namespace ColorCode
+{
+    static const std::string white = "\u001b[37m";
+    static const std::string teal = "\u001b[36m";
+    static const std::string purple = "\u001b[35m";
+    static const std::string blue = "\u001b[34m";
+    static const std::string yellow = "\u001b[33m";
+    static const std::string green = "\u001b[32m";
+    static const std::string red = "\u001b[31m";
+    static const std::string end = "\u001b[0m";
+};
+
 struct PgnGame
 {
 
@@ -38,6 +50,7 @@ struct PgnGame
 
         using namespace std;
         cout
+            << ColorCode::teal
             << left << setw(32) << "White"
             << left << setw(32) << "Black"
             << left << setw(30) << "Event"
@@ -45,6 +58,7 @@ struct PgnGame
             << left << setw(10) << "# Moves"
             << left << setw(10) << "White Elo"
             << left << setw(10) << "Black Elo"
+            << ColorCode::end
             << std::endl;
     }
 };

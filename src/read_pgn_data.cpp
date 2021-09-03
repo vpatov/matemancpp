@@ -23,6 +23,35 @@ std::unordered_multimap<
     std::shared_ptr<std::vector<std::shared_ptr<PgnGame>>>>
     pgn_game_vector_map;
 
+void save_game_vector(std::thread::id thread_id, std::shared_ptr<std::vector<std::shared_ptr<PgnGame>>> games)
+{
+  static std::mutex pgn_game_vector_map_mutex;
+  std::unique_lock<std::mutex> lock(pgn_game_vector_map_mutex);
+
+  pgn_game_vector_map.insert(std::pair(thread_id, games));
+}
+
+void print_game_summaries(
+    std::__1::chrono::steady_clock::time_point clock_start,
+    std::__1::chrono::steady_clock::time_point clock_end,
+    std::thread::id thread_id,
+    int games_list_size,
+    std::string file_path)
+{
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
+  std::string duration_str = std::to_string((double)duration.count() / 1000);
+  duration_str = duration_str.substr(0, duration_str.find(".") + 3);
+
+  std::cout
+      << std::left << std::setw(16) << thread_id
+      << std::left << std::setw(16) << duration_str + "s"
+      << std::left << std::setw(16) << games_list_size
+      << ColorCode::green
+      << file_path.substr(file_path.find_last_of('/') + 1)
+      << ColorCode::end
+      << std::endl;
+}
+
 void read_pgn_file(std::string file_path)
 {
   auto clock_start = std::chrono::high_resolution_clock::now();
@@ -79,25 +108,28 @@ void read_pgn_file(std::string file_path)
       }
     }
   }
-
   // Remove the very last game, which is empty
   games->pop_back();
 
-  std::thread::id thread_id = std::this_thread::get_id();
-  pgn_game_vector_map.insert(std::pair(thread_id, games));
+  // Save the game vector in a global data structure so the main thread can access it
+  save_game_vector(std::this_thread::get_id(), games);
 
-  auto clock_end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
-  std::string duration_str = std::to_string((double)duration.count() / 1000);
-  duration_str = duration_str.substr(0, duration_str.find(".") + 3);
+  std::string tablebase_filepath = "/Users/vas/repos/matemancpp/tablebase/test.tb";
+  openingTablebase.serialize_tablebase(tablebase_filepath);
 
-  std::cout
-      << std::left << std::setw(16) << thread_id
-      << std::left << std::setw(16) << duration_str + "s"
-      << std::left << std::setw(16) << games->size() - 1
-      << "\u001b[32m"
-      << file_path.substr(file_path.find_last_of('/') + 1)
-      << "\u001b[0m" << std::endl;
+  OpeningTablebase test_tablebase = OpeningTablebase::deserialize_tablebase(tablebase_filepath);
+
+  std::cout << ColorCode::red << "Walking original tablebase: " << std::endl;
+  openingTablebase.walk_down_most_popular_path();
+
+  std::cout << ColorCode::end << ColorCode::blue << "Walking deserialized tablebase: " << std::endl;
+  test_tablebase.walk_down_most_popular_path();
+
+  std::cout << ColorCode::end << std::endl;
+
+  // print statistics about pgn processing
+  // auto clock_end = std::chrono::high_resolution_clock::now();
+  // print_game_summaries(clock_start, clock_end, std::this_thread::get_id(), games->size(), file_path);
 }
 
 std::set<std::string> get_completed_files_set()
@@ -122,10 +154,24 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
   ofs.close();
 }
 
-void start_pgn_processing_tasks()
+void print_game_summaries()
 {
-  ThreadPool thread_pool = ThreadPool();
+  for (auto member : pgn_game_vector_map)
+  {
+    auto first = member.first;
+    auto second = member.second;
 
+    std::cout << ColorCode::red << "Thread: " << first << ColorCode::end << std::endl;
+    PgnGame::printGameSummaryHeader();
+    for (auto vec_member : *second)
+    {
+      vec_member->printGameSummary();
+    }
+  }
+}
+
+void print_pgn_processing_header()
+{
   std::cout
       << "\u001b[33m"
       << std::left << std::setw(16) << "Thread ID"
@@ -134,27 +180,23 @@ void start_pgn_processing_tasks()
       << std::left << std::setw(16) << "File Name"
       << "\u001b[0m"
       << std::endl;
+}
+
+void start_pgn_processing_tasks()
+{
+  ThreadPool thread_pool = ThreadPool();
+
+  // print_pgn_processing_header();
 
   // for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
-  for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
+  for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest2"))
   {
     Task task = Task(&read_pgn_file, entry.path());
     thread_pool.add_task(task);
   }
   thread_pool.join_pool();
 
-  for (auto member : pgn_game_vector_map)
-  {
-    auto first = member.first;
-    auto second = member.second;
-
-    std::cout << "Thread: " << first << std::endl;
-    PgnGame::printGameSummaryHeader();
-    for (auto vec_member : *second)
-    {
-      vec_member->printGameSummary();
-    }
-  }
+  // print_game_summaries();
 }
 
 void read_all_pgn_files()

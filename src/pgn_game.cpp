@@ -118,29 +118,22 @@ void PgnGame::process_result(std::string resultstr)
 
 void PgnGame::printGameSummary()
 {
-    static const std::string white_code = "\u001b[37m";
-    static const std::string teal_code = "\u001b[36m";
-    static const std::string purple_code = "\u001b[35m";
-    static const std::string blue_code = "\u001b[34m";
-    static const std::string yellow_code = "\u001b[33m";
-    static const std::string green_code = "\u001b[32m";
-    static const std::string red_code = "\u001b[31m";
-    static const std::string end_code = "\u001b[0m";
+
     using namespace std;
     cout
-        << end_code
+        << ColorCode::end
         << left << setw(32) << m_white_player_name
         << left << setw(32) << m_black_player_name
-        << green_code
+        << ColorCode::green
         << left << setw(30) << m_event
-        << yellow_code
+        << ColorCode::yellow
         << left << setw(14) << m_result
-        << purple_code
+        << ColorCode::purple
         << left << setw(10) << m_move_list.size()
-        << white_code
+        << ColorCode::white
         << left << setw(10) << m_whiteElo
         << left << setw(10) << m_blackElo
-        << end_code
+        << ColorCode::end
         << std::endl;
 }
 

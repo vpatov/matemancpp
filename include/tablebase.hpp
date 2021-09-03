@@ -8,7 +8,10 @@
 #include <vector>
 #include <unordered_map>
 #include <queue>
+#include <fstream>
+#include <iostream>
 #include <type_traits>
+#include <cstring>
 
 // TODO SERIALIZATION OF OPENING TABLEBASE
 // TODO MERGING OF OPENING TABLEBASE FROM DIFFERENT THREADS
@@ -38,7 +41,7 @@ struct MoveEdge
   // move key is bit-wise concatenation of
   // 0x00 + start_square + end_square + promotion_piece
   uint32_t m_move_key;
-  std::string m_pgn_move;
+  char m_pgn_move[8];
 
   friend std::ostream &operator<<(std::ostream &os, MoveEdge &move_edge);
 
@@ -46,132 +49,166 @@ struct MoveEdge
   {
     m_dest_hash = dest_hash;
     m_move_key = move_key;
-    m_pgn_move = std::move(pgn_move);
+    assert(pgn_move.size() < 8);
+    strncpy(m_pgn_move, pgn_move.c_str(), 8);
+
     m_times_played = 1;
   };
+
+  MoveEdge() {}
+
+  // MoveEdge(z_hash_t dest_hash, char pgn_move[8], uint32_t times_played, uint32_t move_key ){
+
+  // }
 };
 bool compare_move_edge(MoveEdge move_edge1, MoveEdge move_edge2);
 
+typedef std::__1::unordered_map<z_hash_t, std::__1::shared_ptr<std::__1::vector<MoveEdge>>>::iterator tablebase_iter;
+
 struct OpeningTablebase
 {
+  // TODO replace with unordered_muiltimap
   std::unordered_map<z_hash_t, std::shared_ptr<std::vector<MoveEdge>>> m_tablebase;
-  // std::unordered_map<z_hash_t, std::vector<MoveEdge>> m_tablebase;
   z_hash_t m_root_hash;
 
-  // TODO split if/else code paths into two functions
-  void update(z_hash_t insert_hash, z_hash_t dest_hash, uint32_t move_key, std::string pgn_move)
+  void update(z_hash_t insert_hash, z_hash_t dest_hash, uint32_t move_key, std::string pgn_move);
+
+  void insert_new_move_edge_list(z_hash_t insert_hash, MoveEdge moveEdge);
+
+  void increment_times_played_or_insert_move(tablebase_iter node, MoveEdge moveEdge);
+
+  void walk_down_most_popular_path();
+
+  template <typename T>
+  void write(std::fstream *stream, T *data, size_t size)
   {
-    if (m_tablebase.empty())
-    {
-      m_root_hash = insert_hash;
-    }
-    // find the node corresponding to the zobrist hash for the position we are inserting at.
-    auto node = m_tablebase.find(insert_hash);
-
-    // if
-    if (node == m_tablebase.end())
-    {
-      MoveEdge edge(dest_hash, move_key, pgn_move);
-      std::shared_ptr<std::vector<MoveEdge>> move_edge_list = std::make_shared<std::vector<MoveEdge>>();
-      move_edge_list->emplace_back(edge);
-
-      m_tablebase[insert_hash] = std::move(move_edge_list);
-    }
-    else
-    {
-      // std::cout << "tablebase size: " << m_tablebase.size() << std::endl;
-      // std::shared_ptr<std::vector<move_edge>> move_edge_list = std::move(node->second);
-
-      // if the move exists already, just increment the times its been played
-      auto it = node->second->begin();
-      for (; it != node->second->end(); it++)
-      {
-        if (it->m_move_key == move_key)
-        {
-          assert(it->m_dest_hash == dest_hash);
-          it->m_times_played++;
-          break;
-        }
-      }
-
-      // if we couldn't find the move in the move list, it's a new move
-      if (it == node->second->end())
-      {
-        MoveEdge edge(dest_hash, move_key, pgn_move);
-        node->second->emplace_back(edge);
-      }
-    }
-  }
-
-  void walk_down_most_popular_path()
-  {
-    auto root = m_tablebase.find(m_root_hash);
-    assert(root != m_tablebase.end());
-
-    std::queue<decltype(root)> to_visit;
-    to_visit.push(root);
-
-    int depth = 0;
-
-    while (!to_visit.empty())
-    {
-      auto node = to_visit.front();
-      to_visit.pop();
-      depth++;
-
-      MoveEdge most_popular_move = *(
-          std::max_element(
-              node->second->begin(), node->second->end(), &compare_move_edge));
-
-      std::cout << "Depth: " << depth << std::endl;
-      std::cout << std::endl
-                << most_popular_move << std::endl;
-
-      auto next_node = m_tablebase.find(most_popular_move.m_dest_hash);
-      if (next_node != m_tablebase.end())
-      {
-        to_visit.push(next_node);
-      }
-    }
+    stream->write(reinterpret_cast<char *>(data), size);
   }
 
   /*
-  void try_all_paths()
-  {
-    typedef std::__1::unordered_map<z_hash_t, std::__1::vector<MoveEdge>>::iterator tablebase_iter;
-    auto root = m_tablebase.find(m_root_hash);
-    assert(root != m_tablebase.end());
+    Binary format for tablebase serialization (8 bits == byte):
 
-    std::queue<std::pair<tablebase_iter, int>> to_visit;
-    to_visit.push(std::make_pair(root, 0));
-
-    while (!to_visit.empty())
     {
-      auto pair = to_visit.front();
-      to_visit.pop();
-
-      auto node = pair.first;
-      int depth = pair.second;
-
-      for (auto move : node->second)
+      8 bytes (64 bits): root hashkey
+    }
+    {
+      4 bytes (32 bits): # of key/value pairs (N)
+    }
+    Key/Value Pair:
+    {
+      Key:
       {
-        auto next_node = m_tablebase.find(move.dest_hash);
-        if (next_node != m_tablebase.end())
-        {
-          for (int i = 0; i < depth; i++)
-          {
-            std::cout << "\t";
-          }
-          std::cout << move.pgn_move << std::endl;
-          to_visit.push(std::make_pair(next_node, depth + 1));
-        }
+        8 bytes (64 bits) -> z_hash_t: key
       }
-
-      if (depth == 5)
+      Value: 
       {
-        return;
+        4 bytes (32 bits) -> uint32_t: length of MoveEdge vector (M)
+        MoveEdge: {
+          8 bytes (64 bits) -> z_hash_t: destination hash 
+          8 bytes (64 bits) -> char[]:   pgn move
+          4 bytes (32 bits) -> uint32_t: times played
+          4 bytes (32 bits) -> uint32_t: move key
+        } x M
+      }
+    } x N
+  */
+  void serialize_tablebase(std::string file_path)
+  {
+    std::fstream stream(file_path, std::ios::out | std::ios::binary);
+
+    // 8 bytes (464bits) -> z_hash_t: hash of starting position
+    write(&stream, &m_root_hash, sizeof(z_hash_t));
+
+    // 4 bytes (4 bits) -> uint32_t: number of keys in tablebase
+    uint32_t tablebase_size = m_tablebase.size();
+    write(&stream, &tablebase_size, sizeof(uint32_t));
+
+    for (auto node = m_tablebase.begin(); node != m_tablebase.end(); node++)
+    {
+      z_hash_t key_hash = node->first;
+      auto move_list = node->second;
+
+      // 8 bytes (64 bits) -> z_hash_t: key
+      write(&stream, &key_hash, sizeof(z_hash_t));
+
+      // // 4 bytes (32 bits) -> uint32_t: length of MoveEdge vector (M)
+      uint32_t move_list_size = move_list->size();
+      write(&stream, &move_list_size, sizeof(uint32_t));
+
+      // MoveEdge serialization (8, 8, 4, 4)
+      for (auto it = move_list->begin(); it != move_list->end(); it++)
+      {
+        write(&stream, &(it->m_dest_hash), sizeof(z_hash_t));
+        write(&stream, &(it->m_pgn_move), sizeof(MoveEdge::m_pgn_move));
+        write(&stream, &(it->m_times_played), sizeof(uint32_t));
+        write(&stream, &(it->m_move_key), sizeof(uint32_t));
       }
     }
+
+    stream.close();
   }
-  */
+
+  static OpeningTablebase deserialize_tablebase(std::string file_path)
+  {
+    std::streampos size;
+    char *data;
+    int index = 0;
+    OpeningTablebase deserialized_tablebase;
+    std::ifstream infile(file_path, std::ios::binary | std::ios::ate);
+
+    if (infile.is_open())
+    {
+      size = infile.tellg();
+
+      data = new char[size];
+      infile.seekg(0, std::ios::beg);
+      infile.read(data, size);
+      infile.close();
+    }
+    else
+    {
+      assert(false);
+    }
+
+    deserialized_tablebase.m_root_hash = *((z_hash_t *)(data + index));
+    index += sizeof(z_hash_t);
+
+    uint32_t tablebase_size = *((uint32_t *)(data + index));
+    index += sizeof(uint32_t);
+
+    for (int n = 0; n < tablebase_size; n++)
+    {
+      z_hash_t key_hash = *((z_hash_t *)(data + index));
+      index += sizeof(z_hash_t);
+
+      uint32_t move_list_size = *((uint32_t *)(data + index));
+      index += sizeof(uint32_t);
+
+      std::shared_ptr<std::vector<MoveEdge>> move_list = std::make_shared<std::vector<MoveEdge>>();
+
+      for (int m = 0; m < move_list_size; m++)
+      {
+
+        MoveEdge moveEdge;
+
+        moveEdge.m_dest_hash = *((z_hash_t *)(data + index));
+        index += sizeof(MoveEdge::m_dest_hash);
+
+        strncpy(moveEdge.m_pgn_move, data + index, sizeof(MoveEdge::m_pgn_move));
+        index += sizeof(MoveEdge::m_pgn_move);
+
+        moveEdge.m_times_played = *((uint32_t *)(data + index));
+        index += sizeof(MoveEdge::m_times_played);
+
+        moveEdge.m_move_key = *((uint32_t *)(data + index));
+        index += sizeof(MoveEdge::m_move_key);
+
+        move_list->push_back(moveEdge);
+      }
+
+      deserialized_tablebase.m_tablebase[key_hash] = move_list;
+    }
+
+    return deserialized_tablebase;
+  }
 };
