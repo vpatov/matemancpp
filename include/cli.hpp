@@ -1,13 +1,14 @@
-#ifndef __CLI_H__
-#define __CLI_H__
+#pragma once
 
 #include <iostream>
 #include <string>
 #include <unistd.h>
+
 #include <unordered_map>
 #include <vector>
 
-enum Command {
+enum Command
+{
   uci,
   debug,
   isready,
@@ -36,5 +37,3 @@ void process_command_quit(std::vector<std::string> args);
 void init_command_map();
 void process_command(std::string command);
 void cli_loop();
-
-#endif

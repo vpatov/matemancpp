@@ -1,6 +1,3 @@
-#ifndef __OPTIONS_H__
-#define __OPTIONS_H__
+#pragma once
 
 void announce_options();
-
-#endif

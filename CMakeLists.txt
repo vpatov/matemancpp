@@ -25,6 +25,7 @@ set(SOURCES
     src/options.cpp
     src/move_generation.cpp
     src/zobrist.cpp
+    src/pgn_game.cpp
     src/read_pgn_data.cpp
     src/threadpool.cpp
     src/tablebase.cpp

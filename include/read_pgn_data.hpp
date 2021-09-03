@@ -1,11 +1,10 @@
-#ifndef __READ_PGN_DATA_H__
-#define __READ_PGN_DATA_H__
+#pragma once
 
 #include "move_generation.hpp"
 #include "position.hpp"
 #include "tablebase.hpp"
 #include "util.hpp"
-#include "game.hpp"
+#include "pgn_game.hpp"
 #include <fstream>
 #include <set>
 #include <thread>
@@ -27,5 +26,3 @@ const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
 void read_pgn_file(std::string file_path);
 void read_all_pgn_files();
 void start_pgn_processing_tasks();
-
-#endif

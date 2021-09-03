@@ -1,5 +1,5 @@
-#ifndef __MOVE_GENERATION_H__
-#define __MOVE_GENERATION_H__
+#pragma once
+
 #include "position.hpp"
 #include <cstdint>
 #include <vector>
@@ -61,5 +61,3 @@ generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
 std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
                                  uint8_t square);
-
-#endif

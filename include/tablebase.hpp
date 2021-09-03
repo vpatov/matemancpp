@@ -10,26 +10,6 @@
 #include <queue>
 #include <type_traits>
 
-// LASTLEFTOFF
-// multithreading for creation of tablebase.
-// every "task" that can be given to a thread, is to create a tablebase for a pgn file.
-// the main thread can then take the results from all the other threads and combine them into one
-// tablebase.
-// Need to figure out way for process_game_move to have reference to tablebase
-// Options:
-//      1) Make some of the read pgn methods class methods for the opening tablebase
-//          (But then how do the game class methods have reference)
-//      2) Add a pointer as a parameter
-//            (but then you need to pass it a few functions deep)
-//      3) Consolidate the Game and OpeningTablebase objects?
-//      ** 4) Add pointer to opening tablebase as a field on Game, and set it for each game. (least amount of code)
-//            (kind of ugly, not elegant, and feels smelly)
-//      PICKED OPTION 4 because it was easiest.
-//      5) Give each thread their own pointer to an opening tablebase?
-
-// TODO MULTITHREADED LOGGING OF PROGRESS TO STDOUT
-//    well, there are no locks around the logging,
-//    but the output is rare enough that the threads havent interfered with each other
 // TODO SERIALIZATION OF OPENING TABLEBASE
 // TODO MERGING OF OPENING TABLEBASE FROM DIFFERENT THREADS
 // LASTLEFTOFF
@@ -195,60 +175,3 @@ struct OpeningTablebase
   }
   */
 };
-
-/*
-uint8_t start_square
-uint8_t end_square
-uint8_t promotion_piece (0 if no promotion)
-using move_key = uint32_t (concatenation of above);
-
-struct move {
-  uint64_t dest_hash
-  uint32_t times_played
-}
-
-
-struct node {
-
-  uint64_t hash (maybe not stored in node)
-  position (entire copy?, probably not)
-
-  // hash and position are technically not necessary to store, if
-  // we arrive at a position always walking from starting position
-
-  hashmap<move_key, uint64_t> move_map;
-  // might be better to use a vector and not a move_map
-}
-
-
-// TODO
-// 1) implement next_position(from_square, dest_square, promotion)
-// 2) implement get_fromsq_destsq_promotion(playerMove)
-// 3) think about threading and locks for this code below
-// 4) Think about using regex instead of a parser
-
-
-
-  For each game:
-    position = new Position in starting position:
-    current_node* = opening_tablebase[starting_position]
-    If no result or elo below threshold: skip
-    For every move in move list:
-      key = (from_square, dest_square, promotion)
-      move* = current_node.move_map.get(key, NULL);
-
-      position = next_position(key)
-
-      if (move != NULL){
-        move->times_played ++;
-        currrent_node = opening_tablebase[move.dest_hash];
-      }
-      else {
-        hash = calculate_zobrist_hash(position)
-        move = {
-          dest_hash : hash,
-          times_played : 1
-        };
-        current_node.move_map.set(key, move);
-      }
-*/

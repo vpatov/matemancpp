@@ -1,6 +1,8 @@
 #include "read_pgn_data.hpp"
+#include "pgn_game.hpp"
 #include "threadpool.hpp"
 #include <chrono>
+#include <utility>
 
 const std::string test_files[8] = {
     "/Users/vas/repos/matemancpp/database/pgn/Berliner.pgn",
@@ -16,50 +18,22 @@ const std::string test_files[8] = {
 const std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
 const std::string pgn_database_path = "/Users/vas/repos/matemancpp/database/pgn";
 
-// Reads the elo, and other metadata.
-void populateMetadata(Game *game)
-{
-  int elo;
-
-  // Iterate through metadata key-value pairs
-  auto metadata = game->metadata;
-  for (auto it = metadata.begin(); it != metadata.end(); it++)
-  {
-    if (it->value.length() < 2)
-    {
-      continue;
-    }
-    if ((it->key).compare("WhiteElo") == 0)
-    {
-      elo = std::stoi(it->value);
-      if (elo >= 0)
-      {
-        game->whiteElo = elo;
-      }
-    }
-    else if ((it->key).compare("BlackElo") == 0)
-    {
-      elo = std::stoi(it->value);
-      if (elo >= 0)
-      {
-        game->blackElo = elo;
-      }
-    }
-  }
-  game->eloOverThreshold =
-      game->whiteElo >= ELO_THRESHOLD && game->blackElo >= ELO_THRESHOLD;
-}
+std::unordered_multimap<
+    std::thread::id,
+    std::shared_ptr<std::vector<std::shared_ptr<PgnGame>>>>
+    pgn_game_vector_map;
 
 void read_pgn_file(std::string file_path)
 {
   auto clock_start = std::chrono::high_resolution_clock::now();
   std::ifstream infile(file_path);
-  std::vector<std::unique_ptr<Game>> games;
+  std::shared_ptr<std::vector<std::shared_ptr<PgnGame>>> games =
+      std::make_shared<std::vector<std::shared_ptr<PgnGame>>>();
   OpeningTablebase openingTablebase;
 
-  games.emplace_back(std::make_unique<Game>());
-  populate_starting_position(&(games.back()->position));
-  games.back()->m_opening_tablebase = &openingTablebase;
+  games->emplace_back(std::make_shared<PgnGame>());
+  populate_starting_position(&(games->back()->m_position));
+  games->back()->m_opening_tablebase = &openingTablebase;
   bool reading_game_moves = false;
   int linecount = 0;
 
@@ -78,7 +52,7 @@ void read_pgn_file(std::string file_path)
     }
 
     // read the metadata until there are no more metadata lines left
-    if (!reading_game_moves && !games.back()->read_metadata_line(line))
+    if (!reading_game_moves && !games->back()->read_metadata_line(line))
     {
       reading_game_moves = true;
     }
@@ -86,25 +60,31 @@ void read_pgn_file(std::string file_path)
     if (reading_game_moves)
     {
 
-      bool is_game_line = games.back()->read_game_move_line(line);
-      if (games.back()->finishedReading)
+      bool is_game_line = games->back()->read_game_move_line(line);
+      if (games->back()->m_finishedReading)
       {
 
-        populateMetadata(games.back().get());
+        games->back()->populateMetadata();
 
         // push a new game to the back of the games vector
-        games.emplace_back(std::make_unique<Game>());
+        games->emplace_back(std::make_shared<PgnGame>());
 
         // std::cerr << "\r"
         //           << std::left << std::setw(7)
         //           << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
 
-        populate_starting_position(&(games.back()->position));
-        games.back()->m_opening_tablebase = &openingTablebase;
+        populate_starting_position(&(games->back()->m_position));
+        games->back()->m_opening_tablebase = &openingTablebase;
         reading_game_moves = false;
       }
     }
   }
+
+  // Remove the very last game, which is empty
+  games->pop_back();
+
+  std::thread::id thread_id = std::this_thread::get_id();
+  pgn_game_vector_map.insert(std::pair(thread_id, games));
 
   auto clock_end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
@@ -112,9 +92,9 @@ void read_pgn_file(std::string file_path)
   duration_str = duration_str.substr(0, duration_str.find(".") + 3);
 
   std::cout
-      << std::left << std::setw(16) << std::this_thread::get_id()
+      << std::left << std::setw(16) << thread_id
       << std::left << std::setw(16) << duration_str + "s"
-      << std::left << std::setw(16) << games.size() - 1
+      << std::left << std::setw(16) << games->size() - 1
       << "\u001b[32m"
       << file_path.substr(file_path.find_last_of('/') + 1)
       << "\u001b[0m" << std::endl;
@@ -144,7 +124,7 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
 
 void start_pgn_processing_tasks()
 {
-  ThreadPool thread_pool = ThreadPool(2);
+  ThreadPool thread_pool = ThreadPool();
 
   std::cout
       << "\u001b[33m"
@@ -155,13 +135,26 @@ void start_pgn_processing_tasks()
       << "\u001b[0m"
       << std::endl;
 
-  for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
-  // for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
+  // for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
+  for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
   {
     Task task = Task(&read_pgn_file, entry.path());
     thread_pool.add_task(task);
   }
   thread_pool.join_pool();
+
+  for (auto member : pgn_game_vector_map)
+  {
+    auto first = member.first;
+    auto second = member.second;
+
+    std::cout << "Thread: " << first << std::endl;
+    PgnGame::printGameSummaryHeader();
+    for (auto vec_member : *second)
+    {
+      vec_member->printGameSummary();
+    }
+  }
 }
 
 void read_all_pgn_files()
@@ -189,119 +182,4 @@ void read_all_pgn_files()
     // std::cerr << "Completed: " << entry.path() << std::endl;
     // update_completed_files_set(entry.path(), &completed_files);
   }
-}
-
-bool Game::read_metadata_line(std::string &line)
-{
-  std::smatch matches;
-  if (std::regex_match(line, matches, std::regex(metadata_line_regex)))
-  {
-    metadata_entry entry;
-    entry.key = std::string(matches[1]);
-    entry.value = std::string(matches[2]);
-    metadata.push_back(entry);
-    return true;
-  }
-  return false;
-}
-
-void Game::process_player_move(std::string player_move, bool whites_turn)
-{
-  uint32_t move_key;
-  boost::algorithm::trim(player_move);
-
-  if (player_move.size() == 0)
-  {
-    return;
-  }
-
-  position.m_whites_turn = whites_turn;
-
-  z_hash_t zhash1 = zobrist_hash(&position);
-
-  std::smatch matches;
-  if (std::regex_match(player_move, matches,
-                       std::regex(non_castling_move_regex)))
-  {
-    char piece_char = getc(1, matches);
-    char src_file = getc(2, matches);
-    char src_rank = getc(3, matches);
-    char capture = getc(4, matches);
-    char dest_file = getc(5, matches);
-    char dest_rank = getc(6, matches);
-    std::string promotion = matches[7];
-    char promotion_piece = 0;
-    char check_or_mate = getc(8, matches);
-
-    // Get the promotion piece
-    if (promotion.size())
-    {
-      promotion_piece = char_to_piece(promotion.at(1));
-      // piece should always be uppercase because pieces are uppercase in PGN.
-      assert(promotion_piece < PIECE_MASK);
-
-      if (!whites_turn)
-      {
-        promotion_piece |= BLACK_PIECE_MASK;
-      }
-    }
-
-    move_key = position.non_castling_move(
-        piece_char, src_file, src_rank,
-        capture, dest_file, dest_rank,
-        promotion_piece, check_or_mate);
-  }
-  else if (std::regex_match(player_move, matches,
-                            std::regex(castling_move_regex)))
-  {
-    move_key = position.castling_move(matches, whites_turn);
-  }
-  else
-  {
-    // expected regex to match a move.
-    assert(false);
-  }
-  // push the parsed move key to the move list
-  move_list.push_back(move_key);
-  position.m_plies++;
-
-  position.m_whites_turn = !whites_turn;
-  z_hash_t zhash2 = zobrist_hash(&position);
-
-  m_opening_tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
-}
-
-bool Game::read_game_move_line(std::string &line)
-{
-
-  bool is_game_line = false;
-  std::smatch matches;
-  while (std::regex_search(line, matches, game_line_regex))
-  {
-    is_game_line = true;
-    // std::cout << "=================================" << std::endl;
-    if (!metadata.size())
-    {
-      std::cerr << "No metadata!" << std::endl;
-      assert(false);
-    }
-    // std::cout << (metadata.size() ? metadata.at(0).value : "No metadata") << std::endl;
-    // std::cout << matches[0] << std::endl;
-
-    process_player_move(matches[1], true);
-    process_player_move(matches[2], false);
-    if (matches[3].length() > 0)
-    {
-      process_result(matches[3]);
-    }
-    line = matches.suffix().str();
-  }
-
-  return is_game_line;
-}
-
-void Game::process_result(std::string resultstr)
-{
-  result = std::move(resultstr);
-  finishedReading = true;
 }
