@@ -58,10 +58,24 @@ struct MoveEdge
 
   MoveEdge() {}
 
-  // MoveEdge(z_hash_t dest_hash, char pgn_move[8], uint32_t times_played, uint32_t move_key ){
-
-  // }
+  bool operator==(const MoveEdge &other) const
+  {
+    return (m_move_key == other.m_move_key);
+  }
 };
+
+namespace std
+{
+  template <>
+  struct hash<MoveEdge>
+  {
+    std::size_t operator()(const MoveEdge &moveEdge) const
+    {
+      return std::hash<uint32_t>()(moveEdge.m_move_key);
+    }
+  };
+}
+
 bool compare_move_edge(MoveEdge move_edge1, MoveEdge move_edge2);
 
 typedef std::__1::unordered_map<z_hash_t, std::__1::shared_ptr<std::__1::vector<MoveEdge>>>::iterator tablebase_iter;

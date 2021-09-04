@@ -96,7 +96,9 @@
     "queue": "cpp",
     "semaphore": "cpp",
     "stop_token": "cpp",
-    "__functional_03": "cpp"
+    "__functional_03": "cpp",
+    "__functional_base_03": "cpp",
+    "unordered_set": "cpp"
   },
   "cmake.configureSettings": {
     "DCMAKE_TOOLCHAIN_FILE": "/home/vas/repos/vcpkg/scripts/buildsystems/vcpkg.cmake"

@@ -6,9 +6,9 @@
 #include "read_pgn_data.hpp"
 #include "zobrist.hpp"
 #include "threadpool.hpp"
+#include "tablebase.hpp"
 #include <iostream>
-#include <fstream>
-#include <filesystem>
+#include <unordered_set>
 
 int main(int argc, char *argv[])
 
