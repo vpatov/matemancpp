@@ -1,5 +1,6 @@
 #include "tablebase.hpp"
 #include "util.hpp"
+#include <set>
 
 bool compare_move_edge(MoveEdge move_edge1, MoveEdge move_edge2)
 {
@@ -76,6 +77,7 @@ void OpeningTablebase::walk_down_most_popular_path()
     assert(root != m_tablebase.end());
 
     std::queue<decltype(root)> to_visit;
+    std::set<z_hash_t> visited;
     to_visit.push(root);
 
     int depth = 0;
@@ -83,6 +85,16 @@ void OpeningTablebase::walk_down_most_popular_path()
     while (!to_visit.empty())
     {
         auto node = to_visit.front();
+
+        if (visited.find(node->first) != visited.end())
+        {
+            break;
+        }
+        else
+        {
+            visited.insert(node->first);
+        }
+
         to_visit.pop();
         depth++;
 

@@ -1,4 +1,5 @@
 #include "threadpool.hpp"
+#include "util.hpp"
 #include <iostream>
 #include <vector>
 #include <mutex>
@@ -35,6 +36,9 @@ void ThreadPool::initialize_threads()
     {
         pool.push_back(std::thread(&ThreadPool::spin, this));
     }
+    std::cout
+        << ColorCode::teal << "Initialized thread pool with "
+        << m_num_threads << " threads." << ColorCode::end << std::endl;
 }
 
 // predicate which returns ​false if the waiting should be continued.

@@ -7,6 +7,8 @@
 #include "zobrist.hpp"
 #include "threadpool.hpp"
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 
 int main(int argc, char *argv[])
 

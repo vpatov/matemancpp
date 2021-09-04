@@ -10,18 +10,6 @@ struct metadata_entry
     std::string value;
 };
 
-namespace ColorCode
-{
-    static const std::string white = "\u001b[37m";
-    static const std::string teal = "\u001b[36m";
-    static const std::string purple = "\u001b[35m";
-    static const std::string blue = "\u001b[34m";
-    static const std::string yellow = "\u001b[33m";
-    static const std::string green = "\u001b[32m";
-    static const std::string red = "\u001b[31m";
-    static const std::string end = "\u001b[0m";
-};
-
 struct PgnGame
 {
 
@@ -36,7 +24,7 @@ struct PgnGame
     std::string m_white_player_name;
     std::string m_black_player_name;
     std::vector<uint32_t> m_move_list;
-    OpeningTablebase *m_opening_tablebase;
+    std::shared_ptr<OpeningTablebase> m_opening_tablebase;
 
     bool read_metadata_line(std::string &line);
     void process_player_move(std::string player_move, bool white);

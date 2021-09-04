@@ -12,6 +12,7 @@
 #include <iostream>
 #include <type_traits>
 #include <cstring>
+#include <thread>
 
 // TODO SERIALIZATION OF OPENING TABLEBASE
 // TODO MERGING OF OPENING TABLEBASE FROM DIFFERENT THREADS
@@ -210,5 +211,123 @@ struct OpeningTablebase
     }
 
     return deserialized_tablebase;
+  }
+
+  static std::vector<OpeningTablebase> read_tablebases(std::string tablebase_filepath)
+  {
+    std::vector<OpeningTablebase> openingTablebases;
+
+    for (const auto &entry : std::filesystem::directory_iterator(tablebase_filepath))
+    {
+      std::string filepath_str = entry.path().generic_string();
+      std::cout
+          << ColorCode::purple << filepath_str.substr(filepath_str.find_last_of('/') + 1)
+          << ColorCode::end << std::endl;
+      openingTablebases.push_back(deserialize_tablebase(entry.path()));
+    }
+    return openingTablebases;
+  }
+
+  static std::shared_ptr<OpeningTablebase> merge_tablebases(
+      std::unordered_multimap<std::thread::id, std::shared_ptr<OpeningTablebase>> *thread_tablebase_map)
+  {
+    std::shared_ptr<OpeningTablebase> merged_tablebase = std::make_shared<OpeningTablebase>();
+    auto tb = &(merged_tablebase->m_tablebase);
+
+    int count = 0;
+    std::cout << ColorCode::teal << "Number of thread/tablebase pairs: "
+              << thread_tablebase_map->size() << ColorCode::end << std::endl;
+
+    std::cout
+        << std::left << std::setw(20) << "Thread"
+        << std::left << std::setw(20) << "Tablebase Address"
+        << std::left << std::setw(20) << "# Positions"
+        << std::endl;
+
+    for (auto thread_tb_pair : *thread_tablebase_map)
+    {
+      auto tablebase = thread_tb_pair.second;
+      std::cout
+          << ColorCode::blue << std::left << std::setw(20) << thread_tb_pair.first
+          << ColorCode::purple << std::left << std::setw(20) << thread_tb_pair.second
+          << ColorCode::teal << std::left << std::setw(20) << tablebase->m_tablebase.size()
+          << ColorCode::end << std::endl;
+
+      if (tb->empty())
+      {
+        merged_tablebase->m_root_hash = tablebase->m_root_hash;
+      }
+
+      for (auto pair : tablebase->m_tablebase)
+      {
+        auto position_hash = pair.first;
+        auto move_list = pair.second;
+
+        auto res = tb->find(position_hash);
+
+        if (res != tb->end())
+        {
+          auto vec = (*tb)[position_hash];
+          vec->insert(vec->end(), move_list->begin(), move_list->end());
+        }
+        // position hasnt been seen yet, take the current move list
+        else
+        {
+          (*tb)[position_hash] = std::move(move_list);
+        }
+      }
+    }
+
+    return merged_tablebase;
+  }
+
+  static std::shared_ptr<OpeningTablebase> merge_tablebases(
+      std::vector<OpeningTablebase> *tablebase_vector)
+  {
+    std::shared_ptr<OpeningTablebase> merged_tablebase = std::make_shared<OpeningTablebase>();
+    auto tb = &(merged_tablebase->m_tablebase);
+
+    int count = 0;
+    std::cout << ColorCode::teal << "Number of tablebases: "
+              << tablebase_vector->size() << ColorCode::end << std::endl;
+
+    std::cout
+        << std::left << std::setw(20) << "Tablebase Address"
+        << std::left << std::setw(20) << "# Positions"
+        << std::endl;
+
+    for (auto tablebase : *tablebase_vector)
+    {
+      std::cout
+          << ColorCode::purple << std::left << std::setw(20) << &tablebase
+          << ColorCode::teal << std::left << std::setw(20) << tablebase.m_tablebase.size()
+          << ColorCode::end << std::endl;
+
+      if (tb->empty())
+      {
+        merged_tablebase->m_root_hash = tablebase.m_root_hash;
+      }
+
+      for (auto pair : tablebase.m_tablebase)
+      {
+        auto position_hash = pair.first;
+        auto move_list = pair.second;
+
+        auto res = tb->find(position_hash);
+
+        if (res != tb->end())
+        {
+          auto vec = (*tb)[position_hash];
+          vec->insert(vec->end(), move_list->begin(), move_list->end());
+        }
+        // position hasnt been seen yet, take the current move list
+        else
+        {
+          (*tb)[position_hash] = std::move(move_list);
+        }
+      }
+    }
+
+    return merged_tablebase;
   }
 };

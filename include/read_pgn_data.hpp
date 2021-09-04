@@ -23,6 +23,12 @@ const std::string non_castling_move_regex =
     "([1-8])(=[RNBKQ])?([\\+\\#])?";
 const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
 
-void read_pgn_file(std::string file_path);
+const auto tablebase_prefix = std::to_string(std::chrono::seconds(std::time(NULL)).count());
+const std::string individual_tablebases_filepath =
+    "/Users/vas/repos/matemancpp/dev_data/tablebase/individual_tablebases/" + tablebase_prefix;
+const std::string master_tablebase_filepath =
+    "/Users/vas/repos/matemancpp/dev_data/tablebase/master_tablebase/" + tablebase_prefix;
+
+void process_pgn_file(std::string file_path);
 void read_all_pgn_files();
 void start_pgn_processing_tasks();
