@@ -171,11 +171,6 @@ void OpeningTablebase::walk_down_most_popular_path()
         to_visit.pop();
         depth++;
 
-        for (auto it = node->second->begin(); it != node->second->end(); it++)
-        {
-            auto foo = *it;
-        }
-
         auto key_move_pair = *(
             std::max_element(
                 node->second->begin(), node->second->end(), &compare_key_move_pair));
