@@ -103,6 +103,19 @@ std::string get_individual_tablebase_filepath(std::string pgn_file_path)
          ".tb";
 }
 
+std::string get_individual_tablebase_walk_filepath(std::string pgn_file_path, std::string suffix)
+{
+  size_t path_end = pgn_file_path.rfind('/');
+  size_t extension_start = pgn_file_path.rfind(".pgn");
+
+  return individual_tablebases_filepath + '/' +
+         pgn_file_path.substr(
+             path_end + 1,
+             extension_start - path_end - 1) +
+         suffix +
+         ".walk";
+}
+
 std::string get_mastertablebase_filepath()
 {
   return master_tablebase_filepath + '/' + "master_tablebase.tb";
@@ -172,7 +185,12 @@ void process_pgn_file(std::string file_path)
   // save_game_vector(std::this_thread::get_id(), games);
   // save_tablebase(std::this_thread::get_id(), openingTablebase);
 
+  openingTablebase->walk_down_most_popular_path(get_individual_tablebase_walk_filepath(file_path, "_before"));
   openingTablebase->serialize_tablebase(get_individual_tablebase_filepath(file_path));
+
+  OpeningTablebase deserialized_tb = OpeningTablebase::deserialize_tablebase(get_individual_tablebase_filepath(file_path));
+
+  deserialized_tb.walk_down_most_popular_path(get_individual_tablebase_walk_filepath(file_path, "_after"));
 
   // print statistics about pgn processing
   auto clock_end = std::chrono::high_resolution_clock::now();
