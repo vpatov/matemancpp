@@ -181,16 +181,7 @@ void process_pgn_file(std::string file_path)
   // Remove the very last game, which is empty
   games->pop_back();
 
-  // Save the game vector in a global data structure so the main thread can access it
-  // save_game_vector(std::this_thread::get_id(), games);
-  // save_tablebase(std::this_thread::get_id(), openingTablebase);
-
-  openingTablebase->walk_down_most_popular_path(get_individual_tablebase_walk_filepath(file_path, "_before"));
   openingTablebase->serialize_tablebase(get_individual_tablebase_filepath(file_path));
-
-  OpeningTablebase deserialized_tb = OpeningTablebase::deserialize_tablebase(get_individual_tablebase_filepath(file_path));
-
-  deserialized_tb.walk_down_most_popular_path(get_individual_tablebase_walk_filepath(file_path, "_after"));
 
   // print statistics about pgn processing
   auto clock_end = std::chrono::high_resolution_clock::now();
@@ -221,6 +212,11 @@ void update_completed_files_set(std::string filename, std::set<std::string> *com
 
 void start_pgn_processing_tasks()
 {
+  // PROCESS PGN FILES
+  auto clock_start = std::chrono::high_resolution_clock::now();
+  std::cout << std::endl
+            << ColorCode::yellow << "Starting PGN processing..." << ColorCode::end << std::endl;
+
   std::filesystem::create_directories(master_tablebase_filepath);
   std::filesystem::create_directories(individual_tablebases_filepath);
   ThreadPool thread_pool = ThreadPool();
@@ -228,18 +224,23 @@ void start_pgn_processing_tasks()
   print_pgn_processing_header();
 
   int count = 0;
-  // for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
-  for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest"))
+  for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
+  // for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest3"))
   {
     Task task = Task(&process_pgn_file, entry.path());
     thread_pool.add_task(task);
-    if (count++ == 100)
-    {
-      break;
-    }
+    // if (count++ == 150)
+    // {
+    //   break;
+    // }
   }
   thread_pool.join_pool();
-  std::cout << ColorCode::red << "ThreadPool has completed its tasks." << ColorCode::end << std::endl;
+
+  auto clock_end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
+  std::cout << ColorCode::green << "ThreadPool has completed pgn processing tasks. " << ColorCode::end
+            << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
+  // -------------------------
 
   // READ TABLEBASES FROM DISK
   auto clock_start0 = std::chrono::high_resolution_clock::now();
@@ -272,7 +273,6 @@ void start_pgn_processing_tasks()
   auto clock_start2 = std::chrono::high_resolution_clock::now();
   std::cout << ColorCode::yellow << "Serializing tablebase..." << ColorCode::end << std::endl;
 
-  // std::string tablebase_filepath = "/Users/vas/repos/matemancpp/master_tablebase/master_tablebase.tb";
   merged_tablebase->serialize_tablebase(get_mastertablebase_filepath());
 
   auto clock_end2 = std::chrono::high_resolution_clock::now();
@@ -282,6 +282,7 @@ void start_pgn_processing_tasks()
   // ----------------
 
   std::cout << ColorCode::green << "Success!" << ColorCode::end << std::endl;
+  exit(0);
 
   // print_game_summaries();
 }

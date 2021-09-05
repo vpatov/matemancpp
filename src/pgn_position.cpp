@@ -291,6 +291,8 @@ uint16_t Position::get_src_square_pawn_move(char capture, char src_file, uint8_t
     }
     else
     {
+        // if the pawn isn't capturing, the square it is moving to should be empty.
+        assert(m_mailbox[dest_square] == 0);
         Direction direction = m_whites_turn ? Direction::DOWN : Direction::UP;
         uint8_t candidate_square = STEP_DIRECTION(direction, dest_square);
         uint8_t candidate_en_passant_square = candidate_square;

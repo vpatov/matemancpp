@@ -18,6 +18,8 @@
 // TODO move functionality into tablebase.cpp
 // TODO add tests, assertions, and printouts
 //  to ensure that serialization and merging methods are correct
+// TODO figure out why tablebases are so much bigger than the pgn files they come from, which is
+// counterintuitive
 
 // move key is bit-wise concatenation of
 // 0x00 + start_square + end_square + promotion_piece
@@ -131,6 +133,11 @@ struct OpeningTablebase
     // 4 bytes (4 bits) -> uint32_t: number of keys in tablebase
     uint32_t tablebase_size = m_tablebase.size();
     write(&stream, &tablebase_size, sizeof(uint32_t));
+
+    std::cout
+        << ColorCode::teal
+        << "Writing " << m_tablebase.size() << " key/val pairs."
+        << ColorCode::end << std::endl;
 
     for (auto node = m_tablebase.begin(); node != m_tablebase.end(); node++)
     {
