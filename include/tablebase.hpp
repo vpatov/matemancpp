@@ -6,6 +6,7 @@
 #include "zobrist.hpp"
 #include <algorithm>
 #include <vector>
+#include <set>
 #include <unordered_map>
 #include <queue>
 #include <fstream>
@@ -14,12 +15,30 @@
 #include <cstring>
 #include <thread>
 
-// LASTLEFTOFF
+const auto latest_tablebase_timestamp = std::to_string(std::chrono::seconds(std::time(NULL)).count());
+const std::string master_tablebase_filepath =
+    "/Users/vas/repos/matemancpp/dev_data/tablebase/master_tablebase";
+const std::string individual_tablebases_filepath =
+    "/Users/vas/repos/matemancpp/dev_data/tablebase/individual_tablebases";
+
+const std::string timestamp_of_attempt_to_use = "1630933103";
+
+const std::string latest_individual_tablebases_filepath =
+    individual_tablebases_filepath +
+    '/' + (timestamp_of_attempt_to_use.empty() ? latest_tablebase_timestamp : timestamp_of_attempt_to_use);
+
+const std::string latest_master_tablebase_filepath =
+    master_tablebase_filepath +
+    '/' + (timestamp_of_attempt_to_use.empty() ? latest_tablebase_timestamp : timestamp_of_attempt_to_use);
+
 // TODO move functionality into tablebase.cpp
 // TODO add tests, assertions, and printouts
 //  to ensure that serialization and merging methods are correct
 // TODO figure out why tablebases are so much bigger than the pgn files they come from, which is
-// counterintuitive
+// counterintuitive (it's probably because of the position hashes and move sets + pgn move)
+// TODO multithreaded serialization/deserialization/merging (divide and conquer for merging)
+// TODO speed up serialization by writing to buffer first, then dumping buffer to output stream
+// TODO add functionality to check `latest` directory and only process those files that havent been processed
 
 // move key is bit-wise concatenation of
 // 0x00 + start_square + end_square + promotion_piece
@@ -165,12 +184,12 @@ struct OpeningTablebase
     stream.close();
   }
 
-  static OpeningTablebase deserialize_tablebase(std::string file_path)
+  static std::unique_ptr<OpeningTablebase> deserialize_tablebase(std::string file_path)
   {
     std::streampos size;
     char *data;
     int index = 0;
-    OpeningTablebase deserialized_tablebase;
+    std::unique_ptr<OpeningTablebase> deserialized_tablebase = std::make_unique<OpeningTablebase>();
     std::ifstream infile(file_path, std::ios::binary | std::ios::ate);
 
     if (infile.is_open())
@@ -188,7 +207,7 @@ struct OpeningTablebase
       assert(false);
     }
 
-    deserialized_tablebase.m_root_hash = *((z_hash_t *)(data + index));
+    deserialized_tablebase->m_root_hash = *((z_hash_t *)(data + index));
     index += sizeof(z_hash_t);
 
     uint32_t tablebase_size = *((uint32_t *)(data + index));
@@ -226,15 +245,15 @@ struct OpeningTablebase
         move_map->insert(std::pair(move_key, moveEdge));
       }
 
-      deserialized_tablebase.m_tablebase[key_hash] = move_map;
+      deserialized_tablebase->m_tablebase[key_hash] = move_map;
     }
 
     return deserialized_tablebase;
   }
 
-  static std::vector<OpeningTablebase> read_tablebases(std::string tablebase_filepath)
+  static std::vector<std::unique_ptr<OpeningTablebase>> read_tablebases(std::string tablebase_filepath)
   {
-    std::vector<OpeningTablebase> openingTablebases;
+    std::vector<std::unique_ptr<OpeningTablebase>> openingTablebases;
 
     for (const auto &entry : std::filesystem::directory_iterator(tablebase_filepath))
     {
@@ -252,8 +271,24 @@ struct OpeningTablebase
     return openingTablebases;
   }
 
+  static std::set<std::string> get_already_completed_tablebases_filenames(std::string desired_timestamp)
+  {
+    std::string tablebase_directory_path = individual_tablebases_filepath + '/' + desired_timestamp;
+    std::set<std::string> completed_tablebases;
+    for (const auto &entry : std::filesystem::directory_iterator(tablebase_directory_path))
+    {
+      std::string filepath = entry.path().generic_string();
+      size_t path_end = filepath.rfind('/');
+      size_t extension_start = filepath.rfind(".tb");
+      std::string filename = filepath.substr(path_end + 1, extension_start - path_end - 1);
+
+      completed_tablebases.insert(filename);
+    }
+    return completed_tablebases;
+  }
+
   static std::shared_ptr<OpeningTablebase> merge_tablebases(
-      std::vector<OpeningTablebase> *tablebase_vector)
+      std::vector<std::unique_ptr<OpeningTablebase>> *tablebase_vector)
   {
     std::shared_ptr<OpeningTablebase> merged_tablebase = std::make_shared<OpeningTablebase>();
     auto mtb = &(merged_tablebase->m_tablebase);
@@ -271,10 +306,13 @@ struct OpeningTablebase
     for (auto it = tablebase_vector->begin(); it != tablebase_vector->end(); it++)
     // for (auto tablebase : *tablebase_vector)
     {
-      auto tablebase = *it;
+      // auto tablebase = *it;
       std::cout
           << ColorCode::purple << std::left << std::setw(20) << &(*it)
-          << ColorCode::teal << std::left << std::setw(20) << tablebase.m_tablebase.size()
+          << ColorCode::teal << std::left << std::setw(20) << (*it)->m_tablebase.size()
+          << ColorCode::end << std::endl;
+      std::cout
+          << ColorCode::green << "Merged tablebase size: " << merged_tablebase->m_tablebase.size()
           << ColorCode::end << std::endl;
 
       // if the tablebase we are aggregating is empty, let's set the root hash. The root hash of all of the
@@ -282,11 +320,11 @@ struct OpeningTablebase
       // an assertion for this somewhere.
       if (mtb->empty())
       {
-        merged_tablebase->m_root_hash = tablebase.m_root_hash;
+        merged_tablebase->m_root_hash = (*it)->m_root_hash;
       }
 
       // merge the move maps of the current tablebase, with our aggregate, for every position
-      for (auto pair : tablebase.m_tablebase)
+      for (auto pair : (*it)->m_tablebase)
       {
         auto current_position_hash = pair.first;
         auto current_move_map = pair.second;

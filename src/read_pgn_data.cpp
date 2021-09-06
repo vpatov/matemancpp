@@ -91,29 +91,16 @@ void save_tablebase(std::thread::id thread_id, std::shared_ptr<OpeningTablebase>
   threads_tablebases.insert(std::pair(thread_id, openingTablebasePtr));
 }
 
-std::string get_individual_tablebase_filepath(std::string pgn_file_path)
+std::string get_individual_tablebase_filepath(std::string pgn_file_path, std::string suffix)
 {
   size_t path_end = pgn_file_path.rfind('/');
   size_t extension_start = pgn_file_path.rfind(".pgn");
 
-  return individual_tablebases_filepath + '/' +
+  return latest_individual_tablebases_filepath + '/' +
          pgn_file_path.substr(
              path_end + 1,
              extension_start - path_end - 1) +
-         ".tb";
-}
-
-std::string get_individual_tablebase_walk_filepath(std::string pgn_file_path, std::string suffix)
-{
-  size_t path_end = pgn_file_path.rfind('/');
-  size_t extension_start = pgn_file_path.rfind(".pgn");
-
-  return individual_tablebases_filepath + '/' +
-         pgn_file_path.substr(
-             path_end + 1,
-             extension_start - path_end - 1) +
-         suffix +
-         ".walk";
+         suffix;
 }
 
 std::string get_mastertablebase_filepath()
@@ -181,7 +168,7 @@ void process_pgn_file(std::string file_path)
   // Remove the very last game, which is empty
   games->pop_back();
 
-  openingTablebase->serialize_tablebase(get_individual_tablebase_filepath(file_path));
+  openingTablebase->serialize_tablebase(get_individual_tablebase_filepath(file_path, ".tb"));
 
   // print statistics about pgn processing
   auto clock_end = std::chrono::high_resolution_clock::now();
@@ -219,6 +206,9 @@ void start_pgn_processing_tasks()
 
   std::filesystem::create_directories(master_tablebase_filepath);
   std::filesystem::create_directories(individual_tablebases_filepath);
+  std::set<std::string> completed_tablebases =
+      OpeningTablebase::get_already_completed_tablebases_filenames(timestamp_of_attempt_to_use);
+
   ThreadPool thread_pool = ThreadPool();
 
   print_pgn_processing_header();
@@ -227,8 +217,18 @@ void start_pgn_processing_tasks()
   for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
   // for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest3"))
   {
-    Task task = Task(&process_pgn_file, entry.path());
-    thread_pool.add_task(task);
+
+    std::string filepath = entry.path().generic_string();
+    size_t path_end = filepath.rfind('/');
+    size_t extension_start = filepath.rfind(".pgn");
+    std::string filename = filepath.substr(path_end + 1, extension_start - path_end - 1);
+
+    if (completed_tablebases.find(filename) == completed_tablebases.end())
+    {
+      Task task = Task(&process_pgn_file, entry.path());
+      thread_pool.add_task(task);
+    }
+
     // if (count++ == 150)
     // {
     //   break;
@@ -247,8 +247,8 @@ void start_pgn_processing_tasks()
   std::cout << std::endl
             << ColorCode::yellow << "Reading tablebases from disk..." << ColorCode::end << std::endl;
 
-  std::vector<OpeningTablebase> deserialized_tablebases =
-      OpeningTablebase::read_tablebases(individual_tablebases_filepath);
+  std::vector<std::unique_ptr<OpeningTablebase>> deserialized_tablebases =
+      OpeningTablebase::read_tablebases(latest_individual_tablebases_filepath);
 
   auto clock_end0 = std::chrono::high_resolution_clock::now();
   auto duration0 = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end0 - clock_start0);
