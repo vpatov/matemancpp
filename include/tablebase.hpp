@@ -38,7 +38,6 @@ const std::string latest_master_tablebase_filepath =
 // counterintuitive (it's probably because of the position hashes and move sets + pgn move)
 // TODO multithreaded serialization/deserialization/merging (divide and conquer for merging)
 // TODO speed up serialization by writing to buffer first, then dumping buffer to output stream
-// TODO add functionality to check `latest` directory and only process those files that havent been processed
 
 // move key is bit-wise concatenation of
 // 0x00 + start_square + end_square + promotion_piece
@@ -363,5 +362,89 @@ struct OpeningTablebase
     }
 
     return merged_tablebase;
+  }
+
+  static std::unique_ptr<OpeningTablebase> aggregate_tablebases(std::string tablebase_filepath)
+  {
+    std::unique_ptr<OpeningTablebase> aggregated_tablebase = std::make_unique<OpeningTablebase>();
+
+    for (const auto &entry : std::filesystem::directory_iterator(tablebase_filepath))
+    {
+      std::string filepath_str = entry.path().generic_string();
+      if (filepath_str.substr(filepath_str.size() - 3).compare(".tb") != 0)
+      {
+        continue;
+      }
+
+      std::cout
+          << ColorCode::purple << filepath_str.substr(filepath_str.find_last_of('/') + 1)
+          << ColorCode::end << std::endl;
+
+      std::unique_ptr<OpeningTablebase> deserialized_tablebase = deserialize_tablebase(entry.path());
+      merge_tablebases(&aggregated_tablebase, std::move(deserialized_tablebase));
+    }
+    return aggregated_tablebase;
+  }
+
+  static void merge_tablebases(
+      std::unique_ptr<OpeningTablebase> *aggregated_tablebase,
+      std::unique_ptr<OpeningTablebase> deserialized_tablebase)
+  {
+    auto mtb = &((*aggregated_tablebase)->m_tablebase);
+
+    // auto tablebase = *it;
+    std::cout
+        << ColorCode::purple << std::left << std::setw(20) << deserialized_tablebase
+        << ColorCode::teal << std::left << std::setw(20) << deserialized_tablebase->m_tablebase.size()
+        << ColorCode::end << std::endl;
+    std::cout
+        << ColorCode::green << "Merged tablebase size: " << (*aggregated_tablebase)->m_tablebase.size()
+        << ColorCode::end << std::endl;
+
+    // if the tablebase we are aggregating is empty, let's set the root hash. The root hash of all of the
+    // tablebases should be the same, since all games start from the same position. Could be useful to put
+    // an assertion for this somewhere.
+    if (mtb->empty())
+    {
+      (*aggregated_tablebase)->m_root_hash = deserialized_tablebase->m_root_hash;
+    }
+
+    // merge the move maps of the current tablebase, with our aggregate, for every position
+    for (auto pair : deserialized_tablebase->m_tablebase)
+    {
+      auto current_position_hash = pair.first;
+      auto current_move_map = pair.second;
+
+      // try to find the current position in the aggregate tablebase
+      auto position_lookup_result = mtb->find(current_position_hash);
+
+      // if it is found, merge the move maps
+      if (position_lookup_result != mtb->end())
+      {
+        auto aggregated_map = (*mtb)[current_position_hash];
+
+        // iterate through the move map,
+        // sum times_played if it is already present in the aggregate,
+        // insert move edge otherwise
+        for (auto key_move_pair : *current_move_map)
+        {
+          auto move_lookup_result = aggregated_map->find(key_move_pair.first);
+          if (move_lookup_result != aggregated_map->end())
+          {
+            move_lookup_result->second.m_times_played += key_move_pair.second.m_times_played;
+          }
+          else
+          {
+            aggregated_map->insert(key_move_pair);
+            // (*aggregated_map)[key_move_pair.first] = key_move_pair.second;
+          }
+        }
+      }
+      // position hasnt been seen yet, so just take the current move map
+      else
+      {
+        (*mtb)[current_position_hash] = std::move(current_move_map);
+      }
+    }
   }
 };

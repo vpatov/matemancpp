@@ -242,6 +242,21 @@ void start_pgn_processing_tasks()
             << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
   // -------------------------
 
+  // READ TABLEBASES FROM DISK AND AGGREGATE
+  auto clock_start3 = std::chrono::high_resolution_clock::now();
+  std::cout << std::endl
+            << ColorCode::yellow << "Reading tablebases from disk and aggregating them..." << ColorCode::end << std::endl;
+
+  std::unique_ptr<OpeningTablebase>
+      aggregated_tablebase = OpeningTablebase::aggregate_tablebases(latest_individual_tablebases_filepath);
+
+  auto clock_end3 = std::chrono::high_resolution_clock::now();
+  auto duration3 = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end3 - clock_start3);
+  std::cout << ColorCode::green << "Done reading + aggregating! " << ColorCode::end
+            << "Elapsed time: " << duration3.count() << " milliseconds." << std::endl;
+  // -----
+
+  /*
   // READ TABLEBASES FROM DISK
   auto clock_start0 = std::chrono::high_resolution_clock::now();
   std::cout << std::endl
@@ -268,12 +283,13 @@ void start_pgn_processing_tasks()
   std::cout << ColorCode::green << "Done merging! " << ColorCode::end
             << "Elapsed time: " << duration1.count() << " milliseconds." << std::endl;
   // ----------------
+  */
 
   // SERIALIZE MERGED TABLEBASE
   auto clock_start2 = std::chrono::high_resolution_clock::now();
   std::cout << ColorCode::yellow << "Serializing tablebase..." << ColorCode::end << std::endl;
 
-  merged_tablebase->serialize_tablebase(get_mastertablebase_filepath());
+  aggregated_tablebase->serialize_tablebase(get_mastertablebase_filepath());
 
   auto clock_end2 = std::chrono::high_resolution_clock::now();
   auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end2 - clock_start2);
