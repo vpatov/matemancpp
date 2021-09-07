@@ -1,5 +1,5 @@
-#include "fen.hpp"
-#include "position.hpp"
+#include "representation/fen.hpp"
+#include "representation/position.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <iostream>

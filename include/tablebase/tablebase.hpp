@@ -1,9 +1,9 @@
 #pragma once
 
 #include "util.hpp"
-#include "position.hpp"
-#include "squares.hpp"
-#include "zobrist.hpp"
+#include "representation/position.hpp"
+#include "representation/squares.hpp"
+#include "tablebase/zobrist.hpp"
 #include <algorithm>
 #include <vector>
 #include <set>

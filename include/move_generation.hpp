@@ -1,6 +1,6 @@
 #pragma once
 
-#include "position.hpp"
+#include "representation/position.hpp"
 #include <cstdint>
 #include <vector>
 

@@ -4,7 +4,7 @@
     during more important things such as move generation. I've placed them separately here for now.
 */
 
-#include "position.hpp"
+#include "representation/position.hpp"
 #include "tablebase/tablebase.hpp"
 #include <thread>
 

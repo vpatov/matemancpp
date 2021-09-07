@@ -1,5 +1,4 @@
 #include "tablebase/zobrist.hpp"
-#include "position.hpp"
 #include <assert.h>
 #include <cmath>
 #include <cstdint>

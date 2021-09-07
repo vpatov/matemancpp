@@ -1,4 +1,4 @@
-#include "position.hpp"
+#include "representation/position.hpp"
 #include "move_generation.hpp"
 #include <iostream>
 #include <algorithm>

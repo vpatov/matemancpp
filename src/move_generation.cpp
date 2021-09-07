@@ -1,5 +1,4 @@
 #include "move_generation.hpp"
-#include "position.hpp"
 #include <assert.h>
 #include <cstdint>
 #include <iostream>

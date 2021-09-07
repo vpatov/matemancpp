@@ -1,6 +1,6 @@
 #pragma once
 
-#include "position.hpp"
+#include "representation/position.hpp"
 
 typedef uint64_t z_hash_t;
 

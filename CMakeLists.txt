@@ -22,8 +22,8 @@ set(SOURCES
     src/process_pgn/pgn_position.cpp
     src/main.cpp
     src/cli.cpp
-    src/position.cpp
-    src/fen.cpp
+    src/representation/position.cpp
+    src/representation/fen.cpp
     src/options.cpp
     src/move_generation.cpp
     src/tablebase/tablebase.cpp
@@ -31,13 +31,13 @@ set(SOURCES
     src/threadpool.cpp
     src/util.cpp
     include/cli.hpp
-    include/position.hpp
-    include/pieces.hpp
-    include/fen.hpp
+    include/representation/position.hpp
+    include/representation/pieces.hpp
+    include/representation/fen.hpp
     include/options.hpp
     include/move_generation.hpp
     include/threadpool.hpp
-    include/squares.hpp
+    include/representation/squares.hpp
     include/process_pgn/read_pgn_data.hpp
     include/process_pgn/pgn_game.hpp
     include/util.hpp

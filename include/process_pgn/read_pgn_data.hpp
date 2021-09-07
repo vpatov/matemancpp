@@ -1,7 +1,7 @@
 #pragma once
 
 #include "move_generation.hpp"
-#include "position.hpp"
+#include "representation/position.hpp"
 #include "tablebase/tablebase.hpp"
 #include "util.hpp"
 #include "pgn_game.hpp"
