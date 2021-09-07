@@ -1,7 +1,7 @@
-#include "read_pgn_data.hpp"
-#include "pgn_game.hpp"
+#include "process_pgn/read_pgn_data.hpp"
+#include "process_pgn/pgn_game.hpp"
 #include "threadpool.hpp"
-#include "master_tablebase.hpp"
+#include "tablebase/master_tablebase.hpp"
 #include <chrono>
 #include <utility>
 #include <filesystem>

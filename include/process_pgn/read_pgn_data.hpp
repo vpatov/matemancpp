@@ -2,7 +2,7 @@
 
 #include "move_generation.hpp"
 #include "position.hpp"
-#include "tablebase.hpp"
+#include "tablebase/tablebase.hpp"
 #include "util.hpp"
 #include "pgn_game.hpp"
 #include <fstream>

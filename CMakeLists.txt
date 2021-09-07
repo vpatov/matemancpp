@@ -17,18 +17,18 @@ find_package(Boost 1.76.0 COMPONENTS algorithm format)
 include_directories( ${Boost_INCLUDE_DIRS} )
 
 set(SOURCES
+    src/process_pgn/pgn_game.cpp
+    src/process_pgn/read_pgn_data.cpp
+    src/process_pgn/pgn_position.cpp
     src/main.cpp
     src/cli.cpp
     src/position.cpp
-    src/pgn_position.cpp
     src/fen.cpp
     src/options.cpp
     src/move_generation.cpp
-    src/zobrist.cpp
-    src/pgn_game.cpp
-    src/read_pgn_data.cpp
+    src/tablebase/tablebase.cpp
+    src/tablebase/zobrist.cpp
     src/threadpool.cpp
-    src/tablebase.cpp
     src/util.cpp
     include/cli.hpp
     include/position.hpp
@@ -37,12 +37,14 @@ set(SOURCES
     include/options.hpp
     include/move_generation.hpp
     include/threadpool.hpp
-    include/zobrist.hpp
     include/squares.hpp
-    include/read_pgn_data.hpp
-    include/tablebase.hpp
-    include/master_tablebase.hpp
+    include/process_pgn/read_pgn_data.hpp
+    include/process_pgn/pgn_game.hpp
     include/util.hpp
+    include/tablebase/tablebase.hpp
+    include/tablebase/master_tablebase.hpp
+    include/tablebase/persistence.hpp
+    include/tablebase/zobrist.hpp
 )
 
 

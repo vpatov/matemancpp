@@ -1,14 +1,4 @@
-
-#include "cli.hpp"
-#include "fen.hpp"
-#include "move_generation.hpp"
-#include "position.hpp"
-#include "read_pgn_data.hpp"
-#include "zobrist.hpp"
-#include "threadpool.hpp"
-#include "tablebase.hpp"
-#include <iostream>
-#include <unordered_set>
+#include "process_pgn/read_pgn_data.hpp"
 
 int main(int argc, char *argv[])
 

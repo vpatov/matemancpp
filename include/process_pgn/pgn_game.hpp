@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tablebase.hpp"
+#include "tablebase/tablebase.hpp"
 #include <iostream>
 #include <fstream>
 

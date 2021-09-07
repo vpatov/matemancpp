@@ -8,10 +8,7 @@
 struct MasterTablebase
 {
     static const uint16_t TABLEBASE_SHARD_COUNT = 64;
-
-    // pointers ? or just the opening tablebases?
     OpeningTablebase tablebases[TABLEBASE_SHARD_COUNT];
-
     std::mutex mutexes[TABLEBASE_SHARD_COUNT];
 
     // TODO look at dissasemble of this method and see if modulo is optimized out.

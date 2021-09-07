@@ -72,6 +72,8 @@ extern std::mutex tablebase_position_hash_distribution_mutex;
 // 0x00 + start_square + end_square + promotion_piece
 typedef uint32_t MoveKey;
 
+uint32_t generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t promotion_piece);
+
 struct MoveEdge
 {
   z_hash_t m_dest_hash;
@@ -116,8 +118,6 @@ struct MoveEdge
   }
 };
 
-bool compare_move_edge(MoveEdge move_edge1, MoveEdge move_edge2);
-
 typedef std::__1::unordered_map<z_hash_t, std::__1::shared_ptr<std::__1::unordered_map<MoveKey, MoveEdge>>>::iterator tablebase_iter;
 
 struct OpeningTablebase
@@ -135,7 +135,7 @@ struct OpeningTablebase
   void walk_down_most_popular_path(std::string file_path);
 
   template <typename T>
-  void write(std::fstream *stream, T *data, size_t size)
+  static void write(std::fstream *stream, T *data, size_t size)
   {
     stream->write(reinterpret_cast<char *>(data), size);
   }
