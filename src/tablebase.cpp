@@ -2,6 +2,11 @@
 #include "util.hpp"
 #include <set>
 
+long tablebase_position_hash_distribution[64] = {0};
+long tablebase_position_hash_hash_distribution[64] = {0};
+
+std::mutex tablebase_position_hash_distribution_mutex;
+
 bool compare_move_edge(MoveEdge move_edge1, MoveEdge move_edge2)
 {
     return move_edge1.m_times_played < move_edge2.m_times_played;

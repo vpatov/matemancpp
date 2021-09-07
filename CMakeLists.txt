@@ -41,6 +41,7 @@ set(SOURCES
     include/squares.hpp
     include/read_pgn_data.hpp
     include/tablebase.hpp
+    include/master_tablebase.hpp
     include/util.hpp
 )
 

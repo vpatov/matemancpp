@@ -1,6 +1,7 @@
 #include "read_pgn_data.hpp"
 #include "pgn_game.hpp"
 #include "threadpool.hpp"
+#include "master_tablebase.hpp"
 #include <chrono>
 #include <utility>
 #include <filesystem>
@@ -26,11 +27,14 @@ std::unordered_multimap<
 
 std::unordered_multimap<std::thread::id, std::shared_ptr<OpeningTablebase>> threads_tablebases;
 
+MasterTablebase masterTablebase;
+
 void print_pgn_processing_performance_summary(
     std::__1::chrono::steady_clock::time_point clock_start,
     std::__1::chrono::steady_clock::time_point clock_end,
     std::thread::id thread_id,
     int games_list_size,
+    int tablebase_size,
     std::string file_path)
 {
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
@@ -41,6 +45,7 @@ void print_pgn_processing_performance_summary(
       << std::left << std::setw(16) << thread_id
       << std::left << std::setw(16) << duration_str + "s"
       << std::left << std::setw(16) << games_list_size
+      << std::left << std::setw(16) << tablebase_size
       << ColorCode::green
       << file_path.substr(file_path.find_last_of('/') + 1)
       << ColorCode::end
@@ -54,6 +59,7 @@ void print_pgn_processing_header()
       << std::left << std::setw(16) << "Thread ID"
       << std::left << std::setw(16) << "Duration"
       << std::left << std::setw(16) << "# of Games"
+      << std::left << std::setw(16) << "Tablebase Size"
       << std::left << std::setw(16) << "File Name"
       << "\u001b[0m"
       << std::endl;
@@ -101,11 +107,6 @@ std::string get_individual_tablebase_filepath(std::string pgn_file_path, std::st
              path_end + 1,
              extension_start - path_end - 1) +
          suffix;
-}
-
-std::string get_mastertablebase_filepath()
-{
-  return master_tablebase_filepath + '/' + "master_tablebase.tb";
 }
 
 void process_pgn_file(std::string file_path)
@@ -168,11 +169,36 @@ void process_pgn_file(std::string file_path)
   // Remove the very last game, which is empty
   games->pop_back();
 
-  openingTablebase->serialize_tablebase(get_individual_tablebase_filepath(file_path, ".tb"));
+  // openingTablebase->serialize_tablebase(get_individual_tablebase_filepath(file_path, ".tb"));
 
   // print statistics about pgn processing
   auto clock_end = std::chrono::high_resolution_clock::now();
-  print_pgn_processing_performance_summary(clock_start, clock_end, std::this_thread::get_id(), games->size(), file_path);
+  print_pgn_processing_performance_summary(
+      clock_start, clock_end, std::this_thread::get_id(),
+      games->size(), openingTablebase->m_tablebase.size(), file_path);
+}
+
+void serialize_tablebase_extern(std::string file_path_prefix)
+{
+  uint16_t bucket = std::stoi(file_path_prefix.substr(file_path_prefix.rfind("/") + 1));
+  masterTablebase.tablebases[bucket].serialize_tablebase(file_path_prefix + ".tb");
+}
+
+void serialize_all(std::string file_path_prefix)
+{
+  // /Users/vas/repos/matemancpp/dev_data/tablebase/master_tablebase/timestamp  /01.tb
+
+  ThreadPool thread_pool = ThreadPool();
+  for (int bucket = 0; bucket < MasterTablebase::TABLEBASE_SHARD_COUNT; bucket++)
+  {
+
+    std::stringstream ss;
+    ss << file_path_prefix << "/" << std::setw(10) << std::setfill('0') << bucket;
+
+    Task task = Task(&serialize_tablebase_extern, ss.str());
+    thread_pool.add_task(task);
+  }
+  thread_pool.join_pool();
 }
 
 std::set<std::string> get_completed_files_set()
@@ -205,7 +231,8 @@ void start_pgn_processing_tasks()
             << ColorCode::yellow << "Starting PGN processing..." << ColorCode::end << std::endl;
 
   std::filesystem::create_directories(master_tablebase_filepath);
-  std::filesystem::create_directories(individual_tablebases_filepath);
+  std::filesystem::create_directories(latest_individual_tablebases_filepath);
+  std::filesystem::create_directories(latest_master_tablebase_filepath);
   std::set<std::string> completed_tablebases =
       OpeningTablebase::get_already_completed_tablebases_filenames(timestamp_of_attempt_to_use);
 
@@ -213,7 +240,6 @@ void start_pgn_processing_tasks()
 
   print_pgn_processing_header();
 
-  int count = 0;
   for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
   // for (const auto &entry : std::filesystem::directory_iterator("/Users/vas/repos/matemancpp/database/subtest3"))
   {
@@ -223,15 +249,10 @@ void start_pgn_processing_tasks()
     size_t extension_start = filepath.rfind(".pgn");
     std::string filename = filepath.substr(path_end + 1, extension_start - path_end - 1);
 
-    if (completed_tablebases.find(filename) == completed_tablebases.end())
-    {
-      Task task = Task(&process_pgn_file, entry.path());
-      thread_pool.add_task(task);
-    }
-
-    // if (count++ == 150)
+    // if (completed_tablebases.find(filename) == completed_tablebases.end())
     // {
-    //   break;
+    Task task = Task(&process_pgn_file, entry.path());
+    thread_pool.add_task(task);
     // }
   }
   thread_pool.join_pool();
@@ -242,18 +263,33 @@ void start_pgn_processing_tasks()
             << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
   // -------------------------
 
+  // SERIALIZE MASTER TABLEBASES
+  auto clock_start4 = std::chrono::high_resolution_clock::now();
+  std::cout << ColorCode::yellow << "Serializing tablebases..." << ColorCode::end << std::endl;
+
+  serialize_all(latest_master_tablebase_filepath);
+
+  auto clock_end4 = std::chrono::high_resolution_clock::now();
+  auto duration4 = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end4 - clock_start4);
+  std::cout << ColorCode::green << "Done serializing! " << ColorCode::end
+            << "Elapsed time: " << duration4.count() << " milliseconds." << std::endl;
+  // ----------------------------
+
   // READ TABLEBASES FROM DISK AND AGGREGATE
+  /*
   auto clock_start3 = std::chrono::high_resolution_clock::now();
   std::cout << std::endl
             << ColorCode::yellow << "Reading tablebases from disk and aggregating them..." << ColorCode::end << std::endl;
 
-  std::unique_ptr<OpeningTablebase>
-      aggregated_tablebase = OpeningTablebase::aggregate_tablebases(latest_individual_tablebases_filepath);
+
+  std::vector<std::shared_ptr<OpeningTablebase>> aggregated_tablebases =
+      OpeningTablebase::aggregate_into_several_tablebases(latest_individual_tablebases_filepath);
 
   auto clock_end3 = std::chrono::high_resolution_clock::now();
   auto duration3 = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end3 - clock_start3);
   std::cout << ColorCode::green << "Done reading + aggregating! " << ColorCode::end
             << "Elapsed time: " << duration3.count() << " milliseconds." << std::endl;
+            */
   // -----
 
   /*
@@ -286,18 +322,58 @@ void start_pgn_processing_tasks()
   */
 
   // SERIALIZE MERGED TABLEBASE
+  /*
   auto clock_start2 = std::chrono::high_resolution_clock::now();
-  std::cout << ColorCode::yellow << "Serializing tablebase..." << ColorCode::end << std::endl;
+  std::cout << ColorCode::yellow << "Serializing tablebases..." << ColorCode::end << std::endl;
 
-  aggregated_tablebase->serialize_tablebase(get_mastertablebase_filepath());
+  for (int i = 0; i < aggregated_tablebases.size(); i++)
+  {
+    aggregated_tablebases.at(i)->serialize_tablebase(latest_master_tablebase_filepath + '_' + std::to_string(i) + ".tb");
+  }
 
   auto clock_end2 = std::chrono::high_resolution_clock::now();
   auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end2 - clock_start2);
   std::cout << ColorCode::green << "Done serializing! " << ColorCode::end
             << "Elapsed time: " << duration2.count() << " milliseconds." << std::endl;
+            */
   // ----------------
 
-  std::cout << ColorCode::green << "Success!" << ColorCode::end << std::endl;
+  // POSITION HASH DISTRIBUTION
+  /*
+  long tablebase_position_hash_distribution_sum = 0;
+  long tablebase_position_hash_hash_distribution_sum = 0;
+  for (int i = 0; i < 64; i++)
+  {
+    tablebase_position_hash_distribution_sum += tablebase_position_hash_distribution[i];
+    tablebase_position_hash_hash_distribution_sum += tablebase_position_hash_hash_distribution[i];
+  }
+
+  std::cout << ColorCode::yellow << "Position Hash distribution (0.015625 is even)" << ColorCode::end << std::endl;
+  for (int i = 0; i < 64; i++)
+  {
+    std::cout
+        << ColorCode::teal
+        << std::left << std::setw(10) << (std ::to_string(i) + ":")
+        << std::left << std::setw(16) << tablebase_position_hash_distribution[i]
+        << std::left << std::setw(16) << (float)tablebase_position_hash_distribution[i] / tablebase_position_hash_distribution_sum
+        << ColorCode::end << std::endl;
+  }
+  std::cout << std::endl;
+  std::cout << ColorCode::yellow << "Position Hash Hash distribution (0.015625 is even)" << ColorCode::end << std::endl;
+  for (int i = 0; i < 64; i++)
+  {
+    std::cout
+        << ColorCode::teal
+        << std::left << std::setw(10) << (std ::to_string(i) + ":")
+        << std::left << std::setw(16) << tablebase_position_hash_hash_distribution[i]
+        << std::left << std::setw(16) << (float)tablebase_position_hash_hash_distribution[i] / tablebase_position_hash_hash_distribution_sum
+        << ColorCode::end << std::endl;
+  }
+  */
+  // ----------------------
+
+  std::cout
+      << ColorCode::green << "Success!" << ColorCode::end << std::endl;
   exit(0);
 
   // print_game_summaries();

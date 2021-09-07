@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <cstring>
 #include <thread>
+#include <mutex>
 
 const auto latest_tablebase_timestamp = std::to_string(std::chrono::seconds(std::time(NULL)).count());
 const std::string master_tablebase_filepath =
@@ -21,7 +22,8 @@ const std::string master_tablebase_filepath =
 const std::string individual_tablebases_filepath =
     "/Users/vas/repos/matemancpp/dev_data/tablebase/individual_tablebases";
 
-const std::string timestamp_of_attempt_to_use = "1630933103";
+// const std::string timestamp_of_attempt_to_use = "1630933103";
+const std::string timestamp_of_attempt_to_use = "";
 
 const std::string latest_individual_tablebases_filepath =
     individual_tablebases_filepath +
@@ -31,6 +33,13 @@ const std::string latest_master_tablebase_filepath =
     master_tablebase_filepath +
     '/' + (timestamp_of_attempt_to_use.empty() ? latest_tablebase_timestamp : timestamp_of_attempt_to_use);
 
+const long FIVE_MILLION = 5000000;
+
+extern long tablebase_position_hash_distribution[64];
+extern long tablebase_position_hash_hash_distribution[64];
+
+extern std::mutex tablebase_position_hash_distribution_mutex;
+
 // TODO move functionality into tablebase.cpp
 // TODO add tests, assertions, and printouts
 //  to ensure that serialization and merging methods are correct
@@ -38,6 +47,26 @@ const std::string latest_master_tablebase_filepath =
 // counterintuitive (it's probably because of the position hashes and move sets + pgn move)
 // TODO multithreaded serialization/deserialization/merging (divide and conquer for merging)
 // TODO speed up serialization by writing to buffer first, then dumping buffer to output stream
+
+/*
+  Seems that the memory problem was to due to my program reaching the 
+  limits of how many key/value pairs the STL unordered map could support. It would crash typically
+  at around 75 million. Splitting the tablebase up into several smaller tablebases seemed to have
+  fixed the issue.
+
+  My tablebase usage should take into this account. One design I am considering is sharding based
+  on modulo of the position hash. For this to work well I would have to see how evenly distributed the
+  zobrist hashes are, to see if it would be effective. Otherwise, if they are not evenly distributed,
+  I could try taking the hash of the hash and sharding that way. 
+
+  Assuming I could successfully create 64 evenly distributed buckets, each would contain a tablebase for
+  positions whose zobrist hashes are in that tablebase. Obviously, there should be no overlap amongst
+  tablebases. A good way to implement this would be to create a wrapper class that overrides element access
+  and performs this extra hashing + modulo + appropriate bucket lookup, such that I could still just do
+
+  auto move_map = opening_tablebase[position_hash]
+
+*/
 
 // move key is bit-wise concatenation of
 // 0x00 + start_square + end_square + promotion_piece
@@ -151,11 +180,6 @@ struct OpeningTablebase
     // 4 bytes (4 bits) -> uint32_t: number of keys in tablebase
     uint32_t tablebase_size = m_tablebase.size();
     write(&stream, &tablebase_size, sizeof(uint32_t));
-
-    std::cout
-        << ColorCode::teal
-        << "Writing " << m_tablebase.size() << " key/val pairs."
-        << ColorCode::end << std::endl;
 
     for (auto node = m_tablebase.begin(); node != m_tablebase.end(); node++)
     {
@@ -364,6 +388,41 @@ struct OpeningTablebase
     return merged_tablebase;
   }
 
+  static std::vector<std::shared_ptr<OpeningTablebase>> aggregate_into_several_tablebases(std::string tablebase_filepath)
+  {
+    using namespace std;
+    auto aggregated_tablebases = vector<shared_ptr<OpeningTablebase>>();
+    aggregated_tablebases.emplace_back(make_shared<OpeningTablebase>());
+    aggregated_tablebases.back()->m_tablebase.reserve(FIVE_MILLION + (FIVE_MILLION / 10));
+
+    for (const auto &entry : std::filesystem::directory_iterator(tablebase_filepath))
+    {
+      // create a new tablebase if the current one is too big
+      if (aggregated_tablebases.back()->m_tablebase.size() > FIVE_MILLION)
+      {
+        aggregated_tablebases.emplace_back(make_shared<OpeningTablebase>());
+        aggregated_tablebases.back()->m_tablebase.reserve(FIVE_MILLION + (FIVE_MILLION / 10));
+      }
+
+      // only process .tb files
+      std::string filepath_str = entry.path().generic_string();
+      if (filepath_str.substr(filepath_str.size() - 3).compare(".tb") != 0)
+      {
+        continue;
+      }
+
+      std::cout
+          << ColorCode::purple << filepath_str.substr(filepath_str.find_last_of('/') + 1)
+          << ColorCode::end << std::endl;
+      std::cout << ColorCode::teal << aggregated_tablebases.size() << " tablebases in vector." << std::endl;
+
+      std::unique_ptr<OpeningTablebase> deserialized_tablebase = deserialize_tablebase(entry.path());
+
+      merge_tablebases(aggregated_tablebases.back().get(), deserialized_tablebase.get());
+    }
+    return aggregated_tablebases;
+  }
+
   static std::unique_ptr<OpeningTablebase> aggregate_tablebases(std::string tablebase_filepath)
   {
     std::unique_ptr<OpeningTablebase> aggregated_tablebase = std::make_unique<OpeningTablebase>();
@@ -381,16 +440,16 @@ struct OpeningTablebase
           << ColorCode::end << std::endl;
 
       std::unique_ptr<OpeningTablebase> deserialized_tablebase = deserialize_tablebase(entry.path());
-      merge_tablebases(&aggregated_tablebase, std::move(deserialized_tablebase));
+      merge_tablebases(aggregated_tablebase.get(), deserialized_tablebase.get());
     }
     return aggregated_tablebase;
   }
 
   static void merge_tablebases(
-      std::unique_ptr<OpeningTablebase> *aggregated_tablebase,
-      std::unique_ptr<OpeningTablebase> deserialized_tablebase)
+      OpeningTablebase *aggregated_tablebase,
+      OpeningTablebase *deserialized_tablebase)
   {
-    auto mtb = &((*aggregated_tablebase)->m_tablebase);
+    auto mtb = &(aggregated_tablebase->m_tablebase);
 
     // auto tablebase = *it;
     std::cout
@@ -398,7 +457,7 @@ struct OpeningTablebase
         << ColorCode::teal << std::left << std::setw(20) << deserialized_tablebase->m_tablebase.size()
         << ColorCode::end << std::endl;
     std::cout
-        << ColorCode::green << "Merged tablebase size: " << (*aggregated_tablebase)->m_tablebase.size()
+        << ColorCode::green << "Merged tablebase size: " << aggregated_tablebase->m_tablebase.size()
         << ColorCode::end << std::endl;
 
     // if the tablebase we are aggregating is empty, let's set the root hash. The root hash of all of the
@@ -406,7 +465,7 @@ struct OpeningTablebase
     // an assertion for this somewhere.
     if (mtb->empty())
     {
-      (*aggregated_tablebase)->m_root_hash = deserialized_tablebase->m_root_hash;
+      aggregated_tablebase->m_root_hash = deserialized_tablebase->m_root_hash;
     }
 
     // merge the move maps of the current tablebase, with our aggregate, for every position

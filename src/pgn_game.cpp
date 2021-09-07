@@ -1,5 +1,6 @@
 #include "pgn_game.hpp"
 #include "read_pgn_data.hpp"
+#include "master_tablebase.hpp"
 
 bool PgnGame::read_metadata_line(std::string &line)
 {
@@ -78,7 +79,10 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn)
     m_position.m_whites_turn = !whites_turn;
     z_hash_t zhash2 = zobrist_hash(&m_position);
 
-    m_opening_tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
+    // m_opening_tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
+
+    // master tablebase update here
+    masterTablebase.update(zhash1, zhash2, move_key, std::string(player_move));
 }
 
 bool PgnGame::read_game_move_line(std::string &line)
@@ -89,17 +93,14 @@ bool PgnGame::read_game_move_line(std::string &line)
     while (std::regex_search(line, matches, game_line_regex))
     {
         is_game_line = true;
-        // std::cout << "=================================" << std::endl;
-        if (!m_metadata.size())
-        {
-            std::cerr << "No metadata!" << std::endl;
-            assert(false);
-        }
-        // std::cout << (metadata.size() ? metadata.at(0).value : "No metadata") << std::endl;
-        // std::cout << matches[0] << std::endl;
 
-        process_player_move(matches[1], true);
-        process_player_move(matches[2], false);
+        // stop processing moves after ply 30 such that the tablebases arent too large.
+        if (m_position.m_plies < 20)
+        {
+            process_player_move(matches[1], true);
+            process_player_move(matches[2], false);
+        }
+
         if (matches[3].length() > 0)
         {
             process_result(matches[3]);
