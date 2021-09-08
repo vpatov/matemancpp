@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(matemancpp VERSION 0.1.0)
 
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -26,9 +27,9 @@ set(SOURCES
     src/representation/fen.cpp
     src/options.cpp
     src/move_generation.cpp
-    src/tablebase/tablebase.cpp
+    src/tablebase/opening_tablebase.cpp
     src/tablebase/zobrist.cpp
-    src/threadpool.cpp
+    src/threadpool/threadpool.cpp
     src/util.cpp
     include/cli.hpp
     include/representation/position.hpp
@@ -36,12 +37,12 @@ set(SOURCES
     include/representation/fen.hpp
     include/options.hpp
     include/move_generation.hpp
-    include/threadpool.hpp
+    include/threadpool/threadpool.hpp
     include/representation/squares.hpp
     include/process_pgn/read_pgn_data.hpp
     include/process_pgn/pgn_game.hpp
     include/util.hpp
-    include/tablebase/tablebase.hpp
+    include/tablebase/opening_tablebase.hpp
     include/tablebase/master_tablebase.hpp
     include/tablebase/persistence.hpp
     include/tablebase/zobrist.hpp
@@ -61,5 +62,8 @@ target_include_directories(matemancpp PRIVATE ${PROJECT_SOURCE_DIR}/include)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(matemancpp PRIVATE Threads::Threads)
+
+add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
 
 

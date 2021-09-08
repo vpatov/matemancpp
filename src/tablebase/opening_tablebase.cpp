@@ -1,11 +1,6 @@
-#include "tablebase/tablebase.hpp"
+#include "tablebase/opening_tablebase.hpp"
 #include "util.hpp"
 #include <set>
-
-long tablebase_position_hash_distribution[64] = {0};
-long tablebase_position_hash_hash_distribution[64] = {0};
-
-std::mutex tablebase_position_hash_distribution_mutex;
 
 /* 
   This function calculates and returns the move key, which is a concatenation 

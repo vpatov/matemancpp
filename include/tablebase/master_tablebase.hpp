@@ -1,7 +1,7 @@
 #pragma once
 
-#include "tablebase.hpp"
-#include "threadpool.hpp"
+#include "tablebase/opening_tablebase.hpp"
+#include <unordered_map>
 #include <sstream>
 #include <iomanip>
 
@@ -11,7 +11,6 @@ struct MasterTablebase
     OpeningTablebase tablebases[TABLEBASE_SHARD_COUNT];
     std::mutex mutexes[TABLEBASE_SHARD_COUNT];
 
-    // TODO look at dissasemble of this method and see if modulo is optimized out.
     std::shared_ptr<std::unordered_map<MoveKey, MoveEdge>> operator[](const z_hash_t position_hash)
     {
         return tablebases[position_hash % TABLEBASE_SHARD_COUNT].m_tablebase[position_hash];
