@@ -122,11 +122,6 @@ white_mgen(Color C)
 #define ATTACKS_FILES_RANKS(piece) \
   (((piece & PIECE_MASK) == ROOK) || (piece & PIECE_MASK) == QUEEN)
 
-// const std::vector<uint8_t> w_diagonal_attackers = {W_BISHOP, W_QUEEN};
-// const std::vector<uint8_t> b_diagonal_attackers = {B_BISHOP, B_QUEEN};
-// const std::vector<uint8_t> w_file_rank_attackers = {ROOK, QUEEN};
-// const std::vector<uint8_t> b_file_rank_attackers = {B_ROOK, B_QUEEN};
-
 constexpr uint8_t direction_offset(Direction D)
 {
   switch (D)
@@ -166,7 +161,7 @@ const std::vector<int> knight_move_offsets = {
 
 struct Position
 {
-  uint8_t m_mailbox[128]; // x88 mailbox flat array
+  piece_t m_mailbox[128]; // x88 mailbox flat array
   bool m_whites_turn;     // true if white's turn
   bool m_white_kingside_castle;
   bool m_white_queenside_castle;
@@ -174,8 +169,8 @@ struct Position
   bool m_black_queenside_castle;
   int m_plies;
   int m_moves;
-  uint8_t m_en_passant_square; // 0 if no en passant possible, is index of square
-                               // otherwise
+  square_t m_en_passant_square; // 0 if no en passant possible, is index of square
+                                // otherwise
 
   uint32_t castling_move(std::smatch &matches, bool white);
   uint32_t non_castling_move(
@@ -183,36 +178,36 @@ struct Position
       char dest_file, char dest_rank, char promotion_piece,
       char check_or_mate);
   void perform_castle(bool white, bool short_castle);
-  void print_with_borders_highlight_squares(uint8_t src_square, uint8_t dest_square);
-  uint8_t find_king();
-  uint16_t get_src_square_pawn_move(char capture, char src_file, uint8_t dest_square, uint8_t dest_rank);
-  uint8_t get_src_square_minmaj_piece_move(
+  void print_with_borders_highlight_squares(square_t src_square, square_t dest_square);
+  square_t find_king();
+  uint16_t get_src_square_pawn_move(char capture, char src_file, square_t dest_square, uint8_t dest_rank);
+  square_t get_src_square_minmaj_piece_move(
       char piece_char, uint8_t src_file, uint8_t src_rank,
-      uint8_t dest_square, uint8_t en_passant_square);
-  void assert_correct_player_turn(uint8_t src_square, uint8_t dest_square);
-  void adjust_position(uint8_t src_square, uint8_t dest_square, uint8_t promotion_piece, uint8_t en_passant_square);
+      square_t dest_square, square_t en_passant_square);
+  void assert_correct_player_turn(square_t src_square, square_t dest_square);
+  void adjust_position(square_t src_square, square_t dest_square, piece_t promotion_piece, square_t en_passant_square);
   bool legal_position();
 };
 
-uint8_t an_square_to_index(std::string square);
-uint8_t an_square_to_index(char src_file, char src_rank);
-uint8_t char_to_piece(char piece);
-char piece_to_char(uint8_t piece);
-const std::string piece_to_name(uint8_t piece);
-std::string piece_to_color_coded_char(uint8_t piece, bool highlight);
-std::string piece_to_unicode_char(uint8_t piece);
-std::string index_to_an_square(uint8_t index);
-char index_to_an_file(uint8_t index);
-char index_to_an_rank(uint8_t index);
+square_t an_square_to_index(std::string square);
+square_t an_square_to_index(char src_file, char src_rank);
+piece_t char_to_piece(char piece);
+char piece_to_char(piece_t piece);
+const std::string piece_to_name(piece_t piece);
+std::string piece_to_color_coded_char(piece_t piece, bool highlight);
+std::string piece_to_unicode_char(piece_t piece);
+std::string index_to_an_square(square_t index);
+char index_to_an_file(square_t index);
+char index_to_an_rank(square_t index);
 void print_position(Position *position);
 void print_position_with_borders(Position *position);
-void print_position_with_borders_highlight_squares(Position *position, uint8_t src_square, uint8_t dest_square);
+void print_position_with_borders_highlight_squares(Position *position, square_t src_square, square_t dest_square);
 std::shared_ptr<Position> starting_position();
 void populate_starting_position(Position *position);
 std::unique_ptr<Position> generate_starting_position();
 
-void adjust_position(Position *position, uint8_t src_square,
-                     uint8_t dest_square, uint8_t promotion_piece, uint8_t en_passant_square);
+void adjust_position(Position *position, square_t src_square,
+                     square_t dest_square, piece_t promotion_piece, square_t en_passant_square);
 
 uint8_t find_king(Position *position, bool white);
 
@@ -221,10 +216,10 @@ void perform_castle(Position *position, bool white, bool short_castle);
 // king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
 bool legal_position(Position *position, bool whites_turn);
 
-uint8_t check_line(Position *position, uint8_t target, int offset, bool (*piece_type_function)(uint8_t));
-std::vector<uint8_t> check_files_ranks(Position *position, uint8_t target_square, bool color_of_attackers);
-std::vector<uint8_t> check_diagonals(Position *position, uint8_t target_square, bool color_of_attackers);
-std::vector<uint8_t> find_attacking_knights(Position *position, uint8_t target_square, bool color_of_attackers);
-std::vector<uint8_t> find_attacking_bishops(Position *position, uint8_t target_square, bool color_of_attackers);
-std::vector<uint8_t> find_attacking_rooks(Position *position, uint8_t target_square, bool color_of_attackers);
-std::vector<uint8_t> find_attacking_queens(Position *position, uint8_t target_square, bool color_of_attackers);
+square_t check_line(Position *position, square_t target, int offset, bool (*piece_type_function)(piece_t));
+std::vector<uint8_t> check_files_ranks(Position *position, square_t target_square, bool color_of_attackers);
+std::vector<uint8_t> check_diagonals(Position *position, square_t target_square, bool color_of_attackers);
+std::vector<uint8_t> find_attacking_knights(Position *position, square_t target_square, bool color_of_attackers);
+std::vector<uint8_t> find_attacking_bishops(Position *position, square_t target_square, bool color_of_attackers);
+std::vector<uint8_t> find_attacking_rooks(Position *position, square_t target_square, bool color_of_attackers);
+std::vector<uint8_t> find_attacking_queens(Position *position, square_t target_square, bool color_of_attackers);
