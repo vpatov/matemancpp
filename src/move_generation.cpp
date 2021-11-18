@@ -1,5 +1,4 @@
 #include "move_generation.hpp"
-#include "position.hpp"
 #include <assert.h>
 #include <cstdint>
 #include <iostream>
@@ -10,36 +9,43 @@
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
-                                uint8_t square) {
+                                uint8_t square)
+{
 
-  assert(VALID_SQUARE(square));
-  assert(position->mailbox[square] == PAWNC(C));
+  assert(is_valid_square(square));
+  assert(position->m_mailbox[square] == PAWNC(C));
 
   uint8_t candidate;
   std::vector<uint8_t> moves;
 
   // check square in front
   candidate = FORWARD_RANK(C, square);
-  if (VALID_SQUARE(candidate) && position->mailbox[candidate] == VOID_PIECE) {
+  if (is_valid_square(candidate) && position->m_mailbox[candidate] == VOID_PIECE)
+  {
     moves.push_back(candidate);
 
     // if square in front is empty, and we're on second rank, we can move two
     // squares
     candidate = FORWARD_RANK(C, candidate);
-    if (IN_START_PAWN_RANK(C, square) && VALID_SQUARE(candidate) &&
-        position->mailbox[candidate] == VOID_PIECE) {
+    if (IN_START_PAWN_RANK(C, square) && is_valid_square(candidate) &&
+        position->m_mailbox[candidate] == VOID_PIECE)
+    {
       moves.push_back(candidate);
     }
   }
 
   // check diagonals for capture
   candidate = PREV_FILE(FORWARD_RANK(C, candidate));
-  if (VALID_SQUARE(candidate) && IS_BLACK_PIECE(position->mailbox[candidate])) {
+  if (is_valid_square(candidate) &&
+      IS_OPPONENT_PIECE(C, position->m_mailbox[candidate]))
+  {
     moves.push_back(candidate);
   }
 
   candidate = NEXT_FILE(FORWARD_RANK(C, candidate));
-  if (VALID_SQUARE(candidate) && IS_BLACK_PIECE(position->mailbox[candidate])) {
+  if (is_valid_square(candidate) &&
+      IS_OPPONENT_PIECE(C, position->m_mailbox[candidate]))
+  {
     moves.push_back(candidate);
   }
 
@@ -49,10 +55,11 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
-                                uint8_t square) {
+                                uint8_t square)
+{
 
-  assert(VALID_SQUARE(square));
-  assert(position->mailbox[square] == KINGC(C));
+  assert(is_valid_square(square));
+  assert(position->m_mailbox[square] == KINGC(C));
 
   uint8_t candidates[8] = {
       NEXT_RANK(PREV_FILE(square)),
@@ -68,10 +75,12 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
   };
   std::vector<uint8_t> moves;
 
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i++)
+  {
     uint8_t candidate = candidates[i];
-    uint8_t piece = position->mailbox[candidate];
-    if (VALID_SQUARE(candidate) && (!IS_BLACK_PIECE(piece))) {
+    uint8_t piece = position->m_mailbox[candidate];
+    if (is_valid_square(candidate) && (!is_black_piece(piece)))
+    {
       moves.push_back(candidate);
     }
   }
@@ -81,25 +90,28 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
   return moves;
 }
 
-#define KINGSIDE_CASTLE_C(C, position)                                         \
-  (white_mgen(C) ? position->white_kingside_castle                             \
-                 : position->black_kingside_castle)
-#define QUEENSIDE_CASTLE_C(C, position)                                        \
-  (white_mgen(C) ? position->white_queenside_castle                            \
-                 : position->black_queenside_castle)
+#define KINGSIDE_CASTLE_C(C, position)               \
+  (white_mgen(C) ? position->m_white_kingside_castle \
+                 : position->m_black_kingside_castle)
+#define QUEENSIDE_CASTLE_C(C, position)               \
+  (white_mgen(C) ? position->m_white_queenside_castle \
+                 : position->m_black_queenside_castle)
 
 // TODO
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_castling_king_moves(std::shared_ptr<Position> position,
-                                         uint8_t square) {
+                                         uint8_t square)
+{
   /** Assumes that position's castling booleans are correct. That is, king moves
    * and rook moves should immediately unset the respective castling boolean. */
   std::vector<uint8_t> moves;
-  if (KINGSIDE_CASTLE_C(C, position)) {
+  if (KINGSIDE_CASTLE_C(C, position))
+  {
     moves.push_back(KING_ROOK_SQUARE_C(C));
   }
-  if (QUEENSIDE_CASTLE_C(C, position)) {
+  if (QUEENSIDE_CASTLE_C(C, position))
+  {
     moves.push_back(QUEEN_ROOK_SQUARE_C(C));
   }
   return moves;
@@ -108,9 +120,10 @@ generate_pseudolegal_castling_king_moves(std::shared_ptr<Position> position,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
-                                  uint8_t square) {
-  assert(VALID_SQUARE(square));
-  assert(position->mailbox[square] == KNIGHTC(C));
+                                  uint8_t square)
+{
+  assert(is_valid_square(square));
+  assert(position->m_mailbox[square] == KNIGHTC(C));
 
   uint8_t candidates[8] = {
       NEXT_RANK(PREV_FILE(PREV_FILE(square))),
@@ -127,10 +140,12 @@ generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
   };
   std::vector<uint8_t> moves;
 
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i++)
+  {
     uint8_t candidate = candidates[i];
-    uint8_t piece = position->mailbox[candidate];
-    if (VALID_SQUARE(candidate) && IS_OPPONENT_PIECE(C, piece)) {
+    uint8_t piece = position->m_mailbox[candidate];
+    if (is_valid_square(candidate) && IS_OPPONENT_PIECE(C, piece))
+    {
       moves.push_back(candidate);
     }
   }
@@ -140,16 +155,20 @@ generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
 
 template <Direction D, Color C>
 inline void sliding_piece_walk(std::vector<uint8_t> *moves, uint8_t square,
-                               std::shared_ptr<Position> position) {
+                               std::shared_ptr<Position> position)
+{
 
   uint8_t candidate = STEP_DIRECTION(D, square);
-  while (VALID_SQUARE(candidate)) {
-    uint8_t piece = position->mailbox[candidate];
-    if (IS_OPPONENT_PIECE(C, piece)) {
+  while (is_valid_square(candidate))
+  {
+    uint8_t piece = position->m_mailbox[candidate];
+    if (IS_OPPONENT_PIECE(C, piece))
+    {
       moves->push_back(candidate);
       break;
     }
-    if (IS_YOUR_PIECE(C, piece)) {
+    if (IS_YOUR_PIECE(C, piece))
+    {
       break;
     }
     moves->push_back(candidate);
@@ -160,9 +179,10 @@ inline void sliding_piece_walk(std::vector<uint8_t> *moves, uint8_t square,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_rook_moves(std::shared_ptr<Position> position,
-                                uint8_t square) {
+                                uint8_t square)
+{
 
-  assert(VALID_SQUARE(square));
+  assert(is_valid_square(square));
   uint8_t candidate;
   std::vector<uint8_t> moves;
 
@@ -177,8 +197,9 @@ generate_pseudolegal_rook_moves(std::shared_ptr<Position> position,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_bishop_moves(std::shared_ptr<Position> position,
-                                  uint8_t square) {
-  assert(VALID_SQUARE(square));
+                                  uint8_t square)
+{
+  assert(is_valid_square(square));
   uint8_t candidate;
   std::vector<uint8_t> moves;
 
@@ -193,9 +214,10 @@ generate_pseudolegal_bishop_moves(std::shared_ptr<Position> position,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
-                                 uint8_t square) {
-  assert(VALID_SQUARE(square));
-  assert(position->mailbox[square] == QUEENC(C));
+                                 uint8_t square)
+{
+  assert(is_valid_square(square));
+  assert(position->m_mailbox[square] == QUEENC(C));
   std::vector<uint8_t> rook_moves;
   std::vector<uint8_t> bishop_moves;
 
@@ -209,9 +231,11 @@ generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
-                                 uint8_t square) {
-  uint8_t piece = position->mailbox[square];
-  switch (piece) {
+                                 uint8_t square)
+{
+  uint8_t piece = position->m_mailbox[square];
+  switch (piece)
+  {
   case PAWN:
     return generate_pseudolegal_pawn_moves<C>(position, square);
   case ROOK:
@@ -231,9 +255,10 @@ generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
 
 std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
-                                 uint8_t square) {
-  uint8_t piece = position->mailbox[square];
-  return IS_WHITE_PIECE(piece)
+                                 uint8_t square)
+{
+  uint8_t piece = position->m_mailbox[square];
+  return is_white_piece(piece)
              ? generate_pseudolegal_piece_moves<Color::WHITE>(position, square)
              : generate_pseudolegal_piece_moves<Color::BLACK>(position, square);
 }
@@ -281,3 +306,57 @@ template std::vector<uint8_t> generate_pseudolegal_piece_moves<Color::WHITE>(
 
 template std::vector<uint8_t> generate_pseudolegal_piece_moves<Color::BLACK>(
     std::shared_ptr<Position> position, uint8_t square);
+
+bool white_attacks_diagonally(uint8_t piece)
+{
+  return is_w_bishop(piece) || is_w_queen(piece);
+}
+
+bool black_attacks_diagonally(uint8_t piece)
+{
+  return is_b_bishop(piece) || is_b_queen(piece);
+}
+
+bool white_attacks_files_ranks(uint8_t piece)
+{
+  return is_w_rook(piece) || is_w_queen(piece);
+}
+
+bool black_attacks_files_ranks(uint8_t piece)
+{
+  return is_b_rook(piece) || is_b_queen(piece);
+}
+
+bool is_w_pawn(uint8_t piece)
+{
+  return piece == W_PAWN;
+}
+bool is_b_pawn(uint8_t piece)
+{
+  return piece == B_PAWN;
+}
+
+bool is_w_bishop(uint8_t piece)
+{
+  return piece == W_BISHOP;
+}
+bool is_w_rook(uint8_t piece)
+{
+  return piece == W_ROOK;
+}
+bool is_w_queen(uint8_t piece)
+{
+  return piece == W_QUEEN;
+}
+bool is_b_bishop(uint8_t piece)
+{
+  return piece == B_BISHOP;
+}
+bool is_b_rook(uint8_t piece)
+{
+  return piece == B_ROOK;
+}
+bool is_b_queen(uint8_t piece)
+{
+  return piece == B_QUEEN;
+}

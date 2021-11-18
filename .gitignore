@@ -1,3 +1,11 @@
+/debug
 /build
 /output
 database/*
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+/CMakeFiles
+allgames_debug.txt
+matemancpp
+/dev_data

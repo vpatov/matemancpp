@@ -1,0 +1,116 @@
+[2021-11-17 13:48:41.124] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 13:50:05.693] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 13:50:10.836] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 13:50:28.745] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 13:50:36.440] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:15:37.113] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:15:40.066] [basic_logger] [info] <-- uci
+[2021-11-17 18:15:40.067] [basic_logger] [info] --> id name MateMan
+[2021-11-17 18:15:40.067] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 18:15:40.067] [basic_logger] [info] --> uciok
+[2021-11-17 18:15:49.683] [basic_logger] [info] <-- position startpos 
+[2021-11-17 18:17:03.612] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:17:14.096] [basic_logger] [info] <-- uci
+[2021-11-17 18:17:14.096] [basic_logger] [info] --> id name MateMan
+[2021-11-17 18:17:14.096] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 18:17:14.096] [basic_logger] [info] --> uciok
+[2021-11-17 18:17:19.096] [basic_logger] [info] <-- position startpos
+[2021-11-17 18:20:13.824] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:20:58.202] [basic_logger] [info] <-- uci
+[2021-11-17 18:20:58.203] [basic_logger] [info] --> id name MateMan
+[2021-11-17 18:20:58.203] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 18:20:58.203] [basic_logger] [info] --> uciok
+[2021-11-17 18:21:01.371] [basic_logger] [info] <-- position startpos
+[2021-11-17 18:21:47.645] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:21:50.243] [basic_logger] [info] <-- uci
+[2021-11-17 18:21:50.244] [basic_logger] [info] --> id name MateMan
+[2021-11-17 18:21:50.244] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 18:21:50.244] [basic_logger] [info] --> uciok
+[2021-11-17 18:21:53.388] [basic_logger] [info] <-- position startpos
+[2021-11-17 18:22:04.672] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:22:41.970] [basic_logger] [info] <-- uci
+[2021-11-17 18:22:41.970] [basic_logger] [info] --> id name MateMan
+[2021-11-17 18:22:41.970] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 18:22:41.970] [basic_logger] [info] --> uciok
+[2021-11-17 18:22:47.537] [basic_logger] [info] <-- position startpos
+[2021-11-17 18:25:16.190] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:25:28.262] [basic_logger] [info] <-- uci
+[2021-11-17 18:25:28.262] [basic_logger] [info] --> id name MateMan
+[2021-11-17 18:25:28.262] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 18:25:28.262] [basic_logger] [info] --> uciok
+[2021-11-17 18:25:35.844] [basic_logger] [info] <-- position startpos
+[2021-11-17 18:27:04.386] [basic_logger] [info] <-- 
+[2021-11-17 18:27:07.639] [basic_logger] [info] <-- positiii
+[2021-11-17 18:27:08.794] [basic_logger] [info] <-- 
+[2021-11-17 18:27:13.147] [basic_logger] [info] <-- position foo
+[2021-11-17 18:27:17.389] [basic_logger] [warning] Unrecognized command for position: foo
+[2021-11-17 18:39:03.824] [basic_logger] [info] <-- position startpos
+[2021-11-17 18:39:21.100] [basic_logger] [info] <-- position startpos e2e4 d7d5
+[2021-11-17 18:39:21.100] [basic_logger] [warning] Unrecognized continuation of position command: e2e4
+[2021-11-17 18:39:34.097] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:39:36.528] [basic_logger] [info] <-- uci
+[2021-11-17 18:39:36.528] [basic_logger] [info] --> id name MateMan
+[2021-11-17 18:39:36.528] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 18:39:36.528] [basic_logger] [info] --> uciok
+[2021-11-17 18:39:43.072] [basic_logger] [info] <-- position startpos e2e4 d7d5
+[2021-11-17 18:40:04.343] [basic_logger] [warning] Unrecognized continuation of position command: e2e4
+[2021-11-17 18:40:30.836] [basic_logger] [info] <-- 
+[2021-11-17 18:40:45.327] [basic_logger] [info] <-- position startpos moves e2e4 d7d5
+[2021-11-17 18:41:43.560] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 18:41:46.789] [basic_logger] [info] <-- uci
+[2021-11-17 18:41:46.790] [basic_logger] [info] --> id name MateMan
+[2021-11-17 18:41:46.790] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 18:41:46.790] [basic_logger] [info] --> uciok
+[2021-11-17 18:41:55.824] [basic_logger] [info] <-- position startpos moves e2e4 d7d5
+[2021-11-17 18:43:10.565] [basic_logger] [info] <-- 
+[2021-11-17 18:43:34.909] [basic_logger] [info] <-- position startpos moves e2e4 d7d5 e4d5 h7h5
+[2021-11-17 19:11:24.776] [basic_logger] [info] Starting main clip loop...
+[2021-11-17 19:11:26.444] [basic_logger] [info] <-- uci
+[2021-11-17 19:11:26.444] [basic_logger] [info] --> id name MateMan
+[2021-11-17 19:11:26.444] [basic_logger] [info] --> id author Vasia Patov
+[2021-11-17 19:11:26.444] [basic_logger] [info] --> uciok
+[2021-11-17 19:11:35.846] [basic_logger] [info] <-- position startpos moves e2e4 d7d4
+[2021-11-18 12:41:33.931] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 12:41:38.629] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 12:41:43.774] [basic_logger] [info] <-- newbase
+[2021-11-18 12:41:46.233] [basic_logger] [info] <-- 
+[2021-11-18 12:43:09.534] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 12:43:13.757] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 12:43:16.669] [basic_logger] [info] <-- 
+[2021-11-18 12:43:18.041] [basic_logger] [info] <-- f
+[2021-11-18 12:43:42.818] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 12:43:46.313] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 12:43:49.165] [basic_logger] [info] <-- newtablebase
+[2021-11-18 12:43:52.462] [basic_logger] [info] <-- s
+[2021-11-18 12:49:51.503] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 12:49:53.077] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 12:49:56.370] [basic_logger] [info] <-- mybase
+[2021-11-18 12:52:35.388] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 12:52:38.134] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 12:57:48.240] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 12:57:48.928] [basic_logger] [info] <-- 
+[2021-11-18 12:57:52.337] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 12:57:57.813] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 12:58:02.161] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 12:58:34.410] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 12:58:35.427] [basic_logger] [info] <-- poo
+[2021-11-18 16:52:59.871] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 16:53:04.440] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 16:56:50.391] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 16:56:53.447] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 17:43:58.824] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 17:44:02.241] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 17:45:23.466] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 17:45:26.274] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 17:46:28.434] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 17:46:31.827] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 17:48:00.390] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 17:48:03.146] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 17:51:49.467] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 17:51:52.261] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 17:57:03.976] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 17:57:06.692] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 18:03:05.966] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 18:03:09.741] [basic_logger] [info] <-- create_tablebases
+[2021-11-18 18:09:30.595] [basic_logger] [info] Starting main clip loop...
+[2021-11-18 18:09:35.583] [basic_logger] [info] <-- create_tablebases

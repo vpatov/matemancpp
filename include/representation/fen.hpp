@@ -1,9 +1,6 @@
-#ifndef __FEN_H__
-#define __FEN_H__
+#pragma once
 
 #include "position.hpp"
 #include <memory>
 
 std::shared_ptr<Position> fen_to_position(std::string fen);
-
-#endif
