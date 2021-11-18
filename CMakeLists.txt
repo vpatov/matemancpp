@@ -41,7 +41,9 @@ set(SOURCES
     src/tablebase/zobrist.cpp
     src/threadpool/threadpool.cpp
     src/util.cpp
+    src/engine/engine.cpp
     include/cli.hpp
+    include/engine/engine.hpp
     include/representation/position.hpp
     include/representation/pieces.hpp
     include/representation/fen.hpp

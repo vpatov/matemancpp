@@ -11,6 +11,7 @@
 #include <vector>
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
+#include "engine/engine.hpp"
 
 std::unordered_map<Command, CommandProcessor> command_processor_map;
 std::unordered_map<std::string, Command> command_map;
@@ -178,22 +179,23 @@ void process_command_position(std::vector<std::string> args)
 }
 void process_command_go(std::vector<std::string> args)
 {
+  Engine engine;
   // 	* movetime <x>
   // 	search exactly x mseconds
   // * infinite
   // 	search until the "stop" command. Do not exit the search without being told so in this mode!
   // write function that creates vector of pairs for keys/values
   int x = 1;
-  int time = 5000;
+  auto time = std::chrono::milliseconds(5000);
   //movetime
   if (x == 1)
   {
     // assume pos is already set up
-    find_best_move(time);
+    engine.find_best_move(time);
   }
   else if (x == 2)
   {
-    find_best_move(0);
+    engine.find_best_move(std::chrono::milliseconds(0));
   }
   // hardcoded_response();
 };
