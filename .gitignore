@@ -9,3 +9,4 @@ Makefile
 allgames_debug.txt
 matemancpp
 /dev_data
+/logs

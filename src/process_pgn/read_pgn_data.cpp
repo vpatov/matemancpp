@@ -18,95 +18,9 @@ const std::string test_files[8] = {
     "/Users/vas/repos/matemancpp/database/pgn/Winawer.pgn",
 };
 
-const std::string completed_files_filepath = "/Users/vas/repos/matemancpp/completed_files.txt";
-
-std::unordered_multimap<
-    std::thread::id,
-    std::shared_ptr<std::vector<std::shared_ptr<PgnGame>>>>
-    pgn_game_vector_map;
-
-std::unordered_multimap<std::thread::id, std::shared_ptr<OpeningTablebase>> threads_tablebases;
-
-void print_pgn_processing_performance_summary(
-    std::__1::chrono::steady_clock::time_point clock_start,
-    std::__1::chrono::steady_clock::time_point clock_end,
-    std::thread::id thread_id,
-    int games_list_size,
-    int tablebase_size,
-    std::string file_path)
-{
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
-  std::string duration_str = std::to_string((double)duration.count() / 1000);
-  duration_str = duration_str.substr(0, duration_str.find(".") + 3);
-
-  std::cout
-      << std::left << std::setw(16) << thread_id
-      << std::left << std::setw(16) << duration_str + "s"
-      << std::left << std::setw(16) << games_list_size
-      << std::left << std::setw(16) << tablebase_size
-      << ColorCode::green
-      << file_path.substr(file_path.find_last_of('/') + 1)
-      << ColorCode::end
-      << std::endl;
-}
-
-void print_game_summaries()
-{
-  for (auto member : pgn_game_vector_map)
-  {
-    auto first = member.first;
-    auto second = member.second;
-
-    std::cout << ColorCode::red << "Thread: " << first << ColorCode::end << std::endl;
-    PgnGame::printGameSummaryHeader();
-    for (auto vec_member : *second)
-    {
-      vec_member->printGameSummary();
-    }
-  }
-}
-
-void save_game_vector(std::thread::id thread_id, std::shared_ptr<std::vector<std::shared_ptr<PgnGame>>> games)
-{
-  static std::mutex pgn_game_vector_map_mutex;
-  std::unique_lock<std::mutex> lock(pgn_game_vector_map_mutex);
-
-  pgn_game_vector_map.insert(std::pair(thread_id, games));
-}
-
-void save_tablebase(std::thread::id thread_id, std::shared_ptr<OpeningTablebase> openingTablebasePtr)
-{
-  static std::mutex threads_tablebases_mutex;
-  std::unique_lock<std::mutex> lock(threads_tablebases_mutex);
-
-  threads_tablebases.insert(std::pair(thread_id, openingTablebasePtr));
-}
-
-std::set<std::string> get_completed_files_set()
-{
-  std::ifstream infile(completed_files_filepath);
-  std::set<std::string> completed_files;
-  for (std::string line; getline(infile, line);)
-  {
-    completed_files.insert(line);
-  }
-  return completed_files;
-}
-
-void update_completed_files_set(std::string filename, std::set<std::string> *completed_files)
-{
-  std::ofstream ofs(completed_files_filepath, std::ofstream::trunc);
-  completed_files->insert(filename);
-  for (auto it = completed_files->begin(); it != completed_files->end(); it++)
-  {
-    ofs << *it << std::endl;
-  }
-  ofs.close();
-}
-
 void start_pgn_processing_tasks(std::string tablebase_name)
 {
-  PgnProcessor pgnProcessor(tablebase_name);
+  PgnProcessor pgnProcessor(master_tablebase_data_dir / tablebase_name);
   pgnProcessor.process_pgn_files();
   pgnProcessor.serialize_all();
 
@@ -177,6 +91,41 @@ void start_pgn_processing_tasks(std::string tablebase_name)
 
   std::cout
       << ColorCode::green << "Success!" << ColorCode::end << std::endl;
+}
+
+void print_pgn_processing_performance_summary(
+    std::__1::chrono::steady_clock::time_point clock_start,
+    std::__1::chrono::steady_clock::time_point clock_end,
+    std::thread::id thread_id,
+    int games_list_size,
+    int tablebase_size,
+    std::string file_path)
+{
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
+  std::string duration_str = std::to_string((double)duration.count() / 1000);
+  duration_str = duration_str.substr(0, duration_str.find(".") + 3);
+
+  std::cout
+      << std::left << std::setw(16) << thread_id
+      << std::left << std::setw(16) << duration_str + "s"
+      << std::left << std::setw(16) << games_list_size
+      << std::left << std::setw(16) << tablebase_size
+      << ColorCode::green
+      << file_path.substr(file_path.find_last_of('/') + 1)
+      << ColorCode::end
+      << std::endl;
+}
+void print_pgn_processing_header()
+{
+  std::cout
+      << "\u001b[33m"
+      << std::left << std::setw(16) << "Thread ID"
+      << std::left << std::setw(16) << "Duration"
+      << std::left << std::setw(16) << "# of Games"
+      << std::left << std::setw(16) << "Tablebase Size"
+      << std::left << std::setw(16) << "File Name"
+      << "\u001b[0m"
+      << std::endl;
 }
 
 void hash_distribution()

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "tablebase/opening_tablebase.hpp"
-#include "tablebase/persistence.hpp"
 #include "threadpool/threadpool.hpp"
 #include <unordered_map>
 #include <sstream>
@@ -12,7 +11,6 @@ class MasterTablebase
     static const uint16_t TABLEBASE_SHARD_COUNT = 64;
     OpeningTablebase m_tablebases[TABLEBASE_SHARD_COUNT];
     std::mutex mutexes[TABLEBASE_SHARD_COUNT];
-    TablebasePersistenceConfig m_persistenceConfig;
 
     std::shared_ptr<std::unordered_map<MoveKey, MoveEdge>> operator[](const z_hash_t position_hash)
     {
@@ -20,18 +18,22 @@ class MasterTablebase
     }
 
 public:
-    MasterTablebase(std::string tablebase_name) : m_persistenceConfig(tablebase_name) {}
+    MasterTablebase() {}
+    MasterTablebase(fs::path source_file_path)
+    {
+        // deserialize
+    }
 
     static uint16_t get_shard_count()
     {
         return TABLEBASE_SHARD_COUNT;
     }
 
-    void serialize_all()
+    void serialize_all(fs::path destination_directory_path)
     {
-
-        std::function<void(std::string &)> f =
-            std::bind(&MasterTablebase::serialize_tablebase_extern, this, std::placeholders::_1);
+        fs::create_directories(destination_directory_path);
+        std::function<void(std::string &)> serialize_fn =
+            std::bind(&MasterTablebase::serialize_tablebase, this, std::placeholders::_1);
 
         ThreadPool thread_pool = ThreadPool();
         for (int bucket = 0; bucket < MasterTablebase::get_shard_count(); bucket++)
@@ -39,7 +41,7 @@ public:
             std::stringstream file_suffix;
             file_suffix << std::setw(10) << std::setfill('0') << bucket;
 
-            Task task = Task(&f, (m_persistenceConfig.m_current_master_tablebase_directory / file_suffix.str()));
+            Task task = Task(&serialize_fn, (destination_directory_path / file_suffix.str()));
             thread_pool.add_task(task);
         }
         thread_pool.join_pool();
@@ -47,7 +49,7 @@ public:
 
     // gets the bucket number from the filepath, then reads that bucket from the master tablebases,
     // and serializes it
-    void serialize_tablebase_extern(std::string file_path_prefix)
+    void serialize_tablebase(std::string file_path_prefix)
     {
         uint16_t bucket = std::stoi(file_path_prefix.substr(file_path_prefix.rfind("/") + 1));
         m_tablebases[bucket].serialize_tablebase(file_path_prefix + ".tb");

@@ -3,25 +3,6 @@
 #include <filesystem>
 #include <set>
 
-namespace fs = std::filesystem;
-
-struct TablebasePersistenceConfig
-{
-    const fs::path tablebase_data_dir = dev_data_dir / "tablebase";
-    const fs::path master_tablebase_data_dir = tablebase_data_dir / "master_tablebase";
-
-    std::string m_tablebase_name;
-    fs::path m_current_master_tablebase_directory;
-
-    TablebasePersistenceConfig(std::string tablebase_name)
-    {
-        m_tablebase_name = tablebase_name;
-        m_current_master_tablebase_directory = master_tablebase_data_dir / tablebase_name;
-
-        std::filesystem::create_directories(m_current_master_tablebase_directory);
-    }
-};
-
 /**
  *  Binary format for tablebase serialization (8 bits == byte):
  * 

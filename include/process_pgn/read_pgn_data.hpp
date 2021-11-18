@@ -35,36 +35,22 @@ void print_pgn_processing_performance_summary(
     int games_list_size,
     int tablebase_size,
     std::string file_path);
+void print_pgn_processing_header();
 
 class PgnProcessor
 {
-
-    const fs::path pgn_database_path = fs::path(PROJECT_ROOT_DIR) / "database" / "pgn";
-
     MasterTablebase m_masterTablebase;
+    fs::path m_tablebase_destination_file_path;
 
 public:
-    PgnProcessor(std::string tablebase_name) : m_masterTablebase(tablebase_name) {}
-
-    static void print_pgn_processing_header()
-    {
-        std::cout
-            << "\u001b[33m"
-            << std::left << std::setw(16) << "Thread ID"
-            << std::left << std::setw(16) << "Duration"
-            << std::left << std::setw(16) << "# of Games"
-            << std::left << std::setw(16) << "Tablebase Size"
-            << std::left << std::setw(16) << "File Name"
-            << "\u001b[0m"
-            << std::endl;
-    }
+    PgnProcessor(std::string tablebase_destination_file_path) : m_tablebase_destination_file_path(tablebase_destination_file_path) {}
 
     void serialize_all()
     {
         auto clock_start = std::chrono::high_resolution_clock::now();
         std::cout << ColorCode::yellow << "Serializing tablebases..." << ColorCode::end << std::endl;
 
-        m_masterTablebase.serialize_all();
+        m_masterTablebase.serialize_all(m_tablebase_destination_file_path);
 
         auto clock_end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
