@@ -19,7 +19,8 @@ enum Command
   go,
   stop,
   ponderhit,
-  quit
+  quit,
+  create_tablebases
 };
 typedef void (*CommandProcessor)(std::vector<std::string>);
 
@@ -33,6 +34,7 @@ void process_command_go(std::vector<std::string> args);
 void process_command_stop(std::vector<std::string> args);
 void process_command_ponderhit(std::vector<std::string> args);
 void process_command_quit(std::vector<std::string> args);
+void process_command_create_tablebases(std::vector<std::string> args);
 
 void init_command_map();
 void process_command(std::string command);

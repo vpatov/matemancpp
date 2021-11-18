@@ -116,11 +116,9 @@ void process_pgn_file(std::string file_path)
   std::ifstream infile(file_path);
   std::shared_ptr<std::vector<std::shared_ptr<PgnGame>>> games =
       std::make_shared<std::vector<std::shared_ptr<PgnGame>>>();
-  std::shared_ptr<OpeningTablebase> openingTablebase = std::make_shared<OpeningTablebase>();
 
   games->emplace_back(std::make_shared<PgnGame>());
   populate_starting_position(&(games->back()->m_position));
-  games->back()->m_opening_tablebase = openingTablebase;
   bool reading_game_moves = false;
   int linecount = 0;
 
@@ -162,7 +160,6 @@ void process_pgn_file(std::string file_path)
         //           << games.size() - 1 << "\u001b[31m " << file_path << "\u001b[0m";
 
         populate_starting_position(&(games->back()->m_position));
-        games->back()->m_opening_tablebase = openingTablebase;
         reading_game_moves = false;
       }
     }
@@ -170,15 +167,15 @@ void process_pgn_file(std::string file_path)
   // Remove the very last game, which is empty
   games->pop_back();
 
-  // openingTablebase->serialize_tablebase(get_individual_tablebase_filepath(file_path, ".tb"));
-
   // print statistics about pgn processing
   auto clock_end = std::chrono::high_resolution_clock::now();
   print_pgn_processing_performance_summary(
       clock_start, clock_end, std::this_thread::get_id(),
-      games->size(), openingTablebase->m_tablebase.size(), file_path);
+      games->size(), masterTablebase.total_size(), file_path);
 }
 
+// gets the bucket number from the filepath, then reads that bucket from the master tablebases,
+// and serializes it
 void serialize_tablebase_extern(std::string file_path_prefix)
 {
   uint16_t bucket = std::stoi(file_path_prefix.substr(file_path_prefix.rfind("/") + 1));
@@ -235,7 +232,7 @@ void start_pgn_processing_tasks()
   std::filesystem::create_directories(latest_individual_tablebases_filepath);
   std::filesystem::create_directories(latest_master_tablebase_filepath);
   std::set<std::string> completed_tablebases =
-      OpeningTablebase::get_already_completed_tablebases_filenames(timestamp_of_attempt_to_use);
+      OpeningTablebase::get_already_completed_tablebases_filenames(current_tablebase_folder);
 
   ThreadPool thread_pool = ThreadPool();
 
@@ -251,7 +248,6 @@ void start_pgn_processing_tasks()
     std::string filename = filepath.substr(path_end + 1, extension_start - path_end - 1);
 
     // if (completed_tablebases.find(filename) == completed_tablebases.end())
-    // {
     Task task = Task(&process_pgn_file, entry.path());
     thread_pool.add_task(task);
     // }

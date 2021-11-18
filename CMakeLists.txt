@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(matemancpp VERSION 0.1.0)
 
+if(NOT TARGET spdlog)
+    # Stand-alone build
+    find_package(spdlog REQUIRED)
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -68,6 +72,8 @@ target_include_directories(matemancpp PRIVATE ${PROJECT_SOURCE_DIR}/include)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(matemancpp PRIVATE Threads::Threads)
+target_link_libraries(matemancpp PRIVATE spdlog::spdlog)
+
 
 add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 

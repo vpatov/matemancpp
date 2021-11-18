@@ -24,7 +24,6 @@ struct PgnGame
     std::string m_white_player_name;
     std::string m_black_player_name;
     std::vector<uint32_t> m_move_list;
-    std::shared_ptr<OpeningTablebase> m_opening_tablebase;
 
     bool read_metadata_line(std::string &line);
     void process_player_move(std::string player_move, bool white);

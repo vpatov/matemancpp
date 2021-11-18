@@ -1,9 +1,18 @@
 #include "process_pgn/read_pgn_data.hpp"
+#include "cli.hpp"
 
 int main(int argc, char *argv[])
 
 {
-   start_pgn_processing_tasks();
+
+   // std::string user_input;
+   // std::cout << "Input the name for this tablebase (leave blank to use the current timestamp):" << std::endl;
+   // std::cin >> user_input;
+   // std::cout << "foo:{" << user_input << "}" << std::endl;
+   // exit(1);
+
+   // start_pgn_processing_tasks();
+   cli_loop();
 }
 
 /*

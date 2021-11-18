@@ -79,8 +79,6 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn)
     m_position.m_whites_turn = !whites_turn;
     z_hash_t zhash2 = zobrist_hash(&m_position);
 
-    // m_opening_tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
-
     // master tablebase update here
     masterTablebase.update(zhash1, zhash2, move_key, std::string(player_move));
 }
@@ -94,8 +92,8 @@ bool PgnGame::read_game_move_line(std::string &line)
     {
         is_game_line = true;
 
-        // stop processing moves after ply 30 such that the tablebases arent too large.
-        if (m_position.m_plies < 20)
+        // stop processing moves after ply 15 such that the tablebases arent too large.
+        if (m_position.m_plies < 15)
         {
             process_player_move(matches[1], true);
             process_player_move(matches[2], false);

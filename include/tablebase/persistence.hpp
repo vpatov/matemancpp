@@ -10,24 +10,22 @@ const fs::path tablebase_data_dir = dev_data_dir / "tablebase";
 const fs::path individual_tablebase_data_dir = tablebase_data_dir / "individual_tablebases";
 const fs::path master_tablebase_data_dir = tablebase_data_dir / "master_tablebase";
 
-const bool use_most_recent_tablebase = true;
-
 const auto latest_tablebase_timestamp = std::to_string(std::chrono::seconds(std::time(NULL)).count());
 const std::string master_tablebase_filepath =
     "/Users/vas/repos/matemancpp/dev_data/tablebase/master_tablebase";
 const std::string individual_tablebases_filepath =
     "/Users/vas/repos/matemancpp/dev_data/tablebase/individual_tablebases";
 
-// const std::string timestamp_of_attempt_to_use = "1630933103";
-const std::string timestamp_of_attempt_to_use = "";
+// const std::string current_tablebase_folder = "1630933103";
+const std::string current_tablebase_folder = "";
 
 const std::string latest_individual_tablebases_filepath =
     individual_tablebases_filepath +
-    '/' + (timestamp_of_attempt_to_use.empty() ? latest_tablebase_timestamp : timestamp_of_attempt_to_use);
+    '/' + (current_tablebase_folder.empty() ? latest_tablebase_timestamp : current_tablebase_folder);
 
 const std::string latest_master_tablebase_filepath =
     master_tablebase_filepath +
-    '/' + (timestamp_of_attempt_to_use.empty() ? latest_tablebase_timestamp : timestamp_of_attempt_to_use);
+    '/' + (current_tablebase_folder.empty() ? latest_tablebase_timestamp : current_tablebase_folder);
 
 /**
  *  Binary format for tablebase serialization (8 bits == byte):
@@ -62,6 +60,10 @@ const std::string latest_master_tablebase_filepath =
 
 class TablebasePersistor
 {
+
+    std::string individual_tablebases_filepath;
+    std::string master_tablebase_filepath;
+
     // void serialize_tablebase(std::string file_path);
 
     // void serialize_tablebase(OpeningTablebase *tablebase, std::string file_path)

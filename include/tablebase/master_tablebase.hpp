@@ -23,6 +23,16 @@ struct MasterTablebase
 
         tablebases[bucket].update(insert_hash, dest_hash, move_key, pgn_move);
     }
+
+    int total_size()
+    {
+        int s = 0;
+        for (int i = 0; i < TABLEBASE_SHARD_COUNT; i++)
+        {
+            s += tablebases[i].m_tablebase.size();
+        }
+        return s;
+    }
 };
 
 extern MasterTablebase masterTablebase;

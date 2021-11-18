@@ -206,9 +206,6 @@ std::shared_ptr<Position> starting_position();
 void populate_starting_position(Position *position);
 std::unique_ptr<Position> generate_starting_position();
 
-void adjust_position(Position *position, square_t src_square,
-                     square_t dest_square, piece_t promotion_piece, square_t en_passant_square);
-
 uint8_t find_king(Position *position, bool white);
 
 void perform_castle(Position *position, bool white, bool short_castle);
