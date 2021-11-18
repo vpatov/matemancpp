@@ -21,7 +21,20 @@ public:
     MasterTablebase() {}
     MasterTablebase(fs::path source_file_path)
     {
-        // deserialize
+        int count = 0;
+        for (const auto &entry : std::filesystem::directory_iterator(source_file_path))
+        {
+            std::string filepath = entry.path().generic_string();
+            size_t path_end = filepath.rfind('/');
+            size_t extension_start = filepath.rfind(".tb");
+            std::string filename = filepath.substr(path_end + 1, extension_start - path_end - 1);
+            uint16_t bucket = std::stoi(filename);
+            m_tablebases[bucket].read_from_file(source_file_path);
+            count++;
+        }
+        std::cout << ColorCode::green << "Sucessfully read "
+                  << ColorCode::yellow << count << ColorCode::green << " tablebases"
+                  << ColorCode::end << std::endl;
     }
 
     static uint16_t get_shard_count()
@@ -74,4 +87,4 @@ public:
     }
 };
 
-extern MasterTablebase masterTablebase;
+extern MasterTablebase engine_opening_tablebase;

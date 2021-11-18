@@ -178,7 +178,24 @@ void process_command_position(std::vector<std::string> args)
 }
 void process_command_go(std::vector<std::string> args)
 {
-  hardcoded_response();
+  // 	* movetime <x>
+  // 	search exactly x mseconds
+  // * infinite
+  // 	search until the "stop" command. Do not exit the search without being told so in this mode!
+  // write function that creates vector of pairs for keys/values
+  int x = 1;
+  int time = 5000;
+  //movetime
+  if (x == 1)
+  {
+    // assume pos is already set up
+    find_best_move(time);
+  }
+  else if (x == 2)
+  {
+    find_best_move(0);
+  }
+  // hardcoded_response();
 };
 void process_command_stop(std::vector<std::string> args){};
 void process_command_ponderhit(std::vector<std::string> args){};
@@ -207,6 +224,25 @@ void process_command_create_tablebases(std::vector<std::string> args)
   start_pgn_processing_tasks(tablebase_name);
 }
 
+void process_command_read_tablebases(std::vector<std::string> args)
+{
+  std::string tablebase_name;
+
+  std::cout << "Input the name of the tablebase you would like to read:" << std::endl;
+  std::getline(std::cin, tablebase_name);
+  std::cout << "tablebase name: {" << tablebase_name << "}" << std::endl;
+
+  if (std::filesystem::is_directory(master_tablebase_data_dir / tablebase_name))
+  {
+    start_deserialization(tablebase_name);
+  }
+  else
+  {
+    std::cerr << ColorCode::red << "Cannot find tablebase with name \"" << tablebase_name
+              << ColorCode::end << std::endl;
+  }
+}
+
 void init_command_map()
 {
   command_map["uci"] = Command::uci;
@@ -220,6 +256,7 @@ void init_command_map()
   command_map["ponderhit"] = Command::ponderhit;
   command_map["quit"] = Command::quit;
   command_map["create_tablebases"] = Command::create_tablebases;
+  command_map["read_tablebases"] = Command::read_tablebases;
 
   command_processor_map[Command::uci] = &process_command_uci;
   command_processor_map[Command::debug] = &process_command_debug;
@@ -232,6 +269,7 @@ void init_command_map()
   command_processor_map[Command::ponderhit] = &process_command_ponderhit;
   command_processor_map[Command::quit] = &process_command_quit;
   command_processor_map[Command::create_tablebases] = &process_command_create_tablebases;
+  command_processor_map[Command::read_tablebases] = &process_command_read_tablebases;
 }
 
 void process_command(std::string command)
@@ -252,7 +290,7 @@ void process_command(std::string command)
 
   // if the command is one of the ones that requires user input, dont spawn a new thread for it
   // so that it's easier to get user input.
-  if (primary.compare("create_tablebases") == 0)
+  if (primary.compare("create_tablebases") == 0 || primary.compare("read_tablebases") == 0)
   {
     command_processor(args);
   }

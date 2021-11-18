@@ -18,6 +18,11 @@ const std::string test_files[8] = {
     "/Users/vas/repos/matemancpp/database/pgn/Winawer.pgn",
 };
 
+void start_deserialization(std::string tablebase_name)
+{
+  MasterTablebase masterTablebase(master_tablebase_data_dir / tablebase_name);
+}
+
 void start_pgn_processing_tasks(std::string tablebase_name)
 {
   PgnProcessor pgnProcessor(master_tablebase_data_dir / tablebase_name);

@@ -28,6 +28,8 @@ const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
 
 void start_pgn_processing_tasks(std::string tablebase_name);
 
+void start_deserialization(std::string tablebase_name);
+
 void print_pgn_processing_performance_summary(
     std::__1::chrono::steady_clock::time_point clock_start,
     std::__1::chrono::steady_clock::time_point clock_end,

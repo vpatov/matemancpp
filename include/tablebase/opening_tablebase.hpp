@@ -164,6 +164,70 @@ struct OpeningTablebase
     stream.close();
   }
 
+  void read_from_file(std::string file_path)
+  {
+    std::streampos size;
+    char *data;
+    int index = 0;
+    std::ifstream infile(file_path, std::ios::binary | std::ios::ate);
+
+    if (infile.is_open())
+    {
+      size = infile.tellg();
+
+      data = new char[size];
+      infile.seekg(0, std::ios::beg);
+      infile.read(data, size);
+      infile.close();
+    }
+    else
+    {
+      std::cerr << ColorCode::red << "Could not open file: " << file_path << ColorCode::end << std::endl;
+      assert(false);
+    }
+
+    m_root_hash = *((z_hash_t *)(data + index));
+    index += sizeof(z_hash_t);
+
+    uint32_t tablebase_size = *((uint32_t *)(data + index));
+    index += sizeof(uint32_t);
+
+    for (int n = 0; n < tablebase_size; n++)
+    {
+      z_hash_t key_hash = *((z_hash_t *)(data + index));
+      index += sizeof(z_hash_t);
+
+      uint32_t move_map_size = *((uint32_t *)(data + index));
+      index += sizeof(uint32_t);
+
+      std::shared_ptr<std::unordered_map<MoveKey, MoveEdge>> move_map =
+          std::make_shared<std::unordered_map<MoveKey, MoveEdge>>();
+
+      for (int m = 0; m < move_map_size; m++)
+      {
+
+        MoveKey move_key = *((uint32_t *)(data + index));
+        index += sizeof(MoveKey);
+
+        z_hash_t dest_hash = *((z_hash_t *)(data + index));
+        index += sizeof(MoveEdge::m_dest_hash);
+
+        char pgn_move[8];
+        strncpy(pgn_move, data + index, sizeof(MoveEdge::m_pgn_move));
+        index += sizeof(MoveEdge::m_pgn_move);
+
+        uint32_t times_played = *((uint32_t *)(data + index));
+        index += sizeof(MoveEdge::m_times_played);
+
+        MoveEdge moveEdge(dest_hash, pgn_move, times_played);
+
+        move_map->insert(std::pair(move_key, moveEdge));
+      }
+
+      m_tablebase[key_hash] = move_map;
+    }
+  }
+
   static std::unique_ptr<OpeningTablebase> deserialize_tablebase(std::string file_path)
   {
     std::streampos size;
