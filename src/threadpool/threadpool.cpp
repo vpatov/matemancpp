@@ -76,7 +76,7 @@ void ThreadPool::spin()
             task_queue.pop();
         }
 
-        task.m_fn(task.m_arg);
+        task.execute();
 
         if (THREAD_POOL_DEBUG)
         {

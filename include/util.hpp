@@ -2,6 +2,14 @@
 
 #include <regex>
 #include <iostream>
+#include <filesystem>
+#include <string>
+
+namespace fs = std::filesystem;
+
+const fs::path project_root_dir = (PROJECT_ROOT_DIR); // PROJECT_ROOT_DIR is defined in CMakeLists.txt
+const fs::path dev_data_dir = project_root_dir / "dev_data";
+const std::string program_start_timestamp = std::to_string(std::chrono::seconds(std::time(NULL)).count());
 
 struct Move
 {

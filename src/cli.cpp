@@ -1,5 +1,6 @@
 #include "cli.hpp"
 #include "options.hpp"
+#include "process_pgn/read_pgn_data.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <iostream>
@@ -189,17 +190,21 @@ void process_command_quit(std::vector<std::string> args)
 
 void process_command_create_tablebases(std::vector<std::string> args)
 {
-  std::string user_input;
+  std::string tablebase_name;
   std::cout << "Input the name for this tablebase (leave blank to use the current timestamp):" << std::endl;
-  std::getline(std::cin, user_input);
+  std::getline(std::cin, tablebase_name);
 
-  if (user_input.size())
+  if (!tablebase_name.size())
   {
+    tablebase_name = program_start_timestamp;
   }
-  std::cout << "you put in :{" << user_input << "}" << std::endl;
+  else
+  {
+    // check tablebase name to make sure there are no illegal characters.
+  }
+  std::cout << "tablebase name: {" << tablebase_name << "}" << std::endl;
 
-  exit(1);
-  // start_pgn_processing_tasks();
+  start_pgn_processing_tasks(tablebase_name);
 }
 
 void init_command_map()

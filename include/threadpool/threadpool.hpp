@@ -17,12 +17,37 @@
 struct Task
 {
     void (*m_fn)(std::string arg);
+    std::function<void(std::string &)> *m_function;
     std::string m_arg;
 
     Task(){};
-    Task(void (*fn)(std::string arg), std::string arg) : m_fn(fn), m_arg(arg){};
+    Task(void (*fn)(std::string arg), std::string arg) : m_fn(fn), m_arg(arg)
+    {
+        m_function = NULL;
+    };
 
-    // Task<Arg>(void (*fn)(Arg *arg), Arg &&arg) : m_fn(fn), m_arg(arg) {}
+    Task(std::function<void(std::string &)> *fn, std::string arg)
+    {
+        m_fn = NULL;
+        m_function = fn;
+        m_arg = arg;
+    }
+
+    void execute()
+    {
+        if (m_fn != NULL)
+        {
+            m_fn(m_arg);
+        }
+        else if (m_function != NULL)
+        {
+            (*(m_function))(m_arg);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
 };
 
 class ThreadPool

@@ -123,6 +123,14 @@ struct OpeningTablebase
   {
     std::fstream stream(file_path, std::ios::out | std::ios::binary);
 
+    if (!stream.is_open())
+    {
+      std::cerr
+          << ColorCode::red << "Cannot open filestream to path: " << ColorCode::end << std::endl
+          << file_path << std::endl;
+      return;
+    }
+
     // 8 bytes (464bits) -> z_hash_t: hash of starting position
     write(&stream, &m_root_hash, sizeof(z_hash_t));
 
@@ -241,22 +249,6 @@ struct OpeningTablebase
       openingTablebases.push_back(deserialize_tablebase(entry.path()));
     }
     return openingTablebases;
-  }
-
-  static std::set<std::string> get_already_completed_tablebases_filenames(std::string desired_timestamp)
-  {
-    std::string tablebase_directory_path = individual_tablebases_filepath + '/' + desired_timestamp;
-    std::set<std::string> completed_tablebases;
-    for (const auto &entry : std::filesystem::directory_iterator(tablebase_directory_path))
-    {
-      std::string filepath = entry.path().generic_string();
-      size_t path_end = filepath.rfind('/');
-      size_t extension_start = filepath.rfind(".tb");
-      std::string filename = filepath.substr(path_end + 1, extension_start - path_end - 1);
-
-      completed_tablebases.insert(filename);
-    }
-    return completed_tablebases;
   }
 
   static std::shared_ptr<OpeningTablebase> merge_tablebases(
