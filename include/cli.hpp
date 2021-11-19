@@ -33,7 +33,6 @@ enum Command
 class CLI
 {
 public:
-  std::shared_ptr<MasterTablebase> m_master_tablebase;
   Engine m_engine;
   spdlog::logger m_logger;
 
@@ -57,19 +56,6 @@ public:
 
   CLI() : m_logger(create_logger())
   {
-    // try
-    // {
-
-    // std::vector<spdlog::sink_ptr> sinks;
-    // sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
-    // logger = spdlog::basic_logger_mt("basic_logger", "logs/basic-log.txt");
-    // }
-    // catch (const spdlog::spdlog_ex &ex)
-    // {
-    //   std::cout << "Log init failed: " << ex.what() << std::endl;
-    //   throw ex;
-    //   exit(1);
-    // }
   }
 
   void process_command_uci(std::vector<std::string> args);
