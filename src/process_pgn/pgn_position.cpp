@@ -428,6 +428,42 @@ void Position::adjust_position(uint8_t src_square,
     m_mailbox[src_square] = 0;
 }
 
+// LASTLEFTOFF
+// TODO refactor position advancement such that it can calculate the en passant square on its own
+// Essentially, create a function that accepts a position, and a pgn move, and that performs the pgn move,
+// while also checking for legality.
+void Position::advance_position(uint8_t src_square,
+                                uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square)
+{
+    assert(is_valid_square(src_square));
+    assert(is_valid_square(dest_square));
+
+    Color color = m_whites_turn ? Color::WHITE : Color::BLACK;
+
+    m_mailbox[dest_square] =
+        promotion_piece ? promotion_piece : m_mailbox[src_square];
+
+    if (m_en_passant_square &&
+        m_en_passant_square == dest_square &&
+        ((m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN))))
+    {
+        // If we are capturing en-passant there should never be a promotion piece
+        assert(!promotion_piece);
+
+        // Remove the pawn that is being captured
+        uint8_t square_of_pawn_being_captured = BACKWARD_RANK(color, dest_square);
+        assert(m_mailbox[square_of_pawn_being_captured] == m_whites_turn
+                   ? B_PAWN
+                   : W_PAWN);
+        m_mailbox[square_of_pawn_being_captured] = 0;
+    }
+    m_en_passant_square = new_en_passant_square;
+
+    m_whites_turn = !m_whites_turn;
+    m_plies++;
+    m_mailbox[src_square] = 0;
+}
+
 void Position::assert_correct_player_turn(uint8_t src_square, uint8_t dest_square)
 {
     assert(is_valid_square(src_square));

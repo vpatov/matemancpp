@@ -26,7 +26,7 @@ const std::string non_castling_move_regex =
     "([1-8])(=[RNBKQ])?([\\+\\#])?";
 const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
 
-void start_pgn_processing_tasks(std::string tablebase_name);
+std::shared_ptr<MasterTablebase> create_tablebases_from_pgn_data(std::string tablebase_name);
 
 void start_deserialization(std::string tablebase_name);
 
@@ -41,23 +41,31 @@ void print_pgn_processing_header();
 
 class PgnProcessor
 {
-    MasterTablebase m_masterTablebase;
+    std::shared_ptr<MasterTablebase> m_masterTablebase;
     fs::path m_tablebase_destination_file_path;
 
 public:
-    PgnProcessor(std::string tablebase_destination_file_path) : m_tablebase_destination_file_path(tablebase_destination_file_path) {}
+    PgnProcessor(std::string tablebase_destination_file_path) : m_tablebase_destination_file_path(tablebase_destination_file_path)
+    {
+        m_masterTablebase = std::make_shared<MasterTablebase>();
+    }
 
-    void serialize_all()
+    std::shared_ptr<MasterTablebase> serialize_all()
     {
         auto clock_start = std::chrono::high_resolution_clock::now();
         std::cout << ColorCode::yellow << "Serializing tablebases..." << ColorCode::end << std::endl;
 
-        m_masterTablebase.serialize_all(m_tablebase_destination_file_path);
+        m_masterTablebase->serialize_all(m_tablebase_destination_file_path);
 
         auto clock_end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
         std::cout << ColorCode::green << "Done serializing! " << ColorCode::end
                   << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
+
+        // test tablebases
+        m_masterTablebase->walk_down_most_popular_path();
+
+        return m_masterTablebase;
     }
 
     void process_pgn_files()
@@ -125,7 +133,7 @@ public:
             if (reading_game_moves)
             {
 
-                bool is_game_line = games->back()->read_game_move_line(line, &m_masterTablebase);
+                bool is_game_line = games->back()->read_game_move_line(line, m_masterTablebase.get());
                 if (games->back()->m_finishedReading)
                 {
 
@@ -144,6 +152,6 @@ public:
         auto clock_end = std::chrono::high_resolution_clock::now();
         print_pgn_processing_performance_summary(
             clock_start, clock_end, std::this_thread::get_id(),
-            games->size(), m_masterTablebase.total_size(), file_path);
+            games->size(), m_masterTablebase->total_size(), file_path);
     }
 };

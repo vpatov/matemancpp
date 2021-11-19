@@ -9,44 +9,29 @@
 #include <unordered_map>
 #include "representation/position.hpp"
 #include <vector>
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/basic_file_sink.h"
+
 #include "engine/engine.hpp"
 
 std::unordered_map<Command, CommandProcessor> command_processor_map;
 std::unordered_map<std::string, Command> command_map;
 
-std::shared_ptr<spdlog::logger> logger;
-std::shared_ptr<Position> current_position;
-
 int hardcoded_stage = 0;
 
-void log_and_respond(std::string output)
+void CLI::log_and_respond(std::string output)
 {
-  logger->info("--> {}", output);
+  m_logger.info("--> {}", output);
   std::cout << output << std::endl;
 }
 
-void cli_loop()
+void CLI::cli_loop()
 {
-  try
-  {
-    logger = spdlog::basic_logger_mt("basic_logger", "logs/basic-log.txt");
-    spdlog::flush_every(std::chrono::seconds(1));
-  }
-  catch (const spdlog::spdlog_ex &ex)
-  {
-    std::cout << "Log init failed: " << ex.what() << std::endl;
-    exit(1);
-  }
-
-  logger->info("Starting main clip loop...");
+  m_logger.info("Starting main clip loop...");
   init_command_map();
 
   for (std::string line; std::getline(std::cin, line);)
   {
 
-    logger->info("<-- {}", line);
+    m_logger.info("<-- {}", line);
 
     // spawn thread to handle command
     // if command is computationally expensive, command will
@@ -55,17 +40,17 @@ void cli_loop()
   }
 }
 
-void announce_uciok() { log_and_respond("uciok"); }
-void announce_readyok() { log_and_respond("readyok"); }
+void CLI::announce_uciok() { log_and_respond("uciok"); }
+void CLI::announce_readyok() { log_and_respond("readyok"); }
 
-void process_command_uci(std::vector<std::string> args)
+void CLI::process_command_uci(std::vector<std::string> args)
 {
   log_and_respond("id name MateMan");
   log_and_respond("id author Vasia Patov");
   announce_options();
   announce_uciok();
 }
-void hardcoded_response()
+void CLI::hardcoded_response()
 {
   switch (hardcoded_stage)
   {
@@ -106,29 +91,29 @@ void hardcoded_response()
   hardcoded_stage++;
 }
 
-void process_command_debug(std::vector<std::string> args)
+void CLI::process_command_debug(std::vector<std::string> args)
 {
   std::cout << "Processing Debug!" << std::endl;
   sleep(10);
   std::cout << "Done Debug!" << std::endl;
 }
 
-void process_command_isready(std::vector<std::string> args)
+void CLI::process_command_isready(std::vector<std::string> args)
 {
   // TODO Determine if engine is actually ready (if it has finished setting all
   // options)
   announce_readyok();
 };
-void process_command_register(std::vector<std::string> args){};
-void process_command_ucinewgame(std::vector<std::string> args){};
+void CLI::process_command_register(std::vector<std::string> args){};
+void CLI::process_command_ucinewgame(std::vector<std::string> args){};
 
 // position startpos moves c2c4
 // position [fen <fenstring> | startpos ]  moves <move1> .... <movei>
-void process_command_position(std::vector<std::string> args)
+void CLI::process_command_position(std::vector<std::string> args)
 {
   if (!args.size())
   {
-    logger->warn("No arguments for position command.");
+    m_logger.warn("No arguments for position command.");
     return;
   }
 
@@ -138,7 +123,7 @@ void process_command_position(std::vector<std::string> args)
   if (startpos_type.compare("startpos") == 0)
   {
     // init position to startpos
-    current_position = starting_position();
+    m_engine.m_current_position = starting_position();
   }
   else if (startpos_type.compare("fen") == 0)
   {
@@ -147,14 +132,14 @@ void process_command_position(std::vector<std::string> args)
   }
   else
   {
-    logger->warn("Unrecognized command for position: {}", startpos_type);
+    m_logger.warn("Unrecognized command for position: {}", startpos_type);
     return;
   }
 
   // either except moves move1 move2 ... moveN, or nothing
   if (it == args.end())
   {
-    logger->debug("No moves found, using current position.");
+    m_logger.debug("No moves found, using current position.");
     return;
   }
   std::string moves_str = *it++;
@@ -164,22 +149,27 @@ void process_command_position(std::vector<std::string> args)
     while (it != args.end())
     {
       std::string move = *it++;
-      logger->debug("parsing move: {}", move);
+      m_logger.debug("parsing move: {}", move);
       square_t src_square = an_square_to_index(move.substr(0, 2));
       square_t dst_square = an_square_to_index(move.substr(2, 4));
 
-      current_position->adjust_position(src_square, dst_square, 0, 0);
-      current_position->print_with_borders_highlight_squares(src_square, dst_square);
+      m_engine.m_current_position->advance_position(src_square, dst_square, 0, 0);
+      m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
     }
   }
   else
   {
-    logger->warn("Unrecognized continuation of position command: {}", moves_str);
+    // TODO also configure logger to log to stderr
+    m_logger.warn("Unrecognized continuation of position command: {}", moves_str);
   }
 }
-void process_command_go(std::vector<std::string> args)
+
+// LASTLEFTOFF implement go, position commands and test engine with moves picked from tablebase.
+
+void CLI::process_command_go(std::vector<std::string> args)
 {
-  Engine engine;
+  std::string best_move;
+
   // 	* movetime <x>
   // 	search exactly x mseconds
   // * infinite
@@ -191,27 +181,46 @@ void process_command_go(std::vector<std::string> args)
   if (x == 1)
   {
     // assume pos is already set up
-    engine.find_best_move(time);
+    best_move = m_engine.find_best_move(time);
+    // std::this_thread::sleep_for(time);
   }
+  // infinite
   else if (x == 2)
   {
-    engine.find_best_move(std::chrono::milliseconds(0));
+    best_move = m_engine.find_best_move(std::chrono::milliseconds(0));
   }
+  std::cout << "bestmove " << best_move << std::endl;
+
   // hardcoded_response();
 };
-void process_command_stop(std::vector<std::string> args){};
-void process_command_ponderhit(std::vector<std::string> args){};
-void process_command_quit(std::vector<std::string> args)
+void CLI::process_command_stop(std::vector<std::string> args)
+{
+
+  // * stop
+  // 	stop calculating as soon as possible,
+  // 	don't forget the "bestmove" and possibly the "ponder" token when finishing the search
+
+  // interrupt thread that is calculating moves, if there is a thread that is doing that.
+  // that thread should have been maintaining what the best move was at every given moment.
+  // that thread should have some sort of an interrupt handler.
+  // look into thread signaling or something
+}
+void CLI::process_command_ponderhit(std::vector<std::string> args){};
+void CLI::process_command_quit(std::vector<std::string> args)
 {
   // TODO cleanup?
   exit(0);
 }
 
-void process_command_create_tablebases(std::vector<std::string> args)
+void CLI::process_command_create_tablebases(std::vector<std::string> args)
 {
-  std::string tablebase_name;
-  std::cout << "Input the name for this tablebase (leave blank to use the current timestamp):" << std::endl;
-  std::getline(std::cin, tablebase_name);
+
+  if (args.size() < 2)
+  {
+    std::cout << "You must provide a tablebase name" << std::endl;
+    return;
+  }
+  std::string tablebase_name = args.at(1);
 
   if (!tablebase_name.size())
   {
@@ -223,20 +232,24 @@ void process_command_create_tablebases(std::vector<std::string> args)
   }
   std::cout << "tablebase name: {" << tablebase_name << "}" << std::endl;
 
-  start_pgn_processing_tasks(tablebase_name);
+  m_engine.set_tablebase(create_tablebases_from_pgn_data(tablebase_name));
 }
 
-void process_command_read_tablebases(std::vector<std::string> args)
+void CLI::process_command_read_tablebases(std::vector<std::string> args)
 {
-  std::string tablebase_name;
+  if (args.size() < 2)
+  {
+    std::cout << "You must provide a table name" << std::endl;
+    return;
+  }
+  std::string tablebase_name = args.at(1);
 
-  std::cout << "Input the name of the tablebase you would like to read:" << std::endl;
-  std::getline(std::cin, tablebase_name);
   std::cout << "tablebase name: {" << tablebase_name << "}" << std::endl;
 
   if (std::filesystem::is_directory(master_tablebase_data_dir / tablebase_name))
   {
-    start_deserialization(tablebase_name);
+
+    m_engine.set_tablebase(std::make_shared<MasterTablebase>(master_tablebase_data_dir / tablebase_name));
   }
   else
   {
@@ -245,7 +258,12 @@ void process_command_read_tablebases(std::vector<std::string> args)
   }
 }
 
-void init_command_map()
+void CLI::process_command_test_tablebases(std::vector<std::string> args)
+{
+  m_engine.m_master_tablebase->walk_down_most_popular_path();
+}
+
+void CLI::init_command_map()
 {
   command_map["uci"] = Command::uci;
   command_map["debug"] = Command::debug;
@@ -259,22 +277,24 @@ void init_command_map()
   command_map["quit"] = Command::quit;
   command_map["create_tablebases"] = Command::create_tablebases;
   command_map["read_tablebases"] = Command::read_tablebases;
+  command_map["test_tablebases"] = Command::test_tablebases;
 
-  command_processor_map[Command::uci] = &process_command_uci;
-  command_processor_map[Command::debug] = &process_command_debug;
-  command_processor_map[Command::isready] = &process_command_isready;
-  command_processor_map[Command::_register] = &process_command_register;
-  command_processor_map[Command::ucinewgame] = &process_command_ucinewgame;
-  command_processor_map[Command::position] = &process_command_position;
-  command_processor_map[Command::go] = &process_command_go;
-  command_processor_map[Command::stop] = &process_command_stop;
-  command_processor_map[Command::ponderhit] = &process_command_ponderhit;
-  command_processor_map[Command::quit] = &process_command_quit;
-  command_processor_map[Command::create_tablebases] = &process_command_create_tablebases;
-  command_processor_map[Command::read_tablebases] = &process_command_read_tablebases;
+  command_processor_map[Command::uci] = &CLI::process_command_uci;
+  command_processor_map[Command::debug] = &CLI::process_command_debug;
+  command_processor_map[Command::isready] = &CLI::process_command_isready;
+  command_processor_map[Command::_register] = &CLI::process_command_register;
+  command_processor_map[Command::ucinewgame] = &CLI::process_command_ucinewgame;
+  command_processor_map[Command::position] = &CLI::process_command_position;
+  command_processor_map[Command::go] = &CLI::process_command_go;
+  command_processor_map[Command::stop] = &CLI::process_command_stop;
+  command_processor_map[Command::ponderhit] = &CLI::process_command_ponderhit;
+  command_processor_map[Command::quit] = &CLI::process_command_quit;
+  command_processor_map[Command::create_tablebases] = &CLI::process_command_create_tablebases;
+  command_processor_map[Command::read_tablebases] = &CLI::process_command_read_tablebases;
+  command_processor_map[Command::test_tablebases] = &CLI::process_command_test_tablebases;
 }
 
-void process_command(std::string command)
+void CLI::process_command(std::string command)
 {
   std::vector<std::string> args;
   boost::algorithm::split(args, command, boost::algorithm::is_any_of("\t "),
@@ -288,17 +308,17 @@ void process_command(std::string command)
     std::cout << "Could not interpret command " << command << std::endl;
     return;
   }
-  auto command_processor = command_processor_map.find(it->second)->second;
+  CommandProcessor command_processor = command_processor_map.find(it->second)->second;
 
   // if the command is one of the ones that requires user input, dont spawn a new thread for it
   // so that it's easier to get user input.
   if (primary.compare("create_tablebases") == 0 || primary.compare("read_tablebases") == 0)
   {
-    command_processor(args);
+    (this->*command_processor)(args);
   }
   else
   {
-    std::thread command_thread(command_processor, args);
+    std::thread command_thread(command_processor, this, args);
     command_thread.detach();
   }
 }

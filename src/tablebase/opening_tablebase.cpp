@@ -1,6 +1,7 @@
 #include "tablebase/opening_tablebase.hpp"
 #include "util.hpp"
 #include <set>
+#include <sstream>
 
 /* 
   This function calculates and returns the move key, which is a concatenation 
@@ -14,6 +15,22 @@ uint32_t generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t prom
     // (empty/reserved) + start_square + end_square + promotion_piece
     // 8 bits             8 bits         8 bits       8 bits
     return (src_square << 16) + (dest_square << 8) + promotion_piece;
+}
+
+// | 00 | start_square | end_square | promotion_piece
+
+std::string generate_long_algebraic_notation(MoveKey move_key)
+{
+    std::stringstream ss;
+    ss << index_to_an_square((move_key >> 16) & 0xff);
+    ss << index_to_an_square((move_key >> 8) & 0xff);
+    piece_t promotion_piece = move_key & 0xff;
+
+    if (promotion_piece)
+    {
+        ss << "=" << piece_to_char(promotion_piece);
+    }
+    return ss.str();
 }
 
 bool compare_key_move_pair(std::pair<MoveKey, MoveEdge> p1, std::pair<MoveKey, MoveEdge> p2)
@@ -96,6 +113,18 @@ void OpeningTablebase::update(z_hash_t insert_hash, z_hash_t dest_hash, MoveKey 
     {
         increment_times_played_or_insert_move(node, move_key, moveEdge);
     }
+
+    // if (insert_hash == 1113003689047388558)
+    // {
+    //     std::cout << ColorCode::red << "insert hash is equal to special value. pgn move: "
+    //               << pgn_move << ColorCode::end << std::endl;
+    // }
+
+    // if (dest_hash == 1113003689047388558)
+    // {
+    //     std::cout << ColorCode::red << "dest hash is equal to special value. pgn move: "
+    //               << pgn_move << ColorCode::end << std::endl;
+    // }
 }
 
 void OpeningTablebase::walk_down_most_popular_path(std::string file_path)
@@ -197,6 +226,45 @@ void OpeningTablebase::walk_down_most_popular_path()
             to_visit.push(next_node);
         }
     }
+}
+
+std::string OpeningTablebase::pick_move_from_sample(z_hash_t position_hash)
+{
+
+    auto node = m_tablebase.find(position_hash);
+
+    if (node == m_tablebase.end())
+    {
+        return "";
+    }
+
+    uint32_t sum_times_played = 0;
+    for (auto it = node->second->begin(); it != node->second->end(); it++)
+    {
+        auto move = *it;
+        sum_times_played += move.second.m_times_played;
+    }
+
+    // random from (0,to sum_times_played)
+    // iterate through moves, and check to see if random var is less than the running sum
+    // of times played. If a move was played X% of the time, it will be picked X% of the time.
+    uint32_t random_var = random_bitstring() % sum_times_played; // is this evenly distributed?
+    uint32_t addend = 0;
+    for (auto it = node->second->begin(); it != node->second->end(); it++)
+    {
+        auto move = *it;
+        addend += move.second.m_times_played;
+        if (random_var < addend)
+        {
+            auto move_key = move.first;
+            return generate_long_algebraic_notation(move_key);
+        }
+    }
+
+    // should not reach this point, because our random number should be
+    // less than the sum of the times_played in this node, and our condition should trigger
+    assert(false);
+    return "";
 }
 
 /*

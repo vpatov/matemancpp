@@ -1,9 +1,84 @@
 #include "process_pgn/read_pgn_data.hpp"
 #include "cli.hpp"
+#include "representation/position.hpp"
+#include "tablebase/zobrist.hpp"
 
 int main(int argc, char *argv[])
 
 {
+   CLI cli;
+
+   cli.process_command_uci({});
+   cli.process_command_create_tablebases({"create_tablebases", "debug_002"});
+
+   std::vector<std::string> args = {"test_tablebases", "test"};
+   // cli.process_command_read_tablebases(args);
+   cli.process_command_position({"position", "startpos"});
+
+   auto position = starting_position();
+   std::cout << "starting_position:\n"
+             << zobrist_hash(position.get()) << std::endl;
+
+   square_t src1 = an_square_to_index("e2");
+   square_t dst1 = an_square_to_index("e4");
+   position->advance_position(src1, dst1, 0, 36);
+
+   std::cout << "position after e2e4:\n"
+             << zobrist_hash(position.get()) << std::endl;
+
+   cli.process_command_position({"position", "startpos", "moves", "e2e4"});
+
+   auto move_map = (*cli.m_engine.m_master_tablebase)[zobrist_hash(starting_position().get())];
+
+   for (auto it = move_map->begin(); it != move_map->end(); it++)
+   {
+      auto move_key = it->first;
+      auto move_edge = it->second;
+      std::cout << "---" << std::endl;
+      std::cout << move_edge.m_dest_hash << " - "
+                << move_edge.m_pgn_move << " - " << move_edge.m_times_played << std::endl;
+      // std::cout << it->first << ", " << it->second
+   }
+   std::cout << "======================" << std::endl;
+
+   auto move_map2 = (*cli.m_engine.m_master_tablebase)[1113003689047388558];
+
+   for (auto it = move_map2->begin(); it != move_map2->end(); it++)
+   {
+      auto move_key = it->first;
+      auto move_edge = it->second;
+      std::cout << "---" << std::endl;
+      std::cout << move_edge.m_dest_hash << " - "
+                << move_edge.m_pgn_move << " - " << move_edge.m_times_played << std::endl;
+      // std::cout << it->first << ", " << it->second
+   }
+
+   // for (auto it = tablebase.begin(); it != node.m_tablebase.end(); it++)
+   // {
+   //    auto first = it->first;
+   //    auto second = it->second;
+   // }
+
+   // PROBLEM is because the pgn processing code is making changes to the position
+   // the adjust method doesnt perform the complete change to the position, with things
+   // such as plies and turn to move.....
+   // also en passant square is calculated by pgn processing and then passed to adjust method.
+   // bad design
+
+   // TODO refactor interface to position?
+   // problem is that you are using adjust_position for two purposeS:
+   //    - to temporarily assume a position to check for legality
+   //    - to actually change the position and move forward
+   // also, advance positino shouldnt be taking en_passant_square as an argument.
+   std::cout
+       << "position exists? "
+       << cli.m_engine.m_master_tablebase->position_exists(
+              zobrist_hash(cli.m_engine.m_current_position.get()))
+       << std::endl;
+   std::cout << "position exists? "
+             << cli.m_engine.m_master_tablebase->position_exists(
+                    zobrist_hash(position.get()))
+             << std::endl;
 
    // std::string user_input;
    // std::cout << "Input the name for this tablebase (leave blank to use the current timestamp):" << std::endl;
@@ -12,7 +87,7 @@ int main(int argc, char *argv[])
    // exit(1);
 
    // start_pgn_processing_tasks();
-   cli_loop();
+   // cli.cli_loop();
 }
 
 /*

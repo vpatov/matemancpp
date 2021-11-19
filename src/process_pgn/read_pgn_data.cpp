@@ -20,14 +20,13 @@ const std::string test_files[8] = {
 
 void start_deserialization(std::string tablebase_name)
 {
-  MasterTablebase masterTablebase(master_tablebase_data_dir / tablebase_name);
 }
 
-void start_pgn_processing_tasks(std::string tablebase_name)
+std::shared_ptr<MasterTablebase> create_tablebases_from_pgn_data(std::string tablebase_name)
 {
   PgnProcessor pgnProcessor(master_tablebase_data_dir / tablebase_name);
   pgnProcessor.process_pgn_files();
-  pgnProcessor.serialize_all();
+  return pgnProcessor.serialize_all();
 
   // ----------------------------
 

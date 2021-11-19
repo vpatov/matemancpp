@@ -51,7 +51,9 @@ const long FIVE_MILLION = 5000000;
 // 0x00 + start_square + end_square + promotion_piece
 typedef uint32_t MoveKey;
 
-uint32_t generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t promotion_piece);
+MoveKey generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t promotion_piece);
+
+std::string generate_long_algebraic_notation(MoveKey move_key);
 
 struct MoveEdge
 {
@@ -99,6 +101,8 @@ struct MoveEdge
 
 typedef std::__1::unordered_map<z_hash_t, std::__1::shared_ptr<std::__1::unordered_map<MoveKey, MoveEdge>>>::iterator tablebase_iter;
 
+bool compare_key_move_pair(std::pair<MoveKey, MoveEdge> p1, std::pair<MoveKey, MoveEdge> p2);
+
 struct OpeningTablebase
 {
   std::unordered_map<z_hash_t, std::shared_ptr<std::unordered_map<MoveKey, MoveEdge>>> m_tablebase;
@@ -112,12 +116,37 @@ struct OpeningTablebase
 
   void walk_down_most_popular_path();
   void walk_down_most_popular_path(std::string file_path);
+  std::string pick_move_from_sample(z_hash_t starting_hash);
+
+  bool position_exists(z_hash_t position_hash)
+  {
+    return m_tablebase.find(position_hash) != m_tablebase.end();
+  }
 
   template <typename T>
   static void write(std::fstream *stream, T *data, size_t size)
   {
     stream->write(reinterpret_cast<char *>(data), size);
   }
+
+  // void calculate_size_statistics()
+  // {
+  //   // output the total number of nodes
+  //   // the total length of move lists
+  //   // the deepest branch
+
+  //   int deepest_branch = 0;
+  //   int total_move_list_length = 0;
+
+  //   std::set<z_hash_t> visited;
+
+  //   for (auto it = m_tablebase.begin(); it != m_tablebase.end(); it++)
+  //   {
+  //     z_hash_t current_position_hash = it->first;
+  //     auto move_key_move_edge_map = it->second;
+
+  //   }
+  // }
 
   void serialize_tablebase(std::string file_path)
   {
@@ -207,6 +236,7 @@ struct OpeningTablebase
       {
 
         MoveKey move_key = *((uint32_t *)(data + index));
+        assert((move_key >> 24) == 0);
         index += sizeof(MoveKey);
 
         z_hash_t dest_hash = *((z_hash_t *)(data + index));
