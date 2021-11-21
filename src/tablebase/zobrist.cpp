@@ -79,18 +79,5 @@ z_hash_t zobrist_hash(Position *position)
     hash ^= zobrist_en_passant_square_table[position->m_en_passant_square];
   }
 
-  ////
-  if (hash == 1113003689047388558)
-  {
-    int y = 5;
-    y += 2;
-  }
-  else if (hash == 4571951291165542340)
-  {
-    int x = 5;
-    x += 2;
-  }
-  ////
-
   return hash;
 }

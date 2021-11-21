@@ -5,6 +5,7 @@
 #include "threadpool/threadpool.hpp"
 #include "util.hpp"
 #include "pgn_game.hpp"
+#include "tablebase/tablebase.hpp"
 #include <filesystem>
 #include <fstream>
 #include <set>
@@ -41,13 +42,13 @@ void print_pgn_processing_header();
 
 class PgnProcessor
 {
-    std::shared_ptr<Tablebase> m_masterTablebase;
+    std::shared_ptr<Tablebase> m_tablebase;
     fs::path m_tablebase_destination_file_path;
 
 public:
     PgnProcessor(std::string tablebase_destination_file_path) : m_tablebase_destination_file_path(tablebase_destination_file_path)
     {
-        m_masterTablebase = std::make_shared<Tablebase>();
+        m_tablebase = std::make_shared<Tablebase>();
     }
 
     std::shared_ptr<Tablebase> serialize_all()
@@ -55,7 +56,7 @@ public:
         auto clock_start = std::chrono::high_resolution_clock::now();
         std::cout << ColorCode::yellow << "Serializing tablebases..." << ColorCode::end << std::endl;
 
-        m_masterTablebase->serialize_all(m_tablebase_destination_file_path);
+        m_tablebase->serialize_all(m_tablebase_destination_file_path);
 
         auto clock_end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
@@ -63,9 +64,9 @@ public:
                   << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
 
         // test tablebases
-        m_masterTablebase->walk_down_most_popular_path();
+        m_tablebase->walk_down_most_popular_path();
 
-        return m_masterTablebase;
+        return m_tablebase;
     }
 
     void process_pgn_files()
@@ -133,7 +134,7 @@ public:
             if (reading_game_moves)
             {
 
-                bool is_game_line = games->back()->read_game_move_line(line, m_masterTablebase.get());
+                bool is_game_line = games->back()->read_game_move_line(line, m_tablebase.get());
                 if (games->back()->m_finishedReading)
                 {
 
@@ -152,6 +153,6 @@ public:
         auto clock_end = std::chrono::high_resolution_clock::now();
         print_pgn_processing_performance_summary(
             clock_start, clock_end, std::this_thread::get_id(),
-            games->size(), m_masterTablebase->total_size(), file_path);
+            games->size(), m_tablebase->total_size(), file_path);
     }
 };
