@@ -26,7 +26,7 @@ const std::string non_castling_move_regex =
     "([1-8])(=[RNBKQ])?([\\+\\#])?";
 const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
 
-std::shared_ptr<MasterTablebase> create_tablebases_from_pgn_data(std::string tablebase_name);
+std::shared_ptr<Tablebase> create_tablebases_from_pgn_data(std::string tablebase_name);
 
 void start_deserialization(std::string tablebase_name);
 
@@ -41,16 +41,16 @@ void print_pgn_processing_header();
 
 class PgnProcessor
 {
-    std::shared_ptr<MasterTablebase> m_masterTablebase;
+    std::shared_ptr<Tablebase> m_masterTablebase;
     fs::path m_tablebase_destination_file_path;
 
 public:
     PgnProcessor(std::string tablebase_destination_file_path) : m_tablebase_destination_file_path(tablebase_destination_file_path)
     {
-        m_masterTablebase = std::make_shared<MasterTablebase>();
+        m_masterTablebase = std::make_shared<Tablebase>();
     }
 
-    std::shared_ptr<MasterTablebase> serialize_all()
+    std::shared_ptr<Tablebase> serialize_all()
     {
         auto clock_start = std::chrono::high_resolution_clock::now();
         std::cout << ColorCode::yellow << "Serializing tablebases..." << ColorCode::end << std::endl;

@@ -2,10 +2,12 @@
 #include "cli.hpp"
 #include "representation/position.hpp"
 #include "tablebase/zobrist.hpp"
+#include <unordered_map>
 
 int main(int argc, char *argv[])
 
 {
+
    CLI cli;
    cli.cli_loop();
 }

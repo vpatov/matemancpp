@@ -17,15 +17,6 @@ const fs::path tablebase_data_dir = dev_data_dir / "tablebase";
 const fs::path master_tablebase_data_dir = tablebase_data_dir / "master_tablebase";
 const fs::path completed_files_filepath = dev_data_dir / "completed_files.txt";
 
-struct Move
-{
-    uint8_t src_square;
-    uint8_t dest_square;
-    uint8_t promotion_piece;
-
-    friend std::ostream &operator<<(std::ostream &os, Move &move);
-};
-
 namespace ColorCode
 {
     static const std::string white = "\u001b[37m";
@@ -38,5 +29,4 @@ namespace ColorCode
     static const std::string end = "\u001b[0m";
 };
 
-Move unpack_move_key(uint32_t move_key);
 char getc(int i, std::smatch &matches);

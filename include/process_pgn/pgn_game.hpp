@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include "representation/position.hpp"
-#include "tablebase/master_tablebase.hpp"
+#include "tablebase/tablebase.hpp"
 
 struct metadata_entry
 {
@@ -27,9 +27,9 @@ struct PgnGame
     std::vector<uint32_t> m_move_list;
 
     bool read_metadata_line(std::string &line);
-    void process_player_move(std::string player_move, bool whites_turn, MasterTablebase *masterTablebase);
+    void process_player_move(std::string player_move, bool whites_turn, Tablebase *masterTablebase);
     void process_result(std::string resultstr);
-    bool read_game_move_line(std::string &line, MasterTablebase *masterTablebase);
+    bool read_game_move_line(std::string &line, Tablebase *masterTablebase);
     void populateMetadata();
     void printGameSummary();
 

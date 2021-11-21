@@ -1,7 +1,7 @@
 #include "process_pgn/read_pgn_data.hpp"
 #include "process_pgn/pgn_game.hpp"
 #include "threadpool/threadpool.hpp"
-#include "tablebase/master_tablebase.hpp"
+#include "tablebase/tablebase.hpp"
 #include "tablebase/persistence.hpp"
 #include <chrono>
 #include <utility>
@@ -22,7 +22,7 @@ void start_deserialization(std::string tablebase_name)
 {
 }
 
-std::shared_ptr<MasterTablebase> create_tablebases_from_pgn_data(std::string tablebase_name)
+std::shared_ptr<Tablebase> create_tablebases_from_pgn_data(std::string tablebase_name)
 {
   PgnProcessor pgnProcessor(master_tablebase_data_dir / tablebase_name);
   pgnProcessor.process_pgn_files();
@@ -134,22 +134,22 @@ void print_pgn_processing_header()
 
 void hash_distribution()
 {
-  long tablebase_position_hash_distribution[MasterTablebase::get_shard_count()];
-  long tablebase_position_hash_hash_distribution[MasterTablebase::get_shard_count()];
-  for (int i = 0; i < MasterTablebase::get_shard_count(); i++)
+  long tablebase_position_hash_distribution[Tablebase::get_shard_count()];
+  long tablebase_position_hash_hash_distribution[Tablebase::get_shard_count()];
+  for (int i = 0; i < Tablebase::get_shard_count(); i++)
   {
   }
 
   long tablebase_position_hash_distribution_sum = 0;
   long tablebase_position_hash_hash_distribution_sum = 0;
-  for (int i = 0; i < MasterTablebase::get_shard_count(); i++)
+  for (int i = 0; i < Tablebase::get_shard_count(); i++)
   {
     tablebase_position_hash_distribution_sum += tablebase_position_hash_distribution[i];
     tablebase_position_hash_hash_distribution_sum += tablebase_position_hash_hash_distribution[i];
   }
 
   std::cout << ColorCode::yellow << "Position Hash distribution (0.015625 is even)" << ColorCode::end << std::endl;
-  for (int i = 0; i < MasterTablebase::get_shard_count(); i++)
+  for (int i = 0; i < Tablebase::get_shard_count(); i++)
   {
     std::cout
         << ColorCode::teal
@@ -160,7 +160,7 @@ void hash_distribution()
   }
   std::cout << std::endl;
   std::cout << ColorCode::yellow << "Position Hash Hash distribution (0.015625 is even)" << ColorCode::end << std::endl;
-  for (int i = 0; i < MasterTablebase::get_shard_count(); i++)
+  for (int i = 0; i < Tablebase::get_shard_count(); i++)
   {
     std::cout
         << ColorCode::teal

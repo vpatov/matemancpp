@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "tablebase/master_tablebase.hpp"
+#include "tablebase/tablebase.hpp"
 #include "engine/engine.hpp"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"

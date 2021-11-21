@@ -37,7 +37,7 @@ set(SOURCES
     src/representation/fen.cpp
     src/options.cpp
     src/move_generation.cpp
-    src/tablebase/opening_tablebase.cpp
+    src/tablebase/tablebase.cpp
     src/tablebase/zobrist.cpp
     src/threadpool/threadpool.cpp
     src/util.cpp
@@ -54,8 +54,7 @@ set(SOURCES
     include/process_pgn/read_pgn_data.hpp
     include/process_pgn/pgn_game.hpp
     include/util.hpp
-    include/tablebase/opening_tablebase.hpp
-    include/tablebase/master_tablebase.hpp
+    include/tablebase/tablebase.hpp
     include/tablebase/persistence.hpp
     include/tablebase/zobrist.hpp
 )

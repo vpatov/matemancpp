@@ -5,7 +5,7 @@
 */
 
 #include "representation/position.hpp"
-#include "tablebase/opening_tablebase.hpp"
+#include "tablebase/tablebase.hpp"
 #include <thread>
 
 uint32_t Position::castling_move(std::smatch &matches, bool white)

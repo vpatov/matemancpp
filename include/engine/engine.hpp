@@ -3,13 +3,13 @@
 #pragma once
 
 #include <string>
-#include "tablebase/master_tablebase.hpp"
+#include "tablebase/tablebase.hpp"
 #include "representation/position.hpp"
 
 class Engine
 {
 public:
-    std::shared_ptr<MasterTablebase> m_master_tablebase;
+    std::shared_ptr<Tablebase> m_master_tablebase;
     std::shared_ptr<Position> m_current_position;
 
     Engine()
@@ -20,7 +20,7 @@ public:
 
     // std::string find_best_move(std::chrono::milliseconds time);
 
-    void set_tablebase(std::shared_ptr<MasterTablebase> tablebase)
+    void set_tablebase(std::shared_ptr<Tablebase> tablebase)
     {
         m_master_tablebase = tablebase;
     }

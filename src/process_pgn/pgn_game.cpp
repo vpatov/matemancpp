@@ -1,6 +1,6 @@
 #include "process_pgn/pgn_game.hpp"
 #include "process_pgn/read_pgn_data.hpp"
-#include "tablebase/master_tablebase.hpp"
+#include "tablebase/tablebase.hpp"
 
 bool PgnGame::read_metadata_line(std::string &line)
 {
@@ -16,7 +16,7 @@ bool PgnGame::read_metadata_line(std::string &line)
     return false;
 }
 
-void PgnGame::process_player_move(std::string player_move, bool whites_turn, MasterTablebase *masterTablebase)
+void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tablebase *masterTablebase)
 {
     uint32_t move_key;
     boost::algorithm::trim(player_move);
@@ -83,7 +83,7 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn, Mas
     masterTablebase->update(zhash1, zhash2, move_key, std::string(player_move));
 }
 
-bool PgnGame::read_game_move_line(std::string &line, MasterTablebase *masterTablebase)
+bool PgnGame::read_game_move_line(std::string &line, Tablebase *masterTablebase)
 {
 
     bool is_game_line = false;

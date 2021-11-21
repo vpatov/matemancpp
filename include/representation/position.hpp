@@ -3,6 +3,7 @@
 #include "pieces.hpp"
 #include "squares.hpp"
 #include "util.hpp"
+#include "tablebase/movekey.hpp"
 #include <regex>
 #include <assert.h>
 #include <cstdint>
@@ -207,6 +208,7 @@ void print_position_with_borders_highlight_squares(Position *position, square_t 
 std::shared_ptr<Position> starting_position();
 void populate_starting_position(Position *position);
 std::unique_ptr<Position> generate_starting_position();
+std::string generate_long_algebraic_notation(MoveKey move_key);
 
 uint8_t find_king(Position *position, bool white);
 
