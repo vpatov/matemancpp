@@ -63,5 +63,7 @@ struct MoveEdge
 
 bool compare_key_move_pair(std::pair<MoveKey, MoveEdge> p1, std::pair<MoveKey, MoveEdge> p2);
 std::ostream &operator<<(std::ostream &os, MoveEdge &move_edge);
+
+std::string generate_long_algebraic_notation(MoveKey move_key);
 MoveKey generate_move_key(square_t src_square, square_t dest_square, piece_t promotion_piece);
 Move unpack_move_key(MoveKey move_key);

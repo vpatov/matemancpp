@@ -45,10 +45,10 @@ public:
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/multisink.txt", true);
     file_sink->set_level(spdlog::level::info);
 
-    auto logger = spdlog::logger("multi_sink", {console_sink, file_sink});
+    // auto logger = spdlog::logger("multi_sink", {console_sink, file_sink});
+    auto logger = spdlog::logger("multi_sink", {});
 
     logger.set_level(spdlog::level::info);
-    logger.info("this message should not appear in the console, only in the file");
     spdlog::flush_every(std::chrono::seconds(1));
 
     return logger;

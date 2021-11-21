@@ -471,3 +471,5 @@ void Position::assert_correct_player_turn(uint8_t src_square, uint8_t dest_squar
     uint8_t moving_piece = m_mailbox[src_square];
     assert(m_whites_turn ? is_white_piece(moving_piece) : is_black_piece(moving_piece));
 }
+
+// LASTLEFTOFF write tests, either with or without a framework.

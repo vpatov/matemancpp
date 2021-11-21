@@ -554,3 +554,49 @@ bool check_diagonal_or_file_or_rank(Position *position, square_t king_square, in
   }
   return true;
 }
+
+// given a long algebraic notation move, make the move.
+// position, plies, en passant, whose turn
+// should not contain an assertion for legality. this will be handled later down the line
+// by the move-generation functions, and it can be checked that the output of this is within
+// the list of legal moves.
+void Position::advance_position2(square_t src_square, square_t dst_square, uint8_t promotion_piece)
+{
+  piece_t moving_piece = m_mailbox[src_square];
+  piece_t captured_piece = m_mailbox[dst_square];
+  square_t new_en_passant_square = 0;
+
+  Color color = m_whites_turn ? Color::WHITE : Color::BLACK;
+
+  m_mailbox[dst_square] =
+      promotion_piece ? promotion_piece : m_mailbox[src_square];
+
+  // if we are capturing en passant
+  if (m_en_passant_square == dst_square &&
+      ((m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN))))
+  {
+
+    // If we are capturing en-passant there should never be a promotion piece
+    assert(!promotion_piece);
+
+    // Remove the pawn that is being captured
+    uint8_t square_of_pawn_being_captured = BACKWARD_RANK(color, dst_square);
+    assert(m_mailbox[square_of_pawn_being_captured] == m_whites_turn
+               ? B_PAWN
+               : W_PAWN);
+    m_mailbox[square_of_pawn_being_captured] = 0;
+  }
+
+  // if pawn is advancing two squares, set the en passant square
+  if (m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN) &&
+      dst_square == FORWARD_RANK(color, FORWARD_RANK(color, src_square)))
+  {
+    new_en_passant_square = FORWARD_RANK(color, src_square);
+  }
+
+  m_en_passant_square = new_en_passant_square;
+
+  m_whites_turn = !m_whites_turn;
+  m_plies++;
+  m_mailbox[src_square] = 0;
+}

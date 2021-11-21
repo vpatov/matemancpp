@@ -86,9 +86,10 @@ void Tablebase::read_from_directory(fs::path source_directory_path)
         read_from_file(filepath, shard);
         count++;
     }
-    std::cout << ColorCode::green << "Sucessfully read "
-              << ColorCode::yellow << count << ColorCode::green << " tablebases"
-              << ColorCode::end << std::endl;
+    // TODO make logger global and static, right now it just belongs to the CLI
+    // std::cout << ColorCode::green << "Successfully read "
+    //           << ColorCode::yellow << count << ColorCode::green << " tablebases"
+    //           << ColorCode::end << std::endl;
 }
 
 void Tablebase::serialize_tablebase(std::string file_path, int shard)

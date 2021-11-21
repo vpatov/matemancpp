@@ -189,9 +189,11 @@ struct Position
   bool legal_position();
   void advance_position(uint8_t src_square,
                         uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square);
+  void advance_position2(square_t src_square, square_t dst_square, uint8_t promotion_piece);
 };
 
 square_t an_square_to_index(std::string square);
+#define sq(s) an_square_to_index(s)
 square_t an_square_to_index(char src_file, char src_rank);
 piece_t char_to_piece(char piece);
 char piece_to_char(piece_t piece);

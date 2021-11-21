@@ -153,8 +153,8 @@ void CLI::process_command_position(std::vector<std::string> args)
       square_t src_square = an_square_to_index(move.substr(0, 2));
       square_t dst_square = an_square_to_index(move.substr(2, 4));
 
-      m_engine.m_current_position->advance_position(src_square, dst_square, 0, 0);
-      m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
+      m_engine.m_current_position->advance_position2(src_square, dst_square, 0);
+      // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
     }
   }
   else
@@ -217,7 +217,7 @@ void CLI::process_command_create_tablebases(std::vector<std::string> args)
 
   if (args.size() < 2)
   {
-    std::cout << "You must provide a tablebase name" << std::endl;
+    m_logger.info("You must provide a tablebase name");
     return;
   }
   std::string tablebase_name = args.at(1);
@@ -230,8 +230,7 @@ void CLI::process_command_create_tablebases(std::vector<std::string> args)
   {
     // check tablebase name to make sure there are no illegal characters.
   }
-  std::cout << "tablebase name: {" << tablebase_name << "}" << std::endl;
-
+  m_logger.debug("tablebase name: {}", tablebase_name);
   m_engine.set_tablebase(create_tablebases_from_pgn_data(tablebase_name));
 }
 
@@ -244,7 +243,7 @@ void CLI::process_command_read_tablebases(std::vector<std::string> args)
   }
   std::string tablebase_name = args.at(1);
 
-  std::cout << "tablebase name: {" << tablebase_name << "}" << std::endl;
+  m_logger.debug("tablebase name: {}", tablebase_name);
 
   if (std::filesystem::is_directory(master_tablebase_data_dir / tablebase_name))
   {

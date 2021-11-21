@@ -54,7 +54,7 @@ void Tablebase::insert_new_move_map(z_hash_t insert_hash, MoveKey moveKey, MoveE
 }
 
 void Tablebase::increment_times_played_or_insert_move(
-    tablebase_iter node, MoveKey moveKey, MoveEdge moveEdge)
+    TablebaseIter node, MoveKey moveKey, MoveEdge moveEdge)
 {
     // if the move exists already, just increment the times its been played
     // TODO name these variables better
