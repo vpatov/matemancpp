@@ -21,12 +21,13 @@ class Tablebase
     PositionToMovesPlayedMap shards[TABLEBASE_SHARD_COUNT];
     std::mutex mutexes[TABLEBASE_SHARD_COUNT];
     z_hash_t m_root_hash;
-    
+
 public:
     void read_from_file(std::string file_path, int shard);
     void read_from_directory(fs::path source_directory_path);
     void serialize_tablebase(std::string file_path, int shard);
     void serialize_all(fs::path destination_directory_path);
+    void test_fn(std::string file_path, int shard);
 
     Tablebase()
     {

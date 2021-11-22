@@ -16,13 +16,9 @@ const std::string test_files[8] = {
     "/Users/vas/repos/matemancpp/database/pgn/Winawer.pgn",
 };
 
-void start_deserialization(std::string tablebase_name)
-{
-}
-
 std::shared_ptr<Tablebase> create_tablebases_from_pgn_data(std::string tablebase_name)
 {
-  PgnProcessor pgnProcessor(master_tablebase_data_dir / tablebase_name);
+  PgnProcessor pgnProcessor(tablebase_data_dir / tablebase_name);
   pgnProcessor.process_pgn_files();
   return pgnProcessor.serialize_all();
 
@@ -111,6 +107,7 @@ void print_pgn_processing_performance_summary(
       << std::left << std::setw(16) << thread_id
       << std::left << std::setw(16) << duration_str + "s"
       << std::left << std::setw(16) << games_list_size
+      << std::left << std::setw(16) << (games_list_size / ((float)duration.count() / 1000))
       << std::left << std::setw(16) << tablebase_size
       << ColorCode::green
       << file_path.substr(file_path.find_last_of('/') + 1)
@@ -124,6 +121,7 @@ void print_pgn_processing_header()
       << std::left << std::setw(16) << "Thread ID"
       << std::left << std::setw(16) << "Duration"
       << std::left << std::setw(16) << "# of Games"
+      << std::left << std::setw(16) << "Games / Second"
       << std::left << std::setw(16) << "Tablebase Size"
       << std::left << std::setw(16) << "File Name"
       << "\u001b[0m"

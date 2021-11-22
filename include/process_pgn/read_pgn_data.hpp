@@ -29,8 +29,6 @@ const std::string castling_move_regex = "((O-O-O)|(O-O))([\\+\\#])?";
 
 std::shared_ptr<Tablebase> create_tablebases_from_pgn_data(std::string tablebase_name);
 
-void start_deserialization(std::string tablebase_name);
-
 void print_pgn_processing_performance_summary(
     std::__1::chrono::steady_clock::time_point clock_start,
     std::__1::chrono::steady_clock::time_point clock_end,
@@ -153,6 +151,7 @@ public:
         auto clock_end = std::chrono::high_resolution_clock::now();
         print_pgn_processing_performance_summary(
             clock_start, clock_end, std::this_thread::get_id(),
-            games->size(), m_tablebase->total_size(), file_path);
+            // games->size(), m_tablebase->total_size(), file_path);
+            games->size(), 0, file_path);
     }
 };

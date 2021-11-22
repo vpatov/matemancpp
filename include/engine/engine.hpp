@@ -49,6 +49,13 @@ public:
             }
         }
 
+        // perform search
+        // generate legal moves for position
+        // for each move
+        //      assume the move is made
+        //      evaluate the position
+        //      minmax
+
         // either the tablebase is null or it didnt find the position
         return "h9a9";
     }

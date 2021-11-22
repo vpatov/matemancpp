@@ -56,26 +56,22 @@ void ThreadPool::spin()
         Task task;
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
-
             cv.wait(lock, [this]
                     { return !should_thread_wait(); });
 
             if (!should_wait_for_more_tasks && task_queue.empty())
             {
-
                 if (THREAD_POOL_DEBUG)
                 {
                     std::unique_lock<std::mutex> lock(stdout_mutex);
                     std::cout << "Thread_" << id << "is exiting... " << std::endl;
                     std::cout << "Task Queue size: " << task_queue.size() << std::endl;
                 }
-
                 return;
             }
             task = task_queue.front();
             task_queue.pop();
         }
-
         task.execute();
 
         if (THREAD_POOL_DEBUG)

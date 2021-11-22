@@ -16,19 +16,15 @@
 
 struct Task
 {
-    void (*m_fn)(std::string arg);
-    std::function<void(std::string &)> *m_function;
+    void (*m_fn)(std::string arg) = NULL;
+    std::function<void(std::string &)> *m_function = NULL;
     std::string m_arg;
 
     Task(){};
-    Task(void (*fn)(std::string arg), std::string arg) : m_fn(fn), m_arg(arg)
-    {
-        m_function = NULL;
-    };
+    Task(void (*fn)(std::string arg), std::string arg) : m_fn(fn), m_arg(arg) {}
 
     Task(std::function<void(std::string &)> *fn, std::string arg)
     {
-        m_fn = NULL;
         m_function = fn;
         m_arg = arg;
     }

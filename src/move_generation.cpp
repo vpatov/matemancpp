@@ -37,14 +37,14 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
   // check diagonals for capture
   candidate = PREV_FILE(FORWARD_RANK(C, candidate));
   if (is_valid_square(candidate) &&
-      IS_OPPONENT_PIECE(C, position->m_mailbox[candidate]))
+      (IS_OPPONENT_PIECE(C, position->m_mailbox[candidate]) || position->m_en_passant_square == candidate))
   {
     moves.push_back(candidate);
   }
 
   candidate = NEXT_FILE(FORWARD_RANK(C, candidate));
   if (is_valid_square(candidate) &&
-      IS_OPPONENT_PIECE(C, position->m_mailbox[candidate]))
+      (IS_OPPONENT_PIECE(C, position->m_mailbox[candidate] || position->m_en_passant_square == candidate)))
   {
     moves.push_back(candidate);
   }

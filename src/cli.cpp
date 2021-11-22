@@ -245,10 +245,10 @@ void CLI::process_command_read_tablebases(std::vector<std::string> args)
 
   m_logger.debug("tablebase name: {}", tablebase_name);
 
-  if (std::filesystem::is_directory(master_tablebase_data_dir / tablebase_name))
+  if (std::filesystem::is_directory(tablebase_data_dir / tablebase_name))
   {
 
-    m_engine.set_tablebase(std::make_shared<Tablebase>(master_tablebase_data_dir / tablebase_name));
+    m_engine.set_tablebase(std::make_shared<Tablebase>(tablebase_data_dir / tablebase_name));
   }
   else
   {

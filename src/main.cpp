@@ -33,8 +33,10 @@ int main(int argc, char *argv[])
    // position->print_with_borders_highlight_squares(sq("g1"), sq("f3"));
 
    CLI cli;
-   cli.process_command_read_tablebases({"read_tablebases", "test"});
-   cli.cli_loop();
+
+   cli.process_command_create_tablebases({"create_tablebases", "latest"});
+   std::cout << ColorCode::green << "Done" << ColorCode::end << std::endl;
+   // cli.cli_loop();
 }
 /*
 High-level Design.

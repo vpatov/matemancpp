@@ -92,6 +92,11 @@ void Tablebase::read_from_directory(fs::path source_directory_path)
     //           << ColorCode::end << std::endl;
 }
 
+void Tablebase::test_fn(std::string file_path, int shard)
+{
+    std::cout << "test_fn: " << shard << std::endl;
+}
+
 void Tablebase::serialize_tablebase(std::string file_path, int shard)
 {
     // serialize_tablebase(file_path_prefix + ".tb", shard);
@@ -135,7 +140,6 @@ void Tablebase::serialize_tablebase(std::string file_path, int shard)
             write(&stream, &(it->second.m_times_played), sizeof(MoveEdge::m_times_played));
         }
     }
-
     stream.close();
 }
 
@@ -144,15 +148,22 @@ void Tablebase::serialize_all(fs::path destination_directory_path)
     fs::create_directories(destination_directory_path);
 
     ThreadPool thread_pool = ThreadPool();
+    // Keep an array of functions outside of the loop such that we can use it's address
+    // as an argument for the task. If the function is a local variable inside the loop,
+    // by the time a thread executes a task the function might be mangled already (since
+    // it lives on the stack)
+    std::function<void(std::string &)> functions[Tablebase::get_shard_count()];
+
     for (uint8_t shard = 0; shard < Tablebase::get_shard_count(); shard++)
     {
         std::stringstream file_suffix;
-        file_suffix << std::setw(10) << std::setfill('0') << shard << ".tb";
+        file_suffix << std::setw(3) << std::setfill('0') << std::to_string(shard) << ".tb";
 
-        std::function<void(std::string &)> serialize_fn =
+        functions[shard] =
             std::bind(&Tablebase::serialize_tablebase, this, std::placeholders::_1, shard);
 
-        Task task = Task(&serialize_fn, (destination_directory_path / file_suffix.str()));
+        std::string path = destination_directory_path / file_suffix.str();
+        Task task = Task(&functions[shard], path);
         thread_pool.add_task(task);
     }
     thread_pool.join_pool();
