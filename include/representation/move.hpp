@@ -135,10 +135,10 @@ inline Move unpack_move_key_16(MoveKey_16 movekey)
 
 inline MoveKey pack_move_key(square_t src_square, square_t dst_square)
 {
-    return (src_square << 16) + (dst_square << 8);
+    return ((uint32_t)src_square << 16) + ((uint32_t)dst_square << 8);
 }
 
 inline MoveKey pack_move_key(square_t src_square, square_t dst_square, piece_t promotion_piece)
 {
-    return (src_square << 16) + (dst_square << 8) + promotion_piece;
+    return ((uint32_t)src_square << 16) + ((uint32_t)dst_square << 8) + promotion_piece;
 }

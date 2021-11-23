@@ -17,7 +17,7 @@ MoveKey generate_move_key(square_t src_square, square_t dest_square, piece_t pro
     // move key is bit-wise concatenation of
     // (empty/reserved) + start_square + end_square + promotion_piece
     // 8 bits             8 bits         8 bits       8 bits
-    return (src_square << 16) + (dest_square << 8) + promotion_piece;
+    return ((uint32_t)src_square << 16) + ((uint32_t)dest_square << 8) + promotion_piece;
 }
 
 std::ostream &operator<<(std::ostream &os, Move &move)

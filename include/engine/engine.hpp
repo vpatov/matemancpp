@@ -41,6 +41,7 @@ public:
         //      minmax
         Color c = m_current_position->m_whites_turn ? Color::WHITE : Color::BLACK;
         square_t square = 0;
+        std::vector<MoveKey> all_moves;
         while (square < 120)
         {
             if (is_invalid_square(square))
@@ -51,14 +52,13 @@ public:
             if (IS_YOUR_PIECE(c, m_current_position->m_mailbox[square]))
             {
                 auto moves = generate_pseudolegal_piece_moves(m_current_position, square);
-                for (auto it = moves.begin(); it != moves.end(); it++)
-                {
-                    std::cout << index_to_an_square(square) << index_to_an_square(*it) << std::endl;
-                }
+                all_moves.insert(all_moves.end(), moves.begin(), moves.end());
             }
             square++;
         }
-        return "";
+        auto movekey = all_moves.at(random_bitstring() % all_moves.size());
+        auto move = unpack_move_key(movekey);
+        return index_to_an_square(move.m_src_square) + index_to_an_square(move.m_dst_square);
     }
 
     std::string find_best_move(std::chrono::milliseconds time)
@@ -90,6 +90,6 @@ public:
         //      minmax
 
         // either the tablebase is null or it didnt find the position
-        return "h9a9";
+        return search_for_best_move();
     }
 };

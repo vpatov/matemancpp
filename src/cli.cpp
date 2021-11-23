@@ -132,13 +132,28 @@ void CLI::process_command_position(std::vector<std::string> args)
   }
   else if (startpos_type.compare("add") == 0)
   {
+
+    // TODO abstract out pgn move processing.
     std::string move = *it++;
+    piece_t promotion_piece = 0;
 
     square_t src_square = an_square_to_index(move.substr(0, 2));
     square_t dst_square = an_square_to_index(move.substr(2, 4));
 
-    m_engine.m_current_position->advance_position2(src_square, dst_square, 0);
-    m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
+    // piece should always be uppercase because pieces are uppercase in PGN.
+
+    if (move.size() > 5)
+    {
+      promotion_piece = char_to_piece(move.at(5));
+      assert(promotion_piece < PIECE_MASK);
+      if (!m_engine.m_current_position->m_whites_turn)
+      {
+        promotion_piece |= BLACK_PIECE_MASK;
+      }
+    }
+
+    m_engine.m_current_position->advance_position2(src_square, dst_square, promotion_piece);
+    // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
     return;
   }
   else
@@ -165,7 +180,7 @@ void CLI::process_command_position(std::vector<std::string> args)
       square_t dst_square = an_square_to_index(move.substr(2, 4));
 
       m_engine.m_current_position->advance_position2(src_square, dst_square, 0);
-      m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
+      // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
     }
   }
   else

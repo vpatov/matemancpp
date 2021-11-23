@@ -242,7 +242,6 @@ generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
   return rook_moves;
 }
 
-// LASTLEFTOFF implement
 std::vector<MoveKey>
 generate_piece_moves(std::shared_ptr<Position> position,
                      square_t src_square)

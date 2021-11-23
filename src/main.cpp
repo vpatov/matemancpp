@@ -9,15 +9,36 @@ int main(int argc, char *argv[])
 
 {
    CLI cli;
-   cli.process_command_read_tablebases({"read_tablebases", "test"});
-   cli.process_command_position({"position", "startpos"});
-   cli.m_engine.search_for_best_move();
-   cli.process_command_position({"position", "add", "d2d4"});
-   cli.m_engine.search_for_best_move();
-   cli.process_command_position({"position", "add", "d7d5"});
-   cli.m_engine.search_for_best_move();
-   cli.process_command_position({"position", "add", "c2c4"});
-   cli.m_engine.search_for_best_move();
+   cli.process_command_read_tablebases({"read_tablebases", "latest"});
+
+   // cli.process_command_position({"position", "startpos"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d2d4"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d7d5"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "c2c4"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d5c4"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d4d5"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d8d7"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d5d6"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d7c6"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "h2h3"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "f7f6"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d6d7"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "e8f7"});
+   // cli.m_engine.search_for_best_move();
+   // cli.process_command_position({"position", "add", "d7d8=Q"});
+   // cli.m_engine.search_for_best_move();
 
    cli.cli_loop();
 }
