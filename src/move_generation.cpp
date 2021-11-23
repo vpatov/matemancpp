@@ -219,7 +219,7 @@ generate_pseudolegal_bishop_moves(std::shared_ptr<Position> position,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
-                                 uint8_t square)
+                                 square_t square)
 {
   assert(is_valid_square(square));
   assert(position->m_mailbox[square] == QUEENC(C));
@@ -235,7 +235,7 @@ generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
 
 std::vector<uint8_t>
 generate_piece_moves(std::shared_ptr<Position> position,
-                     uint8_t src_square)
+                     square_t src_square)
 {
 
   // all possible moves (not taking discovered check into account)
@@ -266,7 +266,7 @@ generate_piece_moves(std::shared_ptr<Position> position,
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
-                                 uint8_t square)
+                                 square_t square)
 {
   uint8_t piece = position->m_mailbox[square];
   switch (piece & PIECE_MASK)
@@ -290,7 +290,7 @@ generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
 
 std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
-                                 uint8_t square)
+                                 square_t square)
 {
   uint8_t piece = position->m_mailbox[square];
   return is_white_piece(piece)
@@ -299,99 +299,99 @@ generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
 }
 
 template std::vector<uint8_t> generate_pseudolegal_pawn_moves<Color::WHITE>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_pawn_moves<Color::BLACK>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_king_moves<Color::WHITE>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_king_moves<Color::BLACK>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t>
 generate_pseudolegal_castling_king_moves<Color::WHITE>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t>
 generate_pseudolegal_castling_king_moves<Color::BLACK>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_rook_moves<Color::WHITE>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_rook_moves<Color::BLACK>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_bishop_moves<Color::WHITE>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_bishop_moves<Color::BLACK>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_queen_moves<Color::WHITE>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_queen_moves<Color::BLACK>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_piece_moves<Color::WHITE>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
 template std::vector<uint8_t> generate_pseudolegal_piece_moves<Color::BLACK>(
-    std::shared_ptr<Position> position, uint8_t square);
+    std::shared_ptr<Position> position, square_t square);
 
-bool white_attacks_diagonally(uint8_t piece)
+bool white_attacks_diagonally(piece_t piece)
 {
   return is_w_bishop(piece) || is_w_queen(piece);
 }
 
-bool black_attacks_diagonally(uint8_t piece)
+bool black_attacks_diagonally(piece_t piece)
 {
   return is_b_bishop(piece) || is_b_queen(piece);
 }
 
-bool white_attacks_files_ranks(uint8_t piece)
+bool white_attacks_files_ranks(piece_t piece)
 {
   return is_w_rook(piece) || is_w_queen(piece);
 }
 
-bool black_attacks_files_ranks(uint8_t piece)
+bool black_attacks_files_ranks(piece_t piece)
 {
   return is_b_rook(piece) || is_b_queen(piece);
 }
 
-bool is_w_pawn(uint8_t piece)
+bool is_w_pawn(piece_t piece)
 {
   return piece == W_PAWN;
 }
-bool is_b_pawn(uint8_t piece)
+bool is_b_pawn(piece_t piece)
 {
   return piece == B_PAWN;
 }
 
-bool is_w_bishop(uint8_t piece)
+bool is_w_bishop(piece_t piece)
 {
   return piece == W_BISHOP;
 }
-bool is_w_rook(uint8_t piece)
+bool is_w_rook(piece_t piece)
 {
   return piece == W_ROOK;
 }
-bool is_w_queen(uint8_t piece)
+bool is_w_queen(piece_t piece)
 {
   return piece == W_QUEEN;
 }
-bool is_b_bishop(uint8_t piece)
+bool is_b_bishop(piece_t piece)
 {
   return piece == B_BISHOP;
 }
-bool is_b_rook(uint8_t piece)
+bool is_b_rook(piece_t piece)
 {
   return piece == B_ROOK;
 }
-bool is_b_queen(uint8_t piece)
+bool is_b_queen(piece_t piece)
 {
   return piece == B_QUEEN;
 }
