@@ -8,6 +8,8 @@
 // 0x00 + start_square + end_square + promotion_piece
 typedef uint32_t MoveKey;
 
+// try using move in move generation because it's simpler to interface with
+// later, if performance improvements are necessary, consider using 16-bit movekey
 struct Move
 {
     square_t m_src_square;
@@ -72,3 +74,71 @@ std::ostream &operator<<(std::ostream &os, MoveEdge &move_edge);
 std::string generate_long_algebraic_notation(MoveKey move_key);
 MoveKey generate_move_key(square_t src_square, square_t dest_square, piece_t promotion_piece);
 Move unpack_move_key(MoveKey move_key);
+
+// since there are only 4 promotion candidates, we can use 2 bits to represent them.
+// promotion_piece (2 bits) - dst_square (7 bits) - src_square (7 bits)
+// color of promotion piece can be inferred from color of src_square piece
+typedef uint16_t MoveKey_16;
+
+inline MoveKey_16 pack_move_key_16(square_t src_square, square_t dst_square, piece_t promotion_piece)
+{
+    uint8_t promotion_bits = 0;
+    switch (promotion_piece & PIECE_MASK)
+    {
+    case VOID_PIECE:
+        promotion_bits = 0;
+        break;
+    case ROOK:
+        promotion_bits = 1;
+        break;
+    case KNIGHT:
+        promotion_bits = 2;
+        break;
+    case BISHOP:
+        promotion_bits = 3;
+        break;
+    case QUEEN:
+        promotion_bits = 4;
+        break;
+    default:
+        __builtin_unreachable();
+    }
+    return (uint16_t)src_square | (dst_square << 7) | promotion_piece << 14;
+    //    return ((uint16_t)src_square << 9) | ()
+}
+
+inline Move unpack_move_key_16(MoveKey_16 movekey)
+{
+    piece_t promotion_piece = 0;
+    switch (movekey >> 14)
+    {
+    case VOID_PIECE:
+        promotion_piece = 0;
+        break;
+    case 1:
+        promotion_piece = ROOK;
+        break;
+    case 2:
+        promotion_piece = KNIGHT;
+        break;
+    case 3:
+        promotion_piece = BISHOP;
+        break;
+    case 4:
+        promotion_piece = QUEEN;
+        break;
+    default:
+        __builtin_unreachable();
+    }
+    return Move(movekey & 0x7f, (movekey >> 7) & 0x7f, promotion_piece);
+}
+
+inline MoveKey pack_move_key(square_t src_square, square_t dst_square)
+{
+    return (src_square << 16) + (dst_square << 8);
+}
+
+inline MoveKey pack_move_key(square_t src_square, square_t dst_square, piece_t promotion_piece)
+{
+    return (src_square << 16) + (dst_square << 8) + promotion_piece;
+}

@@ -1,3 +1,4 @@
+#include <bitset>
 #include "process_pgn/read_pgn_data.hpp"
 #include "cli.hpp"
 #include "representation/position.hpp"
@@ -18,7 +19,7 @@ int main(int argc, char *argv[])
    cli.process_command_position({"position", "add", "c2c4"});
    cli.m_engine.search_for_best_move();
 
-   // cli.cli_loop();
+   cli.cli_loop();
 }
 /*
 High-level Design.

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "color.hpp"
 #include <cstdint>
 #include <string>
 
@@ -38,6 +39,19 @@ const piece_t B_KNIGHT(KNIGHT | BLACK_PIECE_MASK);
 const piece_t B_BISHOP = (BISHOP | BLACK_PIECE_MASK);
 const piece_t B_QUEEN = (QUEEN | BLACK_PIECE_MASK);
 const piece_t B_KING = (KING | BLACK_PIECE_MASK);
+
+#define PAWN_C(C) \
+    (is_white(C) ? W_PAWN : B_PAWN)
+#define ROOK_C(C) \
+    (is_white(C) ? W_ROOK : B_ROOK)
+#define BISHOP_C(C) \
+    (is_white(C) ? W_BISHOP : B_BISHOP)
+#define KNIGHT_C(C) \
+    (is_white(C) ? W_KNIGHT : B_KNIGHT)
+#define KING_C(C) \
+    (is_white(C) ? W_KING : B_KING)
+#define QUEEN_C(C) \
+    (is_white(C) ? W_QUEEN : B_QUEEN)
 
 const piece_t MAX_PIECE = B_KING;
 

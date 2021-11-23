@@ -2,6 +2,7 @@
 
 #include "pieces.hpp"
 #include "squares.hpp"
+#include "color.hpp"
 #include "util.hpp"
 #include <regex>
 #include <assert.h>
@@ -39,11 +40,6 @@ a   b   c   d   e   f   g   h
 a   b   c   d   e   f   g   h
 */
 
-enum class Color
-{
-  WHITE,
-  BLACK
-};
 enum Direction
 {
   UP,
@@ -69,39 +65,33 @@ const std::vector<Direction> directions_vector = {
 const int bishop_offsets[4] = {15, 17, -15, -17};
 const int rook_offsets[4] = {16, 1, -16, -1};
 
-constexpr bool
-white_mgen(Color C)
-{
-  return C == Color::WHITE;
-}
-
-#define PAWNC(C) (white_mgen(C) ? W_PAWN : B_PAWN)
-#define ROOKC(C) (white_mgen(C) ? W_ROOK : B_ROOK)
-#define KNIGHTC(C) (white_mgen(C) ? W_KNIGHT : B_KNIGHT)
-#define BISHOPC(C) (white_mgen(C) ? W_BISHOP : B_BISHOP)
-#define QUEENC(C) (white_mgen(C) ? W_QUEEN : B_QUEEN)
-#define KINGC(C) (white_mgen(C) ? W_KING : B_KING)
+#define PAWNC(C) (is_white(C) ? W_PAWN : B_PAWN)
+#define ROOKC(C) (is_white(C) ? W_ROOK : B_ROOK)
+#define KNIGHTC(C) (is_white(C) ? W_KNIGHT : B_KNIGHT)
+#define BISHOPC(C) (is_white(C) ? W_BISHOP : B_BISHOP)
+#define QUEENC(C) (is_white(C) ? W_QUEEN : B_QUEEN)
+#define KINGC(C) (is_white(C) ? W_KING : B_KING)
 
 #define KING_ROOK_SQUARE_C(C) \
-  (white_mgen(C) ? W_KING_ROOK_SQUARE : B_KING_ROOK_SQUARE)
+  (is_white(C) ? W_KING_ROOK_SQUARE : B_KING_ROOK_SQUARE)
 #define QUEEN_ROOK_SQUARE_C(C) \
-  (white_mgen(C) ? W_QUEEN_ROOK_SQUARE : B_QUEEN_ROOK_SQUARE)
+  (is_white(C) ? W_QUEEN_ROOK_SQUARE : B_QUEEN_ROOK_SQUARE)
 #define KING_SHORT_CASTLE_SQUARE_C(C) \
-  (white_mgen(C) ? W_KING_SHORT_CASTLE_SQUARE : B_KING_SHORT_CASTLE_SQUARE)
+  (is_white(C) ? W_KING_SHORT_CASTLE_SQUARE : B_KING_SHORT_CASTLE_SQUARE)
 #define KING_LONG_CASTLE_SQUARE_C(C) \
-  (white_mgen(C) ? W_KING_LONG_CASTLE_SQUARE : B_KING_LONG_CASTLE_SQUARE)
+  (is_white(C) ? W_KING_LONG_CASTLE_SQUARE : B_KING_LONG_CASTLE_SQUARE)
 
 #define KING_KNIGHT_SQUARE_C(C) \
-  (white_mgen(C) ? W_KING_KNIGHT_SQUARE : B_KING_KNIGHT_SQUARE)
+  (is_white(C) ? W_KING_KNIGHT_SQUARE : B_KING_KNIGHT_SQUARE)
 #define KING_BISHOP_SQUARE_C(C) \
-  (white_mgen(C) ? W_KING_BISHOP_SQUARE : B_KING_BISHOP_SQUARE)
+  (is_white(C) ? W_KING_BISHOP_SQUARE : B_KING_BISHOP_SQUARE)
 
 #define QUEEN_SQUARE_C(C) \
-  (white_mgen(C) ? W_QUEEN_SQUARE : B_QUEEN_SQUARE)
+  (is_white(C) ? W_QUEEN_SQUARE : B_QUEEN_SQUARE)
 #define QUEEN_KNIGHT_SQUARE_C(C) \
-  (white_mgen(C) ? W_QUEEN_KNIGHT_SQUARE : B_QUEEN_KNIGHT_SQUARE)
+  (is_white(C) ? W_QUEEN_KNIGHT_SQUARE : B_QUEEN_KNIGHT_SQUARE)
 #define QUEEN_BISHOP_SQUARE_C(C) \
-  (white_mgen(C) ? W_QUEEN_BISHOP_SQUARE : B_QUEEN_BISHOP_SQUARE)
+  (is_white(C) ? W_QUEEN_BISHOP_SQUARE : B_QUEEN_BISHOP_SQUARE)
 
 #define RANK_OFFSET 16
 #define FILE_OFFSET 1
@@ -117,20 +107,27 @@ white_mgen(Color C)
 
 // Returns the rank that is forward relative to the player
 #define FORWARD_RANK(C, square) \
-  (white_mgen(C) ? NEXT_RANK(square) : PREV_RANK(square))
+  (is_white(C) ? NEXT_RANK(square) : PREV_RANK(square))
 
 #define BACKWARD_RANK(C, square) \
-  (white_mgen(C) ? PREV_RANK(square) : NEXT_RANK(square))
+  (is_white(C) ? PREV_RANK(square) : NEXT_RANK(square))
+
+#define IN_FIRST_RANK(square) \
+  square <= H1_SQ
+#define IN_EIGHTH_RANK(square) \
+  square >= A8_SQ
+#define IN_LAST_PAWN_RANK_C(C, square) \
+  (is_white(C) ? IN_EIGHTH_RANK(square) : IN_FIRST_RANK(square))
 
 #define IN_SECOND_RANK(sq) (sq >= 16 && sq <= 23)
 #define IN_SEVENTH_RANK(sq) (sq >= 96 && sq <= 103)
 #define IN_START_PAWN_RANK(C, square) \
-  (white_mgen(C) ? IN_SECOND_RANK(square) : IN_SEVENTH_RANK(square))
+  (is_white(C) ? IN_SECOND_RANK(square) : IN_SEVENTH_RANK(square))
 
 #define IS_YOUR_PIECE(C, piece) \
-  (white_mgen(C) ? is_white_piece(piece) : is_black_piece(piece))
+  (is_white(C) ? is_white_piece(piece) : is_black_piece(piece))
 #define IS_OPPONENT_PIECE(C, piece) \
-  (white_mgen(C) ? is_black_piece(piece) : is_white_piece(piece))
+  (is_white(C) ? is_black_piece(piece) : is_white_piece(piece))
 
 #define ATTACKS_DIAGONALLY(piece) \
   (((piece & PIECE_MASK) == BISHOP) || (piece & PIECE_MASK) == QUEEN)

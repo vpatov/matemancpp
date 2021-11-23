@@ -12,7 +12,7 @@ Move unpack_move_key(MoveKey move_key)
   information necessary to understand a move). For castling moves, even though
   two pieces move, the src_square and dest_square pertain only to the king.
 */
-MoveKey generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t promotion_piece)
+MoveKey generate_move_key(square_t src_square, square_t dest_square, piece_t promotion_piece)
 {
     // move key is bit-wise concatenation of
     // (empty/reserved) + start_square + end_square + promotion_piece

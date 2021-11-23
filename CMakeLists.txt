@@ -53,6 +53,7 @@ set(SOURCES
     include/representation/move.hpp
     include/representation/pieces.hpp
     include/representation/fen.hpp
+    include/representation/color.hpp
     include/options.hpp
     include/move_generation.hpp
     include/threadpool/threadpool.hpp
