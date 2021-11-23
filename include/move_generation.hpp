@@ -61,3 +61,7 @@ generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
 std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
                                  uint8_t square);
+
+std::vector<uint8_t>
+generate_piece_moves(std::shared_ptr<Position> position,
+                     uint8_t square);

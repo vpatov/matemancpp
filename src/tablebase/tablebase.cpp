@@ -27,14 +27,12 @@ void Tablebase::update(z_hash_t insert_hash, z_hash_t dest_hash, MoveKey move_ke
     uint16_t shard = insert_hash % TABLEBASE_SHARD_COUNT;
     std::unique_lock<std::mutex> lock(mutexes[shard]);
 
-    auto position_moveset_map = shards[shard];
-
     MoveEdge moveEdge(dest_hash, pgn_move);
 
     // find the node corresponding to the zobrist hash for the position we are inserting at.
-    auto node = position_moveset_map.find(insert_hash);
+    auto node = shards[shard].find(insert_hash);
 
-    if (node == position_moveset_map.end())
+    if (node == shards[shard].end())
     {
         insert_new_move_map(insert_hash, move_key, moveEdge);
     }
@@ -115,6 +113,19 @@ std::string Tablebase::pick_move_from_sample(z_hash_t position_hash)
     // less than the sum of the times_played in this node, and our condition should trigger
     assert(false);
     return "";
+}
+
+void Tablebase::list_all_moves_for_position(z_hash_t position_hash)
+{
+    uint8_t shard = position_hash % TABLEBASE_SHARD_COUNT;
+    auto node = shards[shard].find(position_hash);
+    if (node != shards[shard].end())
+    {
+        for (auto it = node->second->begin(); it != node->second->end(); it++)
+        {
+            std::cout << it->second.m_pgn_move << std::endl;
+        }
+    }
 }
 
 void Tablebase::walk_down_most_popular_path()

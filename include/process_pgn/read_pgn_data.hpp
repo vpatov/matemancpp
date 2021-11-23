@@ -151,7 +151,6 @@ public:
         auto clock_end = std::chrono::high_resolution_clock::now();
         print_pgn_processing_performance_summary(
             clock_start, clock_end, std::this_thread::get_id(),
-            // games->size(), m_tablebase->total_size(), file_path);
-            games->size(), 0, file_path);
+            games->size(), m_tablebase->total_size(), file_path);
     }
 };

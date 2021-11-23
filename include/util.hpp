@@ -12,7 +12,6 @@ const fs::path dev_data_dir = project_root_dir / "dev_data";
 const std::string program_start_timestamp = std::to_string(std::chrono::seconds(std::time(NULL)).count());
 
 const fs::path pgn_database_path = fs::path(PROJECT_ROOT_DIR) / "database" / "pgn";
-// const fs::path pgn_database_path = fs::path(PROJECT_ROOT_DIR) / "database" / "subtest";
 const fs::path tablebase_data_dir = dev_data_dir / "tablebase";
 const fs::path completed_files_filepath = dev_data_dir / "completed_files.txt";
 

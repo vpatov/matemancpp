@@ -48,7 +48,10 @@ const char PIECE_CHAR_MAP[24] = {'-', PAWN_CHAR, ROOK_CHAR, KNIGHT_CHAR, BISHOP_
 const std::string UNICODE_PIECE_CHAR_MAP[24] = {"-", "♙", "♖", "♘", "♗", "♕", "♔", " ",
                                                 " ", " ", " ", " ", " ", " ", " ", " ",
                                                 " ", "♟︎", "♜", "♞", "♝", "♛", "♚", " "};
-
+inline bool is_empty(piece_t piece)
+{
+    return piece == VOID_PIECE;
+}
 inline bool is_piece(piece_t piece)
 {
     return piece & PIECE_MASK;

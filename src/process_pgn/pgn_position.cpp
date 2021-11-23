@@ -428,10 +428,6 @@ void Position::adjust_position(uint8_t src_square,
     m_mailbox[src_square] = 0;
 }
 
-// LASTLEFTOFF
-// TODO refactor position advancement such that it can calculate the en passant square on its own
-// Essentially, create a function that accepts a position, and a pgn move, and that performs the pgn move,
-// while also checking for legality.
 void Position::advance_position(uint8_t src_square,
                                 uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square)
 {
@@ -472,4 +468,6 @@ void Position::assert_correct_player_turn(uint8_t src_square, uint8_t dest_squar
     assert(m_whites_turn ? is_white_piece(moving_piece) : is_black_piece(moving_piece));
 }
 
-// LASTLEFTOFF write tests, either with or without a framework.
+// LASTLEFTOFF write some tests
+
+// LASTLEFTOFF are captures working on long algebraic notation?

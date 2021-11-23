@@ -127,8 +127,19 @@ void CLI::process_command_position(std::vector<std::string> args)
   }
   else if (startpos_type.compare("fen") == 0)
   {
-    // init position from the fenstring
+    // TODO init position from the fenstring
     std::string fen_string = *it++;
+  }
+  else if (startpos_type.compare("add") == 0)
+  {
+    std::string move = *it++;
+
+    square_t src_square = an_square_to_index(move.substr(0, 2));
+    square_t dst_square = an_square_to_index(move.substr(2, 4));
+
+    m_engine.m_current_position->advance_position2(src_square, dst_square, 0);
+    m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
+    return;
   }
   else
   {
@@ -154,7 +165,7 @@ void CLI::process_command_position(std::vector<std::string> args)
       square_t dst_square = an_square_to_index(move.substr(2, 4));
 
       m_engine.m_current_position->advance_position2(src_square, dst_square, 0);
-      // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
+      m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
     }
   }
   else
@@ -162,6 +173,11 @@ void CLI::process_command_position(std::vector<std::string> args)
     // TODO also configure logger to log to stderr
     m_logger.warn("Unrecognized continuation of position command: {}", moves_str);
   }
+}
+
+void CLI::process_command_list_position_moves(std::vector<std::string> args)
+{
+  m_engine.m_master_tablebase->list_all_moves_for_position(zobrist_hash(m_engine.m_current_position.get()));
 }
 
 // LASTLEFTOFF implement go, position commands and test engine with moves picked from tablebase.
@@ -277,6 +293,7 @@ void CLI::init_command_map()
   command_map["create_tablebases"] = Command::create_tablebases;
   command_map["read_tablebases"] = Command::read_tablebases;
   command_map["test_tablebases"] = Command::test_tablebases;
+  command_map["list_position_moves"] = Command::list_position_moves;
 
   command_processor_map[Command::uci] = &CLI::process_command_uci;
   command_processor_map[Command::debug] = &CLI::process_command_debug;
@@ -291,6 +308,7 @@ void CLI::init_command_map()
   command_processor_map[Command::create_tablebases] = &CLI::process_command_create_tablebases;
   command_processor_map[Command::read_tablebases] = &CLI::process_command_read_tablebases;
   command_processor_map[Command::test_tablebases] = &CLI::process_command_test_tablebases;
+  command_processor_map[Command::list_position_moves] = &CLI::process_command_list_position_moves;
 }
 
 void CLI::process_command(std::string command)

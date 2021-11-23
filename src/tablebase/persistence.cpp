@@ -92,11 +92,6 @@ void Tablebase::read_from_directory(fs::path source_directory_path)
     //           << ColorCode::end << std::endl;
 }
 
-void Tablebase::test_fn(std::string file_path, int shard)
-{
-    std::cout << "test_fn: " << shard << std::endl;
-}
-
 void Tablebase::serialize_tablebase(std::string file_path, int shard)
 {
     // serialize_tablebase(file_path_prefix + ".tb", shard);

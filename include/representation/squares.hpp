@@ -71,6 +71,23 @@ const square_t H8_SQ = 119;
 
 const square_t W_KING_SQUARE = E1_SQ;
 const square_t B_KING_SQUARE = E8_SQ;
+const square_t W_QUEEN_SQUARE = D1_SQ;
+const square_t B_QUEEN_SQUARE = D8_SQ;
+
+const square_t W_KING_BISHOP_SQUARE = F1_SQ;
+const square_t B_KING_BISHOP_SQUARE = F8_SQ;
+const square_t W_QUEEN_BISHOP_SQUARE = C1_SQ;
+const square_t B_QUEEN_BISHOP_SQUARE = C8_SQ;
+
+const square_t W_KING_KNIGHT_SQUARE = G1_SQ;
+const square_t B_KING_KNIGHT_SQUARE = G8_SQ;
+const square_t W_QUEEN_KNIGHT_SQUARE = B1_SQ;
+const square_t B_QUEEN_KNIGHT_SQUARE = B8_SQ;
+
+const square_t W_KING_ROOK_SQUARE = H1_SQ;
+const square_t B_KING_ROOK_SQUARE = H8_SQ;
+const square_t W_QUEEN_ROOK_SQUARE = A1_SQ;
+const square_t B_QUEEN_ROOK_SQUARE = A8_SQ;
 
 const square_t W_KING_SHORT_CASTLE_SQUARE = G1_SQ;
 const square_t B_KING_SHORT_CASTLE_SQUARE = G8_SQ;
@@ -81,11 +98,6 @@ const square_t W_ROOK_SHORT_CASTLE_SQUARE = F1_SQ;
 const square_t B_ROOK_SHORT_CASTLE_SQUARE = F8_SQ;
 const square_t W_ROOK_LONG_CASTLE_SQUARE = D1_SQ;
 const square_t B_ROOK_LONG_CASTLE_SQUARE = D8_SQ;
-
-const square_t W_KING_ROOK_SQUARE = H1_SQ;
-const square_t W_QUEEN_ROOK_SQUARE = A1_SQ;
-const square_t B_KING_ROOK_SQUARE = H8_SQ;
-const square_t B_QUEEN_ROOK_SQUARE = A8_SQ;
 
 const square_t INVALID_SQUARE = 127;
 

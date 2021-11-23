@@ -27,7 +27,8 @@ enum Command
   quit,
   create_tablebases,
   read_tablebases,
-  test_tablebases
+  test_tablebases,
+  list_position_moves
 };
 
 class CLI
@@ -42,11 +43,11 @@ public:
     console_sink->set_level(spdlog::level::info);
     console_sink->set_pattern("[%^%l%$] %v");
 
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/multisink.txt", true);
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("log.txt", true);
     file_sink->set_level(spdlog::level::info);
 
     // auto logger = spdlog::logger("multi_sink", {console_sink, file_sink});
-    auto logger = spdlog::logger("multi_sink", {});
+    auto logger = spdlog::logger("multi_sink", {file_sink});
 
     logger.set_level(spdlog::level::info);
     spdlog::flush_every(std::chrono::seconds(1));
@@ -71,6 +72,7 @@ public:
   void process_command_create_tablebases(std::vector<std::string> args);
   void process_command_read_tablebases(std::vector<std::string> args);
   void process_command_test_tablebases(std::vector<std::string> args);
+  void process_command_list_position_moves(std::vector<std::string> args);
 
   void init_command_map();
   void process_command(std::string command);

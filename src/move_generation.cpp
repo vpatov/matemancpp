@@ -35,14 +35,14 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
   }
 
   // check diagonals for capture
-  candidate = PREV_FILE(FORWARD_RANK(C, candidate));
+  candidate = PREV_FILE(FORWARD_RANK(C, square));
   if (is_valid_square(candidate) &&
       (IS_OPPONENT_PIECE(C, position->m_mailbox[candidate]) || position->m_en_passant_square == candidate))
   {
     moves.push_back(candidate);
   }
 
-  candidate = NEXT_FILE(FORWARD_RANK(C, candidate));
+  candidate = NEXT_FILE(FORWARD_RANK(C, square));
   if (is_valid_square(candidate) &&
       (IS_OPPONENT_PIECE(C, position->m_mailbox[candidate] || position->m_en_passant_square == candidate)))
   {
@@ -79,7 +79,7 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
   {
     uint8_t candidate = candidates[i];
     uint8_t piece = position->m_mailbox[candidate];
-    if (is_valid_square(candidate) && (!is_black_piece(piece)))
+    if (is_valid_square(candidate) && (!IS_YOUR_PIECE(C, piece)))
     {
       moves.push_back(candidate);
     }
@@ -106,13 +106,18 @@ generate_pseudolegal_castling_king_moves(std::shared_ptr<Position> position,
   /** Assumes that position's castling booleans are correct. That is, king moves
    * and rook moves should immediately unset the respective castling boolean. */
   std::vector<uint8_t> moves;
-  if (KINGSIDE_CASTLE_C(C, position))
+  if (KINGSIDE_CASTLE_C(C, position) &&
+      is_empty(position->m_mailbox[KING_KNIGHT_SQUARE_C(C)]) &&
+      is_empty(position->m_mailbox[KING_BISHOP_SQUARE_C(C)]))
   {
-    moves.push_back(KING_ROOK_SQUARE_C(C));
+    moves.push_back(KING_SHORT_CASTLE_SQUARE_C(C));
   }
-  if (QUEENSIDE_CASTLE_C(C, position))
+  if (QUEENSIDE_CASTLE_C(C, position) &&
+      is_empty(position->m_mailbox[QUEEN_KNIGHT_SQUARE_C(C)]) &&
+      is_empty(position->m_mailbox[QUEEN_SQUARE_C(C)]) &&
+      is_empty(position->m_mailbox[QUEEN_BISHOP_SQUARE_C(C)]))
   {
-    moves.push_back(QUEEN_ROOK_SQUARE_C(C));
+    moves.push_back(KING_LONG_CASTLE_SQUARE_C(C));
   }
   return moves;
 }
@@ -144,7 +149,7 @@ generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
   {
     uint8_t candidate = candidates[i];
     uint8_t piece = position->m_mailbox[candidate];
-    if (is_valid_square(candidate) && IS_OPPONENT_PIECE(C, piece))
+    if (is_valid_square(candidate) && !IS_YOUR_PIECE(C, piece))
     {
       moves.push_back(candidate);
     }
@@ -228,13 +233,43 @@ generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
   return rook_moves;
 }
 
+std::vector<uint8_t>
+generate_piece_moves(std::shared_ptr<Position> position,
+                     uint8_t src_square)
+{
+
+  // all possible moves (not taking discovered check into account)
+  auto moves = generate_pseudolegal_piece_moves(position, src_square);
+
+  // need to filter moves by legality
+  // naive way: for each move,  assume move, and check underlying position for legality
+
+  // maybe en passant and promotion can be represented in the moves returned by pseudolegal move generation
+  // just returning squares makes it tricky to think about those two.
+
+  piece_t src_square_piece = position->m_mailbox[src_square];
+
+  for (auto it = moves.begin(); it != moves.end(); it++)
+  {
+    auto dest_square = *it;
+    piece_t dest_square_piece = position->m_mailbox[dest_square];
+    square_t pawn_being_captured_en_passant_square = 0;
+    piece_t promotion_piece = 0;
+
+    // assume position (src_square, dst_square, pawn_being_captured_en_passant_square, promotion_piece)
+    // assume_position(src_square, dest_square, )
+  }
+
+  return moves;
+}
+
 template <Color C>
 std::vector<uint8_t>
 generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
                                  uint8_t square)
 {
   uint8_t piece = position->m_mailbox[square];
-  switch (piece)
+  switch (piece & PIECE_MASK)
   {
   case PAWN:
     return generate_pseudolegal_pawn_moves<C>(position, square);

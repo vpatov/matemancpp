@@ -7,35 +7,17 @@
 int main(int argc, char *argv[])
 
 {
-
-   // CLI cli;
-   // // cli.cli_loop();
-   // auto position = starting_position();
-   // std::cout << "hash: " << zobrist_hash(position.get()) << std::endl;
-   // position->print_with_borders_highlight_squares(0, 0);
-
-   // std::cout << "\n\n"
-   //           << std::endl;
-   // position->advance_position2(sq("e2"), sq("e4"), 0);
-   // std::cout << "hash: " << zobrist_hash(position.get()) << std::endl;
-   // position->print_with_borders_highlight_squares(sq("e2"), sq("e4"));
-
-   // std::cout << "\n\n"
-   //           << std::endl;
-   // position->advance_position2(sq("e7"), sq("e5"), 0);
-   // std::cout << "hash: " << zobrist_hash(position.get()) << std::endl;
-   // position->print_with_borders_highlight_squares(sq("e7"), sq("e5"));
-
-   // std::cout << "\n\n"
-   //           << std::endl;
-   // position->advance_position2(sq("g1"), sq("f3"), 0);
-   // std::cout << "hash: " << zobrist_hash(position.get()) << std::endl;
-   // position->print_with_borders_highlight_squares(sq("g1"), sq("f3"));
-
    CLI cli;
+   cli.process_command_read_tablebases({"read_tablebases", "test"});
+   cli.process_command_position({"position", "startpos"});
+   cli.m_engine.search_for_best_move();
+   cli.process_command_position({"position", "add", "d2d4"});
+   cli.m_engine.search_for_best_move();
+   cli.process_command_position({"position", "add", "d7d5"});
+   cli.m_engine.search_for_best_move();
+   cli.process_command_position({"position", "add", "c2c4"});
+   cli.m_engine.search_for_best_move();
 
-   cli.process_command_create_tablebases({"create_tablebases", "latest"});
-   std::cout << ColorCode::green << "Done" << ColorCode::end << std::endl;
    // cli.cli_loop();
 }
 /*
