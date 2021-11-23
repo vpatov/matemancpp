@@ -1,11 +1,8 @@
-#include "tablebase/move.hpp"
+#include "representation/move.hpp"
 
 Move unpack_move_key(MoveKey move_key)
 {
-    Move move;
-    move.src_square = move_key >> 16;
-    move.dest_square = (move_key & 0xff00) >> 8;
-    move.promotion_piece = move_key & 0xff;
+    Move move(move_key >> 16, (move_key & 0xff00) >> 8, move_key & 0xff);
     return move;
 }
 
@@ -26,9 +23,9 @@ MoveKey generate_move_key(uint8_t src_square, uint8_t dest_square, uint8_t promo
 std::ostream &operator<<(std::ostream &os, Move &move)
 {
     os
-        << "src_square: " << move.src_square << std::endl
-        << "dest_square: " << move.dest_square << std::endl
-        << "promotion_piece: " << move.promotion_piece << std::endl;
+        << "src_square: " << move.m_src_square << std::endl
+        << "dest_square: " << move.m_dst_square << std::endl
+        << "promotion_piece: " << move.m_promotion_piece << std::endl;
     return os;
 }
 

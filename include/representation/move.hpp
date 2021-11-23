@@ -10,9 +10,14 @@ typedef uint32_t MoveKey;
 
 struct Move
 {
-    square_t src_square;
-    square_t dest_square;
-    piece_t promotion_piece;
+    square_t m_src_square;
+    square_t m_dst_square;
+    piece_t m_promotion_piece;
+
+    Move(square_t src_square, square_t dst_square, piece_t promotion_piece)
+        : m_src_square(src_square), m_dst_square(dst_square), m_promotion_piece(promotion_piece) {}
+    Move(square_t src_square, square_t dst_square)
+        : m_src_square(src_square), m_dst_square(dst_square), m_promotion_piece(0) {}
 
     friend std::ostream &operator<<(std::ostream &os, Move &move);
 };

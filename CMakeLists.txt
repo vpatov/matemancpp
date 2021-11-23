@@ -50,6 +50,7 @@ set(SOURCES
     include/cli.hpp
     include/engine/engine.hpp
     include/representation/position.hpp
+    include/representation/move.hpp
     include/representation/pieces.hpp
     include/representation/fen.hpp
     include/options.hpp
@@ -59,7 +60,6 @@ set(SOURCES
     include/process_pgn/read_pgn_data.hpp
     include/process_pgn/pgn_game.hpp
     include/util.hpp
-    include/tablebase/move.hpp
     include/tablebase/tablebase.hpp
     include/tablebase/zobrist.hpp
 )

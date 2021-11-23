@@ -9,7 +9,7 @@
 #include <set>
 #include "tablebase/zobrist.hpp"
 #include "util.hpp"
-#include "tablebase/move.hpp"
+#include "representation/move.hpp"
 
 using TablebaseIter = std::__1::unordered_map<z_hash_t, std::__1::shared_ptr<std::__1::unordered_map<MoveKey, MoveEdge>>>::iterator;
 using MovesPlayed = std::unordered_map<MoveKey, MoveEdge>;
