@@ -28,7 +28,7 @@ enum Command
   create_tablebases,
   read_tablebases,
   test_tablebases,
-  list_position_moves
+  list_tablebase_moves
 };
 
 class CLI
@@ -72,7 +72,7 @@ public:
   void process_command_create_tablebases(std::vector<std::string> args);
   void process_command_read_tablebases(std::vector<std::string> args);
   void process_command_test_tablebases(std::vector<std::string> args);
-  void process_command_list_position_moves(std::vector<std::string> args);
+  void process_command_list_tablebase_moves(std::vector<std::string> args);
 
   void init_command_map();
   void process_command(std::string command);

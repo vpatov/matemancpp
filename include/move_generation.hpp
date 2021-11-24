@@ -64,5 +64,5 @@ generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
                                  square_t square);
 
 std::vector<MoveKey>
-generate_piece_moves(std::shared_ptr<Position> position,
+generate_legal_moves(std::shared_ptr<Position> position,
                      square_t square);

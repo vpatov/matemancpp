@@ -142,6 +142,7 @@ void CLI::process_command_position(std::vector<std::string> args)
 
     // piece should always be uppercase because pieces are uppercase in PGN.
 
+    // this code should probably be there for the "position startpos moves ...." path too
     if (move.size() > 5)
     {
       promotion_piece = char_to_piece(move.at(5));
@@ -151,7 +152,16 @@ void CLI::process_command_position(std::vector<std::string> args)
         promotion_piece |= BLACK_PIECE_MASK;
       }
     }
+    // ----
 
+    if (!m_engine.m_current_position->is_move_legal(src_square, dst_square))
+    {
+      std::cout << ColorCode::red << "move is illegal? : " << ColorCode::end << move << std::endl;
+    }
+    else
+    {
+      std::cout << ColorCode::green << "legal" << ColorCode::end << std::endl;
+    }
     m_engine.m_current_position->advance_position2(src_square, dst_square, promotion_piece);
     // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
     return;
@@ -178,8 +188,21 @@ void CLI::process_command_position(std::vector<std::string> args)
       m_logger.debug("parsing move: {}", move);
       square_t src_square = an_square_to_index(move.substr(0, 2));
       square_t dst_square = an_square_to_index(move.substr(2, 4));
+      piece_t promotion_piece = 0;
 
-      m_engine.m_current_position->advance_position2(src_square, dst_square, 0);
+      // this code should probably be there for the "position startpos moves ...." path too
+      if (move.size() > 5)
+      {
+        promotion_piece = char_to_piece(move.at(5));
+        assert(promotion_piece < PIECE_MASK);
+        if (!m_engine.m_current_position->m_whites_turn)
+        {
+          promotion_piece |= BLACK_PIECE_MASK;
+        }
+      }
+      // ----
+
+      m_engine.m_current_position->advance_position2(src_square, dst_square, promotion_piece);
       // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
     }
   }
@@ -190,12 +213,12 @@ void CLI::process_command_position(std::vector<std::string> args)
   }
 }
 
-void CLI::process_command_list_position_moves(std::vector<std::string> args)
+void CLI::process_command_list_tablebase_moves(std::vector<std::string> args)
 {
   m_engine.m_master_tablebase->list_all_moves_for_position(zobrist_hash(m_engine.m_current_position.get()));
 }
 
-// LASTLEFTOFF implement go, position commands and test engine with moves picked from tablebase.
+// TODO implement go, position commands and test engine with moves picked from tablebase.
 
 void CLI::process_command_go(std::vector<std::string> args)
 {
@@ -308,7 +331,7 @@ void CLI::init_command_map()
   command_map["create_tablebases"] = Command::create_tablebases;
   command_map["read_tablebases"] = Command::read_tablebases;
   command_map["test_tablebases"] = Command::test_tablebases;
-  command_map["list_position_moves"] = Command::list_position_moves;
+  command_map["list_tablebase_moves"] = Command::list_tablebase_moves;
 
   command_processor_map[Command::uci] = &CLI::process_command_uci;
   command_processor_map[Command::debug] = &CLI::process_command_debug;
@@ -323,7 +346,7 @@ void CLI::init_command_map()
   command_processor_map[Command::create_tablebases] = &CLI::process_command_create_tablebases;
   command_processor_map[Command::read_tablebases] = &CLI::process_command_read_tablebases;
   command_processor_map[Command::test_tablebases] = &CLI::process_command_test_tablebases;
-  command_processor_map[Command::list_position_moves] = &CLI::process_command_list_position_moves;
+  command_processor_map[Command::list_tablebase_moves] = &CLI::process_command_list_tablebase_moves;
 }
 
 void CLI::process_command(std::string command)

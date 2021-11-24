@@ -6,6 +6,52 @@
 
 /** Pseudolegal moves don't take check into account. */
 
+bool Position::is_move_legal(square_t src_square, square_t dst_square)
+{
+  // Assume the move
+  // ----------------
+  assert(is_valid_square(src_square));
+  assert(is_valid_square(dst_square));
+
+  Color color = m_whites_turn ? Color::WHITE : Color::BLACK;
+  piece_t original_src_piece = m_mailbox[src_square];
+  piece_t original_dst_piece = m_mailbox[dst_square];
+
+  // m_mailbox[dst_square] =
+  //     promotion_piece ? promotion_piece : m_mailbox[src_square];
+  // we can ignore promotion because it doesnt affect the legality of the move
+  // i.e. if it was legal to move the pawn up (pawn wasnt blocking check) then
+  // it doesnt matter what piece it gets promoted to, it will be legal either
+  // way.
+  m_mailbox[dst_square] = m_mailbox[src_square];
+  square_t square_of_pawn_being_captured = 0;
+
+  if (m_en_passant_square &&
+      m_en_passant_square == dst_square &&
+      ((m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN))))
+  {
+    // Remove the pawn that is being captured
+    square_of_pawn_being_captured = BACKWARD_RANK(color, dst_square);
+    assert(m_mailbox[square_of_pawn_being_captured] == m_whites_turn
+               ? B_PAWN
+               : W_PAWN);
+    m_mailbox[square_of_pawn_being_captured] = 0;
+  }
+  m_mailbox[src_square] = 0;
+
+  bool legal = legal_position();
+
+  // Undo the move
+  // ----------------
+  m_mailbox[src_square] = original_src_piece;
+  m_mailbox[dst_square] = original_dst_piece;
+  if (square_of_pawn_being_captured)
+  {
+    m_mailbox[square_of_pawn_being_captured] = m_whites_turn ? B_PAWN : W_PAWN;
+  }
+  return legal;
+}
+
 template <Color C>
 std::vector<MoveKey>
 generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
@@ -243,12 +289,18 @@ generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
 }
 
 std::vector<MoveKey>
-generate_piece_moves(std::shared_ptr<Position> position,
+generate_legal_moves(std::shared_ptr<Position> position,
                      square_t src_square)
 {
 
+  if (src_square == F7_SQ)
+  {
+    std::cout << "breakpoint" << std::endl;
+  }
+
   // all possible moves (not taking discovered check into account)
   auto moves = generate_pseudolegal_piece_moves(position, src_square);
+  std::vector<MoveKey> legal_moves;
 
   // need to filter moves by legality
   // naive way: for each move,  assume move, and check underlying position for legality
@@ -256,21 +308,20 @@ generate_piece_moves(std::shared_ptr<Position> position,
   // maybe en passant and promotion can be represented in the moves returned by pseudolegal move generation
   // just returning squares makes it tricky to think about those two.
 
-  piece_t src_square_piece = position->m_mailbox[src_square];
-
   for (auto it = moves.begin(); it != moves.end(); it++)
   {
-    auto dest_square = *it;
-    piece_t dest_square_piece = position->m_mailbox[dest_square];
-    square_t pawn_being_captured_en_passant_square = 0;
-    piece_t promotion_piece = 0;
+    auto move = unpack_move_key(*it);
+    auto dst_square = move.m_dst_square;
 
-    // LASTLEFTOFF
-    // assume position (src_square, dst_square, pawn_being_captured_en_passant_square, promotion_piece)
-    // assume_position(src_square, dest_square, )
+    // easier to assume move and check for legality
+    if (position->is_move_legal(src_square, dst_square))
+    {
+      legal_moves.push_back(*it);
+    }
+    // assume_position()
   }
 
-  return moves;
+  return legal_moves;
 }
 
 template <Color C>

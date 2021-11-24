@@ -203,6 +203,7 @@ struct Position
   void advance_position(uint8_t src_square,
                         uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square);
   void advance_position2(square_t src_square, square_t dst_square, uint8_t promotion_piece);
+  bool is_move_legal(square_t src_square, square_t dst_square);
 };
 
 square_t an_square_to_index(std::string square);

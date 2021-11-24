@@ -468,6 +468,4 @@ void Position::assert_correct_player_turn(uint8_t src_square, uint8_t dest_squar
     assert(m_whites_turn ? is_white_piece(moving_piece) : is_black_piece(moving_piece));
 }
 
-// LASTLEFTOFF write some tests
-
-// LASTLEFTOFF are captures working on long algebraic notation?
+// TODO write some tests

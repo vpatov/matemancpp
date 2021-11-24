@@ -51,24 +51,27 @@ public:
 
             if (IS_YOUR_PIECE(c, m_current_position->m_mailbox[square]))
             {
-                auto moves = generate_pseudolegal_piece_moves(m_current_position, square);
+                auto moves = generate_legal_moves(m_current_position, square);
                 all_moves.insert(all_moves.end(), moves.begin(), moves.end());
             }
             square++;
         }
+        std::cout << ColorCode::purple << "legal moves: " << ColorCode::teal;
+        for (auto m = all_moves.begin(); m != all_moves.end(); m++)
+        {
+            auto move = unpack_move_key(*m);
+            std::cout << index_to_an_square(move.m_src_square)
+                      << index_to_an_square(move.m_dst_square) << " ";
+        }
+        std::cout << std::endl;
+
         auto movekey = all_moves.at(random_bitstring() % all_moves.size());
         auto move = unpack_move_key(movekey);
         return index_to_an_square(move.m_src_square) + index_to_an_square(move.m_dst_square);
     }
 
-    std::string find_best_move(std::chrono::milliseconds time)
+    std::string tablebase_move_lookup()
     {
-
-        // try to look up position in opening tablebase. if found,
-        // pick a move, with the likelihood of a move being selected proportional
-        // to how often that move is seen.
-        // return in long algebraic notation
-
         if (m_master_tablebase != NULL)
         {
             z_hash_t position_hash = zobrist_hash(m_current_position.get());
@@ -79,17 +82,17 @@ public:
                 return lookup_move;
             }
         }
+        return "";
+    }
 
-        // std::string best_move = search_for_best_move();
+    std::string find_best_move(std::chrono::milliseconds time)
+    {
+        // std::string tablebase_move = tablebase_move_lookup();
+        // if (tablebase_move.size())
+        // {
+        //     return tablebase_move;
+        // }
 
-        // perform search
-        // generate legal moves for position
-        // for each move
-        //      assume the move is made
-        //      evaluate the position
-        //      minmax
-
-        // either the tablebase is null or it didnt find the position
         return search_for_best_move();
     }
 };
