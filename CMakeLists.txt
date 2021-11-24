@@ -47,6 +47,7 @@ set(SOURCES
     src/threadpool/threadpool.cpp
     src/util.cpp
     src/engine/engine.cpp
+    src/test/launcher.cpp
     include/cli.hpp
     include/engine/engine.hpp
     include/representation/position.hpp
@@ -63,11 +64,13 @@ set(SOURCES
     include/util.hpp
     include/tablebase/tablebase.hpp
     include/tablebase/zobrist.hpp
+    include/test/launcher.hpp
 )
 
 
 
 add_executable(matemancpp ${SOURCES})
+
 
 # find_path(BOOST_ALGORITHM_INCLUDE_DIRS "boost/algorithm/algorithm.hpp")
 # target_include_directories(matemancpp PRIVATE ${BOOST_ALGORITHM_INCLUDE_DIRS})

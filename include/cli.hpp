@@ -28,7 +28,9 @@ enum Command
   create_tablebases,
   read_tablebases,
   test_tablebases,
-  list_tablebase_moves
+  list_tablebase_moves,
+  list_engine_moves,
+  print_current_position
 };
 
 class CLI
@@ -40,17 +42,18 @@ public:
   spdlog::logger create_logger()
   {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::info);
+    console_sink->set_level(spdlog::level::trace);
     console_sink->set_pattern("[%^%l%$] %v");
 
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("log.txt", true);
-    file_sink->set_level(spdlog::level::info);
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("/Users/vas/log/log.txt", true);
+    file_sink->set_level(spdlog::level::trace);
 
     // auto logger = spdlog::logger("multi_sink", {console_sink, file_sink});
     auto logger = spdlog::logger("multi_sink", {file_sink});
 
-    logger.set_level(spdlog::level::info);
-    spdlog::flush_every(std::chrono::seconds(1));
+    logger.set_level(spdlog::level::trace);
+    logger.flush_on(spdlog::level::trace);
+    logger.debug("START ----- " + program_start_timestamp);
 
     return logger;
   }
@@ -73,6 +76,8 @@ public:
   void process_command_read_tablebases(std::vector<std::string> args);
   void process_command_test_tablebases(std::vector<std::string> args);
   void process_command_list_tablebase_moves(std::vector<std::string> args);
+  void process_command_list_engine_moves(std::vector<std::string> args);
+  void process_command_print_current_position(std::vector<std::string> args);
 
   void init_command_map();
   void process_command(std::string command);

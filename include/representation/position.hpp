@@ -93,6 +93,9 @@ const int rook_offsets[4] = {16, 1, -16, -1};
 #define QUEEN_BISHOP_SQUARE_C(C) \
   (is_white(C) ? W_QUEEN_BISHOP_SQUARE : B_QUEEN_BISHOP_SQUARE)
 
+#define KING_SQUARE_C(C) \
+  (is_white(C) ? W_KING_SQUARE : B_KING_SQUARE)
+
 #define RANK_OFFSET 16
 #define FILE_OFFSET 1
 
@@ -192,6 +195,8 @@ struct Position
       char check_or_mate);
   void perform_castle(bool white, bool short_castle);
   void print_with_borders_highlight_squares(square_t src_square, square_t dest_square);
+  std::string pretty_string();
+
   square_t find_king();
   uint16_t get_src_square_pawn_move(char capture, char src_file, square_t dest_square, uint8_t dest_rank);
   square_t get_src_square_minmaj_piece_move(

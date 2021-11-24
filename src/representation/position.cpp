@@ -1,5 +1,6 @@
 #include "representation/position.hpp"
 #include "move_generation.hpp"
+#include <sstream>
 #include <iostream>
 #include <algorithm>
 #include <memory>
@@ -14,44 +15,7 @@ std::unique_ptr<Position> generate_starting_position()
 std::shared_ptr<Position> starting_position()
 {
   auto position = std::make_shared<Position>();
-
-  /** White pieces*/
-  position->m_mailbox[0x0] = W_ROOK;
-  position->m_mailbox[0x1] = W_KNIGHT;
-  position->m_mailbox[0x2] = W_BISHOP;
-  position->m_mailbox[0x3] = W_QUEEN;
-  position->m_mailbox[0x4] = W_KING;
-  position->m_mailbox[0x5] = W_BISHOP;
-  position->m_mailbox[0x6] = W_KNIGHT;
-  position->m_mailbox[0x7] = W_ROOK;
-  for (int i = 0x10; i < 0x18; i++)
-  {
-    position->m_mailbox[i] = W_PAWN;
-  }
-
-  /** Black pieces*/
-  position->m_mailbox[0x70] = B_ROOK;
-  position->m_mailbox[0x71] = B_KNIGHT;
-  position->m_mailbox[0x72] = B_BISHOP;
-  position->m_mailbox[0x73] = B_QUEEN;
-  position->m_mailbox[0x74] = B_KING;
-  position->m_mailbox[0x75] = B_BISHOP;
-  position->m_mailbox[0x76] = B_KNIGHT;
-  position->m_mailbox[0x77] = B_ROOK;
-  for (int i = 0x60; i < 0x68; i++)
-  {
-    position->m_mailbox[i] = B_PAWN;
-  }
-
-  position->m_white_kingside_castle = true;
-  position->m_white_queenside_castle = true;
-  position->m_black_kingside_castle = true;
-  position->m_black_queenside_castle = true;
-
-  position->m_plies = 0;
-  position->m_moves = 1;
-  position->m_en_passant_square = 0;
-  position->m_whites_turn = true;
+  populate_starting_position(position.get());
 
   return position;
 }
@@ -321,8 +285,53 @@ void print_position_with_borders(Position *position)
             << std::endl;
 }
 
+std::string Position::pretty_string()
+{
+  std::stringstream ss;
+  int i = 0x70;
+  char rank = '8';
+
+  ss << '\n';
+  ss << "   ";
+  for (char file = 'a'; file <= 'h'; file++)
+  {
+    ss << file << " ";
+  }
+  ss << "\n\n";
+
+  while (1)
+  {
+    if (i % 16 == 0)
+    {
+      ss << rank << "  ";
+    }
+    ss << piece_to_char(m_mailbox[i]) << " ";
+    i++;
+
+    if (i & 0x88)
+    {
+      i -= 0x18;
+      ss << "  " << rank-- << '\n';
+    }
+    if (i == (8 - 0x18))
+    {
+      break;
+    }
+  }
+  ss << '\n';
+  ss << "   ";
+  for (char file = 'a'; file <= 'h'; file++)
+  {
+    ss << file << " ";
+  }
+  ss << '\n'
+     << std::endl;
+  return ss.str();
+}
+
 void Position::print_with_borders_highlight_squares(square_t src_square, square_t dest_square)
 {
+
   int i = 0x70;
   char rank = '8';
 
@@ -566,21 +575,62 @@ void Position::advance_position2(square_t src_square, square_t dst_square, uint8
   piece_t captured_piece = m_mailbox[dst_square];
   square_t new_en_passant_square = 0;
 
-  Color color = m_whites_turn ? Color::WHITE : Color::BLACK;
+  assert(moving_piece != VOID_PIECE);
+
+  Color C = m_whites_turn ? Color::WHITE : Color::BLACK;
+
+  // remove castling rights
+  if (moving_piece == ROOK_C(C) && src_square == KING_ROOK_SQUARE_C(C))
+  {
+    if (m_whites_turn)
+    {
+      m_white_kingside_castle = false;
+    }
+    else
+    {
+      m_black_kingside_castle = false;
+    }
+  }
+
+  else if (moving_piece == ROOK_C(C) && src_square == QUEEN_ROOK_SQUARE_C(C))
+  {
+    if (m_whites_turn)
+    {
+      m_white_queenside_castle = false;
+    }
+    else
+    {
+      m_black_queenside_castle = false;
+    }
+  }
+  else if (moving_piece == KING_C(C) == src_square == KING_SQUARE_C(C))
+  {
+    if (m_whites_turn)
+    {
+      m_white_kingside_castle = false;
+      m_white_queenside_castle = false;
+    }
+    else
+    {
+      m_black_kingside_castle = false;
+      m_black_queenside_castle = false;
+    }
+  }
+  // -----------
 
   m_mailbox[dst_square] =
       promotion_piece ? promotion_piece : m_mailbox[src_square];
 
   // if we are capturing en passant
   if (m_en_passant_square == dst_square &&
-      ((m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN))))
+      ((m_mailbox[src_square] == (PAWN_C(C)))))
   {
 
     // If we are capturing en-passant there should never be a promotion piece
     assert(!promotion_piece);
 
     // Remove the pawn that is being captured
-    uint8_t square_of_pawn_being_captured = BACKWARD_RANK(color, dst_square);
+    uint8_t square_of_pawn_being_captured = BACKWARD_RANK(C, dst_square);
     assert(m_mailbox[square_of_pawn_being_captured] == m_whites_turn
                ? B_PAWN
                : W_PAWN);
@@ -589,9 +639,9 @@ void Position::advance_position2(square_t src_square, square_t dst_square, uint8
 
   // if pawn is advancing two squares, set the en passant square
   if (m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN) &&
-      dst_square == FORWARD_RANK(color, FORWARD_RANK(color, src_square)))
+      dst_square == FORWARD_RANK(C, FORWARD_RANK(C, src_square)))
   {
-    new_en_passant_square = FORWARD_RANK(color, src_square);
+    new_en_passant_square = FORWARD_RANK(C, src_square);
   }
 
   m_en_passant_square = new_en_passant_square;

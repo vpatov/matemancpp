@@ -50,47 +50,6 @@ void CLI::process_command_uci(std::vector<std::string> args)
   announce_options();
   announce_uciok();
 }
-void CLI::hardcoded_response()
-{
-  switch (hardcoded_stage)
-  {
-  case 0:
-    // ponder("bestmove g8f6");
-
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    log_and_respond("bestmove g8f6");
-    break;
-  case 1:
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    log_and_respond("bestmove a7a6");
-    break;
-  case 2:
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    log_and_respond("bestmove a6a5");
-    break;
-  case 3:
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    log_and_respond("bestmove a5a4");
-    break;
-  case 4:
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    log_and_respond("bestmove h7h6");
-  case 5:
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-
-    log_and_respond("bestmove h6h5");
-  case 6:
-    log_and_respond("bestmove h5h4");
-    break;
-  }
-  hardcoded_stage++;
-}
-
 void CLI::process_command_debug(std::vector<std::string> args)
 {
   std::cout << "Processing Debug!" << std::endl;
@@ -203,6 +162,10 @@ void CLI::process_command_position(std::vector<std::string> args)
       // ----
 
       m_engine.m_current_position->advance_position2(src_square, dst_square, promotion_piece);
+      m_logger.info(m_engine.m_current_position->pretty_string());
+      m_logger.info(m_engine.string_list_all_moves());
+
+      // std::cout << move << std::endl;
       // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
     }
   }
@@ -211,6 +174,11 @@ void CLI::process_command_position(std::vector<std::string> args)
     // TODO also configure logger to log to stderr
     m_logger.warn("Unrecognized continuation of position command: {}", moves_str);
   }
+}
+
+void CLI::process_command_list_engine_moves(std::vector<std::string> args)
+{
+  m_logger.info(m_engine.string_list_all_moves());
 }
 
 void CLI::process_command_list_tablebase_moves(std::vector<std::string> args)
@@ -243,9 +211,8 @@ void CLI::process_command_go(std::vector<std::string> args)
   {
     best_move = m_engine.find_best_move(std::chrono::milliseconds(0));
   }
-  std::cout << "bestmove " << best_move << std::endl;
-
-  // hardcoded_response();
+  // std::cout << "bestmove " << best_move << std::endl;
+  log_and_respond("bestmove " + best_move);
 };
 void CLI::process_command_stop(std::vector<std::string> args)
 {
@@ -332,6 +299,9 @@ void CLI::init_command_map()
   command_map["read_tablebases"] = Command::read_tablebases;
   command_map["test_tablebases"] = Command::test_tablebases;
   command_map["list_tablebase_moves"] = Command::list_tablebase_moves;
+  command_map["list_engine_moves"] = Command::list_engine_moves;
+  command_map["print_current_position"] = Command::print_current_position;
+  command_map["pcp"] = Command::print_current_position;
 
   command_processor_map[Command::uci] = &CLI::process_command_uci;
   command_processor_map[Command::debug] = &CLI::process_command_debug;
@@ -347,6 +317,13 @@ void CLI::init_command_map()
   command_processor_map[Command::read_tablebases] = &CLI::process_command_read_tablebases;
   command_processor_map[Command::test_tablebases] = &CLI::process_command_test_tablebases;
   command_processor_map[Command::list_tablebase_moves] = &CLI::process_command_list_tablebase_moves;
+  command_processor_map[Command::list_engine_moves] = &CLI::process_command_list_engine_moves;
+  command_processor_map[Command::print_current_position] = &CLI::process_command_print_current_position;
+}
+
+void CLI::process_command_print_current_position(std::vector<std::string> args)
+{
+  m_engine.m_current_position->print_with_borders_highlight_squares(0, 0);
 }
 
 void CLI::process_command(std::string command)
@@ -364,16 +341,17 @@ void CLI::process_command(std::string command)
     return;
   }
   CommandProcessor command_processor = command_processor_map.find(it->second)->second;
+  (this->*command_processor)(args);
 
   // if the command is one of the ones that requires user input, dont spawn a new thread for it
   // so that it's easier to get user input.
-  if (primary.compare("create_tablebases") == 0 || primary.compare("read_tablebases") == 0)
-  {
-    (this->*command_processor)(args);
-  }
-  else
-  {
-    std::thread command_thread(command_processor, this, args);
-    command_thread.detach();
-  }
+  // if (primary.compare("create_tablebases") == 0 || primary.compare("read_tablebases") == 0)
+  // {
+  //   (this->*command_processor)(args);
+  // }
+  // else
+  // {
+  //   std::thread command_thread(command_processor, this, args);
+  //   command_thread.detach();
+  // }
 }

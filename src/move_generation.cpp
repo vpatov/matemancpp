@@ -103,7 +103,7 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
 
   candidate_square = NEXT_FILE(FORWARD_RANK(C, src_square));
   if (is_valid_square(candidate_square) &&
-      (IS_OPPONENT_PIECE(C, position->m_mailbox[candidate_square] || position->m_en_passant_square == candidate_square)))
+      (IS_OPPONENT_PIECE(C, position->m_mailbox[candidate_square]) || position->m_en_passant_square == candidate_square))
   {
     moves.push_back(pack_move_key(src_square, candidate_square));
   }
@@ -168,6 +168,8 @@ generate_pseudolegal_castling_king_moves(std::shared_ptr<Position> position,
       is_empty(position->m_mailbox[KING_KNIGHT_SQUARE_C(C)]) &&
       is_empty(position->m_mailbox[KING_BISHOP_SQUARE_C(C)]))
   {
+    assert(position->m_mailbox[KING_SQUARE_C(C)] == KING_C(C));
+    assert(position->m_mailbox[KING_ROOK_SQUARE_C(C)] == ROOK_C(C));
     moves.push_back(pack_move_key(src_square, KING_SHORT_CASTLE_SQUARE_C(C)));
   }
   if (QUEENSIDE_CASTLE_C(C, position) &&
@@ -175,6 +177,8 @@ generate_pseudolegal_castling_king_moves(std::shared_ptr<Position> position,
       is_empty(position->m_mailbox[QUEEN_SQUARE_C(C)]) &&
       is_empty(position->m_mailbox[QUEEN_BISHOP_SQUARE_C(C)]))
   {
+    assert(position->m_mailbox[KING_SQUARE_C(C)] == KING_C(C));
+    assert(position->m_mailbox[QUEEN_ROOK_SQUARE_C(C)] == ROOK_C(C));
     moves.push_back(pack_move_key(src_square, KING_LONG_CASTLE_SQUARE_C(C)));
   }
   return moves;
@@ -292,11 +296,6 @@ std::vector<MoveKey>
 generate_legal_moves(std::shared_ptr<Position> position,
                      square_t src_square)
 {
-
-  if (src_square == F7_SQ)
-  {
-    std::cout << "breakpoint" << std::endl;
-  }
 
   // all possible moves (not taking discovered check into account)
   auto moves = generate_pseudolegal_piece_moves(position, src_square);
