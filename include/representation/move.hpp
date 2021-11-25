@@ -23,6 +23,11 @@ struct Move
         : m_src_square(src_square), m_dst_square(dst_square), m_promotion_piece(0) {}
 
     friend std::ostream &operator<<(std::ostream &os, Move &move);
+
+    MoveKey to_move_key()
+    {
+        return ((uint32_t)m_src_square << 16) + ((uint32_t)m_dst_square << 8) + m_promotion_piece;
+    }
 };
 
 std::string generate_long_algebraic_notation(MoveKey move_key);

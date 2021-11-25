@@ -87,8 +87,14 @@ void CLI::process_command_position(std::vector<std::string> args)
   }
   else if (startpos_type.compare("fen") == 0)
   {
-    std::string fen_string = *it++;
-    m_engine.m_current_position = fen_to_position(fen_string);
+    std::stringstream fenstring;
+    for (auto el = it; el != args.end(); el++)
+      fenstring << *el << " ";
+
+    // std::string fen_string = *it++;
+    m_engine.m_current_position = fen_to_position(fenstring.str());
+    m_engine.m_current_position->print_with_borders_highlight_squares(0, 0);
+    it = args.end();
   }
   else if (startpos_type.compare("add") == 0)
   {
@@ -130,7 +136,9 @@ void CLI::process_command_position(std::vector<std::string> args)
 
 void CLI::process_command_list_engine_moves(std::vector<std::string> args)
 {
-  m_logger.info(m_engine.string_list_all_moves());
+  std::string all_moves_str = m_engine.string_list_all_moves();
+  m_logger.info(all_moves_str);
+  std::cout << all_moves_str << std::endl;
 }
 
 void CLI::process_command_list_tablebase_moves(std::vector<std::string> args)

@@ -450,7 +450,7 @@ void Position::advance_position(square_t src_square, square_t dst_square, uint8_
       m_black_queenside_castle = false;
     }
   }
-  else if (moving_piece == KING_C(C) == src_square == KING_SQUARE_C(C))
+  else if (moving_piece == KING_C(C) && src_square == KING_SQUARE_C(C))
   {
     if (m_whites_turn)
     {
@@ -461,6 +461,16 @@ void Position::advance_position(square_t src_square, square_t dst_square, uint8_
     {
       m_black_kingside_castle = false;
       m_black_queenside_castle = false;
+    }
+    if (dst_square == KING_SHORT_CASTLE_SQUARE_C(C))
+    {
+      m_mailbox[KING_ROOK_SQUARE_C(C)] = 0;
+      m_mailbox[ROOK_SHORT_CASTLE_SQUARE_C(C)] = ROOK_C(C);
+    }
+    else if (dst_square == KING_LONG_CASTLE_SQUARE_C(C))
+    {
+      m_mailbox[QUEEN_ROOK_SQUARE_C(C)] = 0;
+      m_mailbox[ROOK_LONG_CASTLE_SQUARE_C(C)] = ROOK_C(C);
     }
   }
   // -----------
