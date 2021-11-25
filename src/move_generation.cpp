@@ -26,7 +26,7 @@ bool Position::is_move_legal(square_t src_square, square_t dst_square)
   m_mailbox[dst_square] = m_mailbox[src_square];
   square_t square_of_pawn_being_captured = 0;
 
-  if (m_en_passant_square &&
+  if (is_valid_square(m_en_passant_square) &&
       m_en_passant_square == dst_square &&
       ((m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN))))
   {

@@ -76,5 +76,5 @@ TEST_CASE("fen->pos->fen returns original string, more complicated - 001", "[pos
     REQUIRE(position->m_black_queenside_castle == false);
     REQUIRE(position->m_white_queenside_castle == false);
     REQUIRE(position->m_mailbox[A1_SQ] == W_KING);
-    REQUIRE(position->m_en_passant_square == 0);
+    REQUIRE(position->m_en_passant_square == INVALID_SQUARE);
 }

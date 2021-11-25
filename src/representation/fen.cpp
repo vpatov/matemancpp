@@ -131,6 +131,10 @@ std::shared_ptr<Position> fen_to_position(std::string fen)
     assert(is_valid_square(square));
     position->m_en_passant_square = square;
   }
+  else
+  {
+    position->m_en_passant_square = INVALID_SQUARE;
+  }
 
   position->m_moves = std::stoi(fen_parts.at(4));
   return position;
@@ -211,7 +215,7 @@ std::string position_to_fen(std::shared_ptr<Position> position)
 
   // en passant square
   ss << " ";
-  ss << (position->m_en_passant_square
+  ss << (is_valid_square(position->m_en_passant_square)
              ? index_to_an_square(position->m_en_passant_square)
              : "-");
 

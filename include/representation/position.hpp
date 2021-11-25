@@ -192,8 +192,7 @@ public:
   bool m_black_queenside_castle;
   int m_plies;
   int m_moves;
-  square_t m_en_passant_square; // 0 if no en passant possible, is index of square
-                                // otherwise
+  square_t m_en_passant_square = INVALID_SQUARE;
   uint32_t castling_move(std::smatch &matches, bool white);
   uint32_t non_castling_move(
       char piece_char, char src_file, char src_rank, char capture,

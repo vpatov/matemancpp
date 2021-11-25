@@ -94,7 +94,7 @@ void Position::perform_castle(bool white, bool short_castle)
             m_mailbox[B_ROOK_LONG_CASTLE_SQUARE] = B_ROOK;
         }
     }
-    m_en_passant_square = 0;
+    m_en_passant_square = INVALID_SQUARE;
 }
 
 // Non-trivial because this
@@ -115,7 +115,7 @@ uint32_t Position::non_castling_move(
 {
     uint8_t src_square = 0x7f;
     uint8_t dest_square = 0x7f;
-    uint8_t new_en_passant_square = 0;
+    uint8_t new_en_passant_square = INVALID_SQUARE;
     Color color = m_whites_turn ? Color::WHITE : Color::BLACK;
 
     // destination file and rank should be present in every non-castling move
@@ -366,21 +366,21 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
             {
 
                 // temporarily assume the move
-                adjust_position(*it, dest_square, 0, 0);
+                adjust_position(*it, dest_square, 0, INVALID_SQUARE);
 
                 // ensure the position is legal (king is not in check)
                 if (legal_position())
                 {
                     // set the src_square and undo the move.
                     src_square = *it;
-                    adjust_position(dest_square, src_square, 0, 0);
+                    adjust_position(dest_square, src_square, 0, INVALID_SQUARE);
                     break;
                 }
                 else
                 {
 
                     // undo the move
-                    adjust_position(dest_square, *it, 0, 0);
+                    adjust_position(dest_square, *it, 0, INVALID_SQUARE);
                 }
             }
         }
@@ -403,7 +403,7 @@ void Position::adjust_position(uint8_t src_square,
     m_mailbox[dest_square] =
         promotion_piece ? promotion_piece : m_mailbox[src_square];
 
-    if (m_en_passant_square &&
+    if (is_valid_square(m_en_passant_square) &&
         m_en_passant_square == dest_square &&
         ((m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN))))
     {

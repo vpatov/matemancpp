@@ -60,7 +60,7 @@ void populate_starting_position(Position *position)
 
   position->m_plies = 0;
   position->m_moves = 1;
-  position->m_en_passant_square = 0;
+  position->m_en_passant_square = INVALID_SQUARE;
   position->m_whites_turn = true;
 }
 
@@ -420,7 +420,7 @@ void Position::advance_position(square_t src_square, square_t dst_square, piece_
 {
   piece_t moving_piece = m_mailbox[src_square];
   piece_t captured_piece = m_mailbox[dst_square];
-  square_t new_en_passant_square = 0;
+  square_t new_en_passant_square = INVALID_SQUARE;
 
   Color C = m_whites_turn ? Color::WHITE : Color::BLACK;
   assert(moving_piece != VOID_PIECE);
@@ -480,7 +480,7 @@ void Position::advance_position(square_t src_square, square_t dst_square, piece_
       promotion_piece ? promotion_piece : m_mailbox[src_square];
 
   // if we are capturing en passant
-  if (m_en_passant_square &&
+  if (is_valid_square(m_en_passant_square) &&
       m_en_passant_square == dst_square &&
       ((m_mailbox[src_square] == (PAWN_C(C)))))
   {

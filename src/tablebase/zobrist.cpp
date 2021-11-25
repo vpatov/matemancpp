@@ -74,7 +74,7 @@ z_hash_t zobrist_hash(Position *position)
 
   hash ^= zobrist_turn_table[(position->m_whites_turn) ? 1 : 0];
 
-  if (position->m_en_passant_square)
+  if (is_valid_square(position->m_en_passant_square))
   {
     hash ^= zobrist_en_passant_square_table[position->m_en_passant_square];
   }
