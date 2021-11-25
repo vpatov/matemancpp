@@ -173,25 +173,40 @@ std::string position_to_fen(std::shared_ptr<Position> position)
     square++;
   }
 
+  if (empty_square_count != 0)
+  {
+    ss << empty_square_count;
+  }
+
   // whose turn
   ss << " " << (position->m_whites_turn ? "w " : "b ");
 
+  bool some_castling = false;
   // castling rights
   if (position->m_white_kingside_castle)
   {
     ss << "K";
+    some_castling = true;
   }
   if (position->m_white_queenside_castle)
   {
     ss << "Q";
+    some_castling = true;
   }
   if (position->m_black_kingside_castle)
   {
     ss << "k";
+    some_castling = true;
   }
   if (position->m_black_queenside_castle)
   {
     ss << "q";
+    some_castling = true;
+  }
+
+  if (!some_castling)
+  {
+    ss << "-";
   }
 
   // en passant square

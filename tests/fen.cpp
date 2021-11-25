@@ -64,16 +64,17 @@ TEST_CASE("fen->pos->fen returns original string", "[position_to_fen, fen_to_pos
     REQUIRE(fen == STARTING_FEN);
 }
 
-TEST_CASE("", "")
+TEST_CASE("fen->pos->fen returns original string, more complicated - 001", "[position_to_fen, fen_to_position]")
 {
+    std::string test_fen = "6qk/6RP/4b3/7N/3p1n2/3P4/n7/K7 w - - 0 1";
+    auto position = fen_to_position(test_fen);
+    std::string fen = position_to_fen(position);
 
-    // LASTLEFTOFF castling input provided by UI is encoded as e1c1. advance_position doesnt
-    // properly treat this.
-
-    // position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c1g5 f6e4 c3e4 c8f5 c4d5
-    // c7c6 d5c6 h7h6 g5h6 a7a6 g1f3 d8c8 d1b3 b7b5 b3b5 c8c6 b5c6 e8d8 c6b6 d8d7 e4c5
-    // d7c8 b6a6 c8c7 f3e5 h8h6 a6a5 c7d6 a5d8 b8d7 d8d7 f5d7 e5d7 e7e6 d7b6 d6c7 b6c4
-    // h6h5 e1c1 f7f6 c1b1 c7d8 c5b7 d8e7 d1c1
-
-    // r4b2/1N2k3/4ppp1/7r/2NP4/8/PP2PPPP/RK3B1R w  - 0 1
+    REQUIRE(fen == test_fen);
+    REQUIRE(position->m_black_kingside_castle == false);
+    REQUIRE(position->m_white_kingside_castle == false);
+    REQUIRE(position->m_black_queenside_castle == false);
+    REQUIRE(position->m_white_queenside_castle == false);
+    REQUIRE(position->m_mailbox[A1_SQ] == W_KING);
+    REQUIRE(position->m_en_passant_square == 0);
 }

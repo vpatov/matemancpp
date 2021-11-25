@@ -3,7 +3,6 @@
 #include "cli.hpp"
 #include "representation/position.hpp"
 #include "tablebase/zobrist.hpp"
-// #include "test/launcher.hpp"
 #include <unordered_map>
 
 int main(int argc, char *argv[])
@@ -11,36 +10,6 @@ int main(int argc, char *argv[])
 {
    CLI cli;
    cli.process_command_read_tablebases({"read_tablebases", "latest"});
-
-   // cli.process_command_position({"position", "startpos"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d2d4"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d7d5"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "c2c4"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d5c4"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d4d5"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d8d7"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d5d6"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d7c6"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "h2h3"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "f7f6"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d6d7"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "e8f7"});
-   // cli.m_engine.search_for_best_move();
-   // cli.process_command_position({"position", "add", "d7d8=Q"});
-   // cli.m_engine.search_for_best_move();
-
    cli.cli_loop();
 }
 /*
@@ -62,11 +31,6 @@ Think of CLI as server, and of the different commands as endpoints.
 Looking at it this way, it's much clearer that the server owns the engine.
 
 ----------
-
-Tablebase class needs to be consolidated into something that makes sense.
-It's pretty confusing right now with MasterTablebase, OpeningTablebase, m_tablebases....
-Would be good to just have one class with one interface for all tablebase interaction. 
-and just call it Tablebase.
 */
 
 /*
@@ -161,104 +125,4 @@ MAIN GOALS:
 - make a computer that can beat you, and your friends
 - engineer a readable and well-designed implementation that you are proud of (not a spaghetti mess)
 - learn lots of C++ in the process
-
-CONSIDERATIONS
-==================
-- Consider making opening tablebase in C++ and the engine in some other language?
-   Pros:
-   - Get to spend time learning another lang
-   - Already spent time learning intuitions about how the engine should be done after writing the pgn parser
-
-   Cons:
-   - Will be spending more time learning another lang, and less time on the chess engine
-   - Will make lots of beginner's mistake in the new lang and might feel like rewriting stuff
-      after learning more.
-
 */
-
-/*
-
-  CLI cli;
-
-   cli.process_command_uci({});
-   cli.process_command_create_tablebases({"create_tablebases", "debug_002"});
-
-   std::vector<std::string> args = {"test_tablebases", "test"};
-   // cli.process_command_read_tablebases(args);
-   cli.process_command_position({"position", "startpos"});
-
-   auto position = starting_position();
-   std::cout << "starting_position:\n"
-             << zobrist_hash(position.get()) << std::endl;
-
-   square_t src1 = an_square_to_index("e2");
-   square_t dst1 = an_square_to_index("e4");
-   position->advance_position(src1, dst1, 0, 36);
-
-   std::cout << "position after e2e4:\n"
-             << zobrist_hash(position.get()) << std::endl;
-
-   cli.process_command_position({"position", "startpos", "moves", "e2e4"});
-
-   auto move_map = (*cli.m_engine.m_master_tablebase)[zobrist_hash(starting_position().get())];
-
-   for (auto it = move_map->begin(); it != move_map->end(); it++)
-   {
-      auto move_key = it->first;
-      auto move_edge = it->second;
-      std::cout << "---" << std::endl;
-      std::cout << move_edge.m_dest_hash << " - "
-                << move_edge.m_pgn_move << " - " << move_edge.m_times_played << std::endl;
-      // std::cout << it->first << ", " << it->second
-   }
-   std::cout << "======================" << std::endl;
-
-   auto move_map2 = (*cli.m_engine.m_master_tablebase)[1113003689047388558];
-
-   for (auto it = move_map2->begin(); it != move_map2->end(); it++)
-   {
-      auto move_key = it->first;
-      auto move_edge = it->second;
-      std::cout << "---" << std::endl;
-      std::cout << move_edge.m_dest_hash << " - "
-                << move_edge.m_pgn_move << " - " << move_edge.m_times_played << std::endl;
-      // std::cout << it->first << ", " << it->second
-   }
-
-   // for (auto it = tablebase.begin(); it != node.m_tablebase.end(); it++)
-   // {
-   //    auto first = it->first;
-   //    auto second = it->second;
-   // }
-
-   // PROBLEM is because the pgn processing code is making changes to the position
-   // the adjust method doesnt perform the complete change to the position, with things
-   // such as plies and turn to move.....
-   // also en passant square is calculated by pgn processing and then passed to adjust method.
-   // bad design
-
-   // TODO refactor interface to position?
-   // problem is that you are using adjust_position for two purposeS:
-   //    - to temporarily assume a position to check for legality
-   //    - to actually change the position and move forward
-   // also, advance positino shouldnt be taking en_passant_square as an argument.
-   std::cout
-       << "position exists? "
-       << cli.m_engine.m_master_tablebase->position_exists(
-              zobrist_hash(cli.m_engine.m_current_position.get()))
-       << std::endl;
-   std::cout << "position exists? "
-             << cli.m_engine.m_master_tablebase->position_exists(
-                    zobrist_hash(position.get()))
-             << std::endl;
-
-   // std::string user_input;
-   // std::cout << "Input the name for this tablebase (leave blank to use the current timestamp):" << std::endl;
-   // std::cin >> user_input;
-   // std::cout << "foo:{" << user_input << "}" << std::endl;
-   // exit(1);
-
-   // start_pgn_processing_tasks();
-   // cli.cli_loop();
-
-   */

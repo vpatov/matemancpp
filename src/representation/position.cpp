@@ -416,40 +416,34 @@ void Position::advance_position(Move move)
 // should not contain an assertion for legality. this will be handled later down the line
 // by the move-generation functions, and it can be checked that the output of this is within
 // the list of legal moves.
-void Position::advance_position(square_t src_square, square_t dst_square, uint8_t promotion_piece)
+void Position::advance_position(square_t src_square, square_t dst_square, piece_t promotion_piece)
 {
   piece_t moving_piece = m_mailbox[src_square];
   piece_t captured_piece = m_mailbox[dst_square];
   square_t new_en_passant_square = 0;
 
-  assert(moving_piece != VOID_PIECE);
-
   Color C = m_whites_turn ? Color::WHITE : Color::BLACK;
+  assert(moving_piece != VOID_PIECE);
+  assert(IS_YOUR_PIECE(C, moving_piece));
 
-  // remove castling rights
-  if (moving_piece == ROOK_C(C) && src_square == KING_ROOK_SQUARE_C(C))
+  // remove castling rights if the rook moves or gets captured
+  if (src_square == W_KING_ROOK_SQUARE || dst_square == W_KING_ROOK_SQUARE)
   {
-    if (m_whites_turn)
-    {
-      m_white_kingside_castle = false;
-    }
-    else
-    {
-      m_black_kingside_castle = false;
-    }
+    m_white_kingside_castle = false;
+  }
+  else if (src_square == W_QUEEN_ROOK_SQUARE || dst_square == W_QUEEN_ROOK_SQUARE)
+  {
+    m_white_queenside_castle = false;
+  }
+  else if (src_square == B_KING_ROOK_SQUARE || dst_square == B_KING_ROOK_SQUARE)
+  {
+    m_black_kingside_castle = false;
+  }
+  else if (src_square == B_QUEEN_ROOK_SQUARE || dst_square == B_QUEEN_ROOK_SQUARE)
+  {
+    m_black_queenside_castle = false;
   }
 
-  else if (moving_piece == ROOK_C(C) && src_square == QUEEN_ROOK_SQUARE_C(C))
-  {
-    if (m_whites_turn)
-    {
-      m_white_queenside_castle = false;
-    }
-    else
-    {
-      m_black_queenside_castle = false;
-    }
-  }
   else if (moving_piece == KING_C(C) && src_square == KING_SQUARE_C(C))
   {
     if (m_whites_turn)
@@ -475,11 +469,19 @@ void Position::advance_position(square_t src_square, square_t dst_square, uint8_
   }
   // -----------
 
+  // if the promotion piece is set, and its not whites turn,
+  // we have to turn the promotion piece into a black piece.
+  if (promotion_piece && !m_whites_turn)
+  {
+    promotion_piece |= BLACK_PIECE_MASK;
+  }
+
   m_mailbox[dst_square] =
       promotion_piece ? promotion_piece : m_mailbox[src_square];
 
   // if we are capturing en passant
-  if (m_en_passant_square == dst_square &&
+  if (m_en_passant_square &&
+      m_en_passant_square == dst_square &&
       ((m_mailbox[src_square] == (PAWN_C(C)))))
   {
 

@@ -123,9 +123,9 @@ void CLI::process_command_position(std::vector<std::string> args)
       m_engine.m_current_position->advance_position(move);
 
       m_logger.debug(position_to_fen(m_engine.m_current_position));
-      m_logger.debug(m_engine.m_current_position->pretty_string());
-      m_logger.debug(m_engine.string_list_all_moves());
     }
+    m_logger.debug(m_engine.m_current_position->pretty_string());
+    m_logger.debug(m_engine.string_list_all_moves());
   }
   else
   {
