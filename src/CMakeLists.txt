@@ -6,12 +6,14 @@ process_pgn/pgn_position.cpp
 cli.cpp
 representation/position.cpp
 representation/fen.cpp
+representation/notation.cpp
 options.cpp
 move_generation.cpp
 tablebase/move.cpp
 tablebase/persistence.cpp
 tablebase/tablebase.cpp
 tablebase/zobrist.cpp
+tablebase/move_edge.cpp
 threadpool/threadpool.cpp
 util.cpp
 engine/engine.cpp
@@ -23,6 +25,7 @@ engine/engine.cpp
 ../include/representation/pieces.hpp
 ../include/representation/fen.hpp
 ../include/representation/color.hpp
+../include/representation/notation.hpp
 ../include/options.hpp
 ../include/move_generation.hpp
 ../include/threadpool/threadpool.hpp
@@ -31,6 +34,7 @@ engine/engine.cpp
 ../include/process_pgn/pgn_game.hpp
 ../include/util.hpp
 ../include/tablebase/tablebase.hpp
+../include/tablebase/move_edge.hpp
 ../include/tablebase/zobrist.hpp
 # include/test/launcher.hpp
 )

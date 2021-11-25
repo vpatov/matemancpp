@@ -2,7 +2,8 @@
 #include <ostream>
 #include "representation/squares.hpp"
 #include "representation/pieces.hpp"
-#include "tablebase/zobrist.hpp"
+#include "representation/notation.hpp"
+#include <sstream>
 
 // move key is bit-wise concatenation of
 // 0x00 + start_square + end_square + promotion_piece
@@ -23,53 +24,6 @@ struct Move
 
     friend std::ostream &operator<<(std::ostream &os, Move &move);
 };
-
-struct MoveEdge
-{
-    z_hash_t m_dest_hash;
-    uint32_t m_times_played;
-
-    char m_pgn_move[8];
-
-    friend std::ostream &operator<<(std::ostream &os, MoveEdge &move_edge);
-
-    MoveEdge(z_hash_t dest_hash, std::string pgn_move)
-    {
-        m_dest_hash = dest_hash;
-        assert(pgn_move.size() < 8);
-        strncpy(m_pgn_move, pgn_move.c_str(), 8);
-
-        m_times_played = 1;
-    };
-
-    MoveEdge(z_hash_t dest_hash, std::string pgn_move, uint32_t times_played)
-    {
-        m_dest_hash = dest_hash;
-        assert(pgn_move.size() < 8);
-        strncpy(m_pgn_move, pgn_move.c_str(), 8);
-
-        m_times_played = times_played;
-    };
-
-    MoveEdge() {}
-
-    MoveEdge(const MoveEdge &other)
-    {
-        m_dest_hash = other.m_dest_hash;
-        m_times_played = other.m_times_played;
-        strncpy(m_pgn_move, other.m_pgn_move, 8);
-    }
-
-    MoveEdge(MoveEdge &&other)
-    {
-        m_dest_hash = other.m_dest_hash;
-        m_times_played = other.m_times_played;
-        strncpy(m_pgn_move, other.m_pgn_move, 8);
-    }
-};
-
-bool compare_key_move_pair(std::pair<MoveKey, MoveEdge> p1, std::pair<MoveKey, MoveEdge> p2);
-std::ostream &operator<<(std::ostream &os, MoveEdge &move_edge);
 
 std::string generate_long_algebraic_notation(MoveKey move_key);
 MoveKey generate_move_key(square_t src_square, square_t dest_square, piece_t promotion_piece);
@@ -142,4 +96,46 @@ inline MoveKey pack_move_key(square_t src_square, square_t dst_square)
 inline MoveKey pack_move_key(square_t src_square, square_t dst_square, piece_t promotion_piece)
 {
     return ((uint32_t)src_square << 16) + ((uint32_t)dst_square << 8) + promotion_piece;
+}
+
+inline std::string movekey_to_lan(MoveKey move_key)
+{
+    std::stringstream ss;
+    auto move = unpack_move_key(move_key);
+    ss << index_to_an_square(move.m_src_square) << index_to_an_square(move.m_dst_square);
+    if (move.m_promotion_piece)
+    {
+        ss << "=" << piece_to_char(move.m_promotion_piece);
+    }
+    return ss.str();
+}
+
+inline Move lan_to_move(std::string move_str)
+{
+    square_t src_square = an_square_to_index(move_str.substr(0, 2));
+    square_t dst_square = an_square_to_index(move_str.substr(2, 4));
+    piece_t promotion_piece = VOID_PIECE;
+
+    // piece should always be uppercase because pieces are uppercase in PGN.
+
+    // this code should probably be there for the "position startpos moves ...." path too
+    if (move_str.size() >= 5)
+    {
+        if (move_str.at(4) == '=')
+        {
+            promotion_piece = char_to_piece(move_str.at(5));
+        }
+        else if (is_possible_promotion_piece(move_str.at(4)))
+        {
+            promotion_piece = char_to_piece(move_str.at(4));
+        }
+        else
+        {
+            assert(false);
+        }
+        // promotion piece is always white, and then appropriate color is set
+        // when the piece is placed on the board.
+        promotion_piece &= PIECE_MASK;
+    }
+    return Move(src_square, dst_square, promotion_piece);
 }

@@ -80,3 +80,8 @@ inline bool is_white_piece(piece_t piece)
 {
     return piece && !(piece & BLACK_PIECE_MASK);
 }
+
+inline bool is_possible_promotion_piece(char piece)
+{
+    return piece == 'q' || piece == 'n' || piece == 'r' || piece == 'b';
+}

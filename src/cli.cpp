@@ -9,6 +9,7 @@
 #include <thread>
 #include <unordered_map>
 #include "representation/position.hpp"
+#include "representation/notation.hpp"
 #include <vector>
 
 #include "engine/engine.hpp"
@@ -82,48 +83,16 @@ void CLI::process_command_position(std::vector<std::string> args)
   std::string startpos_type = *it++;
   if (startpos_type.compare("startpos") == 0)
   {
-    // init position to startpos
     m_engine.m_current_position = starting_position();
   }
   else if (startpos_type.compare("fen") == 0)
   {
-    // TODO init position from the fenstring
     std::string fen_string = *it++;
+    m_engine.m_current_position = fen_to_position(fen_string);
   }
   else if (startpos_type.compare("add") == 0)
   {
-
-    // TODO abstract out pgn move processing.
-    std::string move = *it++;
-    piece_t promotion_piece = 0;
-
-    square_t src_square = an_square_to_index(move.substr(0, 2));
-    square_t dst_square = an_square_to_index(move.substr(2, 4));
-
-    // piece should always be uppercase because pieces are uppercase in PGN.
-
-    // this code should probably be there for the "position startpos moves ...." path too
-    if (move.size() > 5)
-    {
-      promotion_piece = char_to_piece(move.at(5));
-      assert(promotion_piece < PIECE_MASK);
-      if (!m_engine.m_current_position->m_whites_turn)
-      {
-        promotion_piece |= BLACK_PIECE_MASK;
-      }
-    }
-    // ----
-
-    if (!m_engine.m_current_position->is_move_legal(src_square, dst_square))
-    {
-      std::cout << ColorCode::red << "move is illegal? : " << ColorCode::end << move << std::endl;
-    }
-    else
-    {
-      std::cout << ColorCode::green << "legal" << ColorCode::end << std::endl;
-    }
-    m_engine.m_current_position->advance_position2(src_square, dst_square, promotion_piece);
-    // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
+    m_engine.m_current_position->advance_position(lan_to_move(*it++));
     return;
   }
   else
@@ -144,31 +113,12 @@ void CLI::process_command_position(std::vector<std::string> args)
     // for each move, adjust the position with it.
     while (it != args.end())
     {
-      std::string move = *it++;
-      m_logger.debug("parsing move: {}", move);
-      square_t src_square = an_square_to_index(move.substr(0, 2));
-      square_t dst_square = an_square_to_index(move.substr(2, 4));
-      piece_t promotion_piece = 0;
+      Move move = lan_to_move(*it++);
+      m_engine.m_current_position->advance_position(move);
 
-      // this code should probably be there for the "position startpos moves ...." path too
-      if (move.size() > 5)
-      {
-        promotion_piece = char_to_piece(move.at(5));
-        assert(promotion_piece < PIECE_MASK);
-        if (!m_engine.m_current_position->m_whites_turn)
-        {
-          promotion_piece |= BLACK_PIECE_MASK;
-        }
-      }
-      // ----
-
-      m_engine.m_current_position->advance_position2(src_square, dst_square, promotion_piece);
-      m_logger.info(position_to_fen(m_engine.m_current_position));
-      m_logger.info(m_engine.m_current_position->pretty_string());
-      m_logger.info(m_engine.string_list_all_moves());
-
-      // std::cout << move << std::endl;
-      // m_engine.m_current_position->print_with_borders_highlight_squares(src_square, dst_square);
+      m_logger.debug(position_to_fen(m_engine.m_current_position));
+      m_logger.debug(m_engine.m_current_position->pretty_string());
+      m_logger.debug(m_engine.string_list_all_moves());
     }
   }
   else

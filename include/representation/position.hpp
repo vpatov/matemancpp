@@ -4,6 +4,7 @@
 #include "squares.hpp"
 #include "color.hpp"
 #include "util.hpp"
+#include "representation/move.hpp"
 #include <regex>
 #include <assert.h>
 #include <cstdint>
@@ -205,9 +206,8 @@ public:
   void assert_correct_player_turn(square_t src_square, square_t dest_square);
   void adjust_position(square_t src_square, square_t dest_square, piece_t promotion_piece, square_t en_passant_square);
   bool legal_position();
-  void advance_position(uint8_t src_square,
-                        uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square);
-  void advance_position2(square_t src_square, square_t dst_square, uint8_t promotion_piece);
+  void advance_position(Move move);
+  void advance_position(square_t src_square, square_t dst_square, uint8_t promotion_piece);
   bool is_move_legal(square_t src_square, square_t dst_square);
 
   bool operator==(const Position &rhs) const
@@ -238,17 +238,6 @@ public:
 
 // TODO put some of these methods in a different file, cut dead code, refactor similarities
 
-square_t an_square_to_index(std::string square);
-#define sq(s) an_square_to_index(s)
-square_t an_square_to_index(char src_file, char src_rank);
-piece_t char_to_piece(char piece);
-char piece_to_char(piece_t piece);
-const std::string piece_to_name(piece_t piece);
-std::string piece_to_color_coded_char(piece_t piece, bool highlight);
-std::string piece_to_unicode_char(piece_t piece);
-std::string index_to_an_square(square_t index);
-char index_to_an_file(square_t index);
-char index_to_an_rank(square_t index);
 void print_position(Position *position);
 void print_position_with_borders(Position *position);
 void print_position_with_borders_highlight_squares(Position *position, square_t src_square, square_t dest_square);

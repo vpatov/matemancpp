@@ -1,6 +1,7 @@
 #include "process_pgn/pgn_game.hpp"
 #include "process_pgn/read_pgn_data.hpp"
 #include "tablebase/tablebase.hpp"
+#include "representation/notation.hpp"
 
 bool PgnGame::read_metadata_line(std::string &line)
 {

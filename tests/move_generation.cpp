@@ -49,7 +49,7 @@ TEST_CASE("move generation works correctly for starting position", "[move_genera
         REQUIRE(move_set.find(*it) != move_set.end());
     }
 
-    engine.m_current_position->advance_position2(E2_SQ, E4_SQ, 0);
+    engine.m_current_position->advance_position(E2_SQ, E4_SQ, 0);
     move_list = engine.get_all_moves();
     move_set = std::set<MoveKey>(move_list.begin(), move_list.end());
     REQUIRE(move_list.size() == move_set.size());
