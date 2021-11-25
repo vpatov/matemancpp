@@ -4,18 +4,35 @@
 
 TEST_CASE("starting position is correctly read from fen string", "[fen_to_position]")
 {
-    // Example FEN string (starting position):
-    // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-    std::shared_ptr<Position> position = fen_to_position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    std::shared_ptr<Position> position =
+        fen_to_position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
     REQUIRE((*position) == (*starting_position()));
 }
 
 TEST_CASE("starting position is correctly read from fen string after d4", "[fen_to_position]")
 {
-    // Example FEN string (starting position):
-    // rnbqkbnr/ppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-    std::shared_ptr<Position> fen_position = fen_to_position("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1");
     auto expected_position = starting_position();
     expected_position->advance_position2(D2_SQ, D4_SQ, VOID_PIECE);
+
+    std::shared_ptr<Position> fen_position =
+        fen_to_position("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1");
+
+    REQUIRE((*fen_position) == (*expected_position));
+}
+
+TEST_CASE("starting position is correctly read from fen string after a set of moves", "[fen_to_position]")
+{
+    auto expected_position = starting_position();
+    expected_position->advance_position2(D2_SQ, D4_SQ, VOID_PIECE);
+    expected_position->advance_position2(D7_SQ, D5_SQ, VOID_PIECE);
+    expected_position->advance_position2(C2_SQ, C4_SQ, VOID_PIECE);
+    expected_position->advance_position2(C7_SQ, C6_SQ, VOID_PIECE);
+    expected_position->advance_position2(G1_SQ, F3_SQ, VOID_PIECE);
+    expected_position->advance_position2(G8_SQ, F6_SQ, VOID_PIECE);
+
+    std::shared_ptr<Position> fen_position =
+        fen_to_position("rnbqkb1r/pp2pppp/2p2n2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 2 4");
+
     REQUIRE((*fen_position) == (*expected_position));
 }

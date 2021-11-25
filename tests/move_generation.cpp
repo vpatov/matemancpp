@@ -1,6 +1,7 @@
 #include "catch.hpp"
 #include "representation/position.hpp"
 #include "representation/pieces.hpp"
+#include "representation/fen.hpp"
 #include "engine/engine.hpp"
 #include "move_generation.hpp"
 #include <iostream>
@@ -80,4 +81,15 @@ TEST_CASE("move generation works correctly for starting position", "[move_genera
     {
         REQUIRE(move_set.find(*it) != move_set.end());
     }
+}
+
+TEST_CASE("doesn't generate illegal moves", "[move_generation]")
+{
+    Engine engine;
+    engine.m_current_position =
+        fen_to_position("rnbqkbnr/ppp2Qpp/8/3pp3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3");
+
+    auto moves = engine.get_all_moves();
+    REQUIRE(moves.size() == 1);
+    REQUIRE(moves.at(0) == m(E8_SQ, F7_SQ));
 }
