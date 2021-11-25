@@ -29,11 +29,11 @@ public:
         m_current_position = position;
     }
 
-    std::string search_for_best_move()
+    MoveKey search_for_best_move()
     {
         std::vector<MoveKey> all_moves = get_all_moves();
         auto movekey = all_moves.at(random_bitstring() % all_moves.size());
-        return movekey_to_lan(movekey);
+        return movekey;
     }
 
     std::vector<MoveKey> get_all_moves()
@@ -64,62 +64,33 @@ public:
         std::vector<MoveKey> all_moves = get_all_moves();
         for (auto m = all_moves.begin(); m != all_moves.end(); m++)
         {
-            auto move = unpack_move_key(*m);
-
-            ss << index_to_an_square(move.m_src_square)
-               << index_to_an_square(move.m_dst_square);
-            if (move.m_promotion_piece)
-            {
-                ss << "=" << piece_to_char(move.m_promotion_piece);
-            }
-            ss << " ";
+            ss << movekey_to_lan(*m) << " ";
         }
         ss << '\n';
         return ss.str();
     }
 
-    // LASTLEFTOFF
-    // for some reason, when playing through cutechess, the engine makes a move for white when it should
-    // make a move for black
-    // looks like it was a threading issue
-    // TODO
-    // implement fen                    XXXXXXXX
-    // 0) write some god damn tests      XXXXXXXX
-    // 1) print out fen                  XXXXXXXX
-    // 2) position from fen              XXXXXXXX
-    // 2a) test fen for some positions   XXXXXXXX
-    // 3) log fen string after every position change
-    // 4) use fen string debug situation where illegal move was given
-    // 5) clean up code
-    //      - make small functions
-    //      - separate into interfaes
-    //      - make debugging functions clean
-    //      - clean up cli
-    //      - pgn move processing
     void print_all_moves()
     {
         std::cout << string_list_all_moves() << std::endl;
     }
 
-    std::string tablebase_move_lookup()
+    MoveKey tablebase_move_lookup()
     {
+        MoveKey tablebase_move = VOID_MOVE;
         if (m_master_tablebase != NULL)
         {
             z_hash_t position_hash = zobrist_hash(m_current_position.get());
-            std::string lookup_move = m_master_tablebase->pick_move_from_sample(position_hash);
-
-            if (lookup_move.size())
-            {
-                return lookup_move;
-            }
+            tablebase_move = m_master_tablebase->pick_move_from_sample(position_hash);
         }
-        return "";
+        return tablebase_move;
     }
 
-    std::string find_best_move(std::chrono::milliseconds time)
+    MoveKey find_best_move(std::chrono::milliseconds time)
     {
-        std::string tablebase_move = tablebase_move_lookup();
-        if (tablebase_move.size())
+        MoveKey tablebase_move = tablebase_move_lookup();
+
+        if (tablebase_move)
         {
             return tablebase_move;
         }

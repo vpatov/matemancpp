@@ -74,7 +74,7 @@ void Tablebase::increment_times_played_or_insert_move(
     }
 }
 
-std::string Tablebase::pick_move_from_sample(z_hash_t position_hash)
+MoveKey Tablebase::pick_move_from_sample(z_hash_t position_hash)
 {
     uint16_t shard = position_hash % TABLEBASE_SHARD_COUNT;
 
@@ -83,7 +83,7 @@ std::string Tablebase::pick_move_from_sample(z_hash_t position_hash)
 
     if (node == position_moveset_map.end())
     {
-        return "";
+        return VOID_MOVE;
     }
 
     uint32_t sum_times_played = 0;
@@ -100,19 +100,19 @@ std::string Tablebase::pick_move_from_sample(z_hash_t position_hash)
     uint32_t addend = 0;
     for (auto it = node->second->begin(); it != node->second->end(); it++)
     {
-        auto move = *it;
-        addend += move.second.m_times_played;
+        auto pair = *it;
+        addend += pair.second.m_times_played;
         if (random_var < addend)
         {
-            auto move_key = move.first;
-            return generate_long_algebraic_notation(move_key);
+            auto move_key = pair.first;
+            return move_key;
         }
     }
 
     // should not reach this point, because our random number should be
     // less than the sum of the times_played in this node, and our condition should trigger
     assert(false);
-    return "";
+    return VOID_MOVE;
 }
 
 void Tablebase::list_all_moves_for_position(z_hash_t position_hash)

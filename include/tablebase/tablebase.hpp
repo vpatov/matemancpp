@@ -57,7 +57,7 @@ public:
     void update(z_hash_t insert_hash, z_hash_t dest_hash, MoveKey move_key, std::string pgn_move);
     void insert_new_move_map(z_hash_t insert_hash, MoveKey moveKey, MoveEdge moveEdge);
     void increment_times_played_or_insert_move(TablebaseIter node, MoveKey moveKey, MoveEdge moveEdge);
-    std::string pick_move_from_sample(z_hash_t position_hash);
+    MoveKey pick_move_from_sample(z_hash_t position_hash);
     void walk_down_most_popular_path();
     void list_all_moves_for_position(z_hash_t position_hash);
 

@@ -8,6 +8,7 @@
 // move key is bit-wise concatenation of
 // 0x00 + start_square + end_square + promotion_piece
 typedef uint32_t MoveKey;
+const MoveKey VOID_MOVE = 0;
 
 // try using move in move generation because it's simpler to interface with
 // later, if performance improvements are necessary, consider using 16-bit movekey

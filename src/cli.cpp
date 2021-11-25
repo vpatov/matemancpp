@@ -150,7 +150,7 @@ void CLI::process_command_list_tablebase_moves(std::vector<std::string> args)
 
 void CLI::process_command_go(std::vector<std::string> args)
 {
-  std::string best_move;
+  MoveKey best_move;
 
   // 	* movetime <x>
   // 	search exactly x mseconds
@@ -160,7 +160,7 @@ void CLI::process_command_go(std::vector<std::string> args)
 
   auto time = std::chrono::milliseconds(5000);
   best_move = m_engine.find_best_move(time);
-  log_and_respond("bestmove " + best_move);
+  log_and_respond("bestmove " + movekey_to_lan(best_move));
 };
 void CLI::process_command_stop(std::vector<std::string> args)
 {
