@@ -1,6 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 #include "representation/position.hpp"
+#include "representation/pieces.hpp"
+#include "representation/fen.hpp"
 #include "engine/engine.hpp"
 #include "move_generation.hpp"
 #include <iostream>
@@ -85,4 +87,12 @@ TEST_CASE("move generation works correctly for starting position", "[move_genera
     {
         REQUIRE(move_set.find(*it) != move_set.end());
     }
+}
+
+TEST_CASE("starting position is correctly read from fen string", "[fen_to_position]")
+{
+    // Example FEN string (starting position):
+    // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+    std::shared_ptr<Position> position = fen_to_position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    REQUIRE((*position) == (*starting_position()));
 }

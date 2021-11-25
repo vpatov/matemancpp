@@ -58,7 +58,7 @@ void populate_starting_position(Position *position)
   position->m_black_queenside_castle = true;
 
   position->m_plies = 0;
-  position->m_moves = 1;
+  position->m_moves = 0;
   position->m_en_passant_square = 0;
   position->m_whites_turn = true;
 }

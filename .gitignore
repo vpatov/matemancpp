@@ -6,6 +6,9 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 /CMakeFiles
+tests/Test
+src/CMakeFiles
+tests/CMakeFiles
 allgames_debug.txt
 matemancpp
 /dev_data

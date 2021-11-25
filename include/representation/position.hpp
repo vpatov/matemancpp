@@ -209,6 +209,32 @@ struct Position
                         uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square);
   void advance_position2(square_t src_square, square_t dst_square, uint8_t promotion_piece);
   bool is_move_legal(square_t src_square, square_t dst_square);
+
+  bool operator==(const Position &rhs) const
+  {
+
+    for (square_t sq = 0; sq <= H8_SQ; sq++)
+    {
+      if (is_valid_square(sq) && m_mailbox[sq] != rhs.m_mailbox[sq])
+      {
+        return false;
+      }
+    }
+    if (
+        m_whites_turn != rhs.m_whites_turn ||
+        m_white_kingside_castle != rhs.m_white_kingside_castle ||
+        m_white_queenside_castle != rhs.m_white_queenside_castle ||
+        m_black_kingside_castle != rhs.m_black_kingside_castle ||
+        m_black_queenside_castle != rhs.m_black_queenside_castle ||
+        m_moves != rhs.m_moves ||
+        m_plies != rhs.m_plies ||
+        m_en_passant_square != rhs.m_en_passant_square)
+    {
+      return false;
+    }
+
+    return true;
+  }
 };
 
 square_t an_square_to_index(std::string square);

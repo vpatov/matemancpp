@@ -12,6 +12,16 @@
             "miDebuggerPath": "/usr/bin/lldb"
 
 
+        },
+        {
+            "name": "Test",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/tests/Test",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build",
+            "targetArchitecture":"x86_64",
+            "miDebuggerPath": "/usr/bin/lldb"
         }
     ]
 }
