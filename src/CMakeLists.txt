@@ -27,6 +27,7 @@ engine/engine.cpp
 ../include/representation/color.hpp
 ../include/representation/notation.hpp
 ../include/options.hpp
+../include/representation/offsets.hpp
 ../include/move_generation.hpp
 ../include/threadpool/threadpool.hpp
 ../include/representation/squares.hpp

@@ -40,6 +40,11 @@ const piece_t B_BISHOP = (BISHOP | BLACK_PIECE_MASK);
 const piece_t B_QUEEN = (QUEEN | BLACK_PIECE_MASK);
 const piece_t B_KING = (KING | BLACK_PIECE_MASK);
 
+#define IS_YOUR_PIECE(C, piece) \
+    (is_white(C) ? is_white_piece(piece) : is_black_piece(piece))
+#define IS_OPPONENT_PIECE(C, piece) \
+    (is_white(C) ? is_black_piece(piece) : is_white_piece(piece))
+
 #define PAWN_C(C) \
     (is_white(C) ? W_PAWN : B_PAWN)
 #define ROOK_C(C) \

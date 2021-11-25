@@ -5,6 +5,7 @@
 */
 
 #include "representation/position.hpp"
+#include "representation/offsets.hpp"
 #include "representation/notation.hpp"
 #include "tablebase/tablebase.hpp"
 #include <thread>

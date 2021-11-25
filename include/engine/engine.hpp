@@ -31,7 +31,9 @@ public:
 
     MoveKey search_for_best_move()
     {
+        int depth = 3;
         std::vector<MoveKey> all_moves = get_all_moves();
+
         auto movekey = all_moves.at(random_bitstring() % all_moves.size());
         return movekey;
     }

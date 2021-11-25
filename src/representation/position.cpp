@@ -1,5 +1,6 @@
 #include "representation/position.hpp"
 #include "representation/notation.hpp"
+#include "representation/offsets.hpp"
 #include "move_generation.hpp"
 #include <sstream>
 #include <iostream>

@@ -1,3 +1,4 @@
+#include "representation/offsets.hpp"
 #include "move_generation.hpp"
 #include <assert.h>
 #include <cstdint>
@@ -6,10 +7,16 @@
 
 /** Pseudolegal moves don't take check into account. */
 
+// TODO ensure that king cannot castle in check, and cannot pass through check
 bool Position::is_move_legal(square_t src_square, square_t dst_square)
 {
   // Assume the move
   // ----------------
+  // PROBLEM: we dont properly assume castle moves. The king gets put into the assumed
+  // position, but the rook doesnt. In theory this should be fine, because we are only
+  // using this to check for legality, and are thus only concerned with the resultant
+  // position of the king. Also, the rook cant block check because its on the same file
+  // as the king, and if the king was in check on that file, the king couldnt castle anyway.
   assert(is_valid_square(src_square));
   assert(is_valid_square(dst_square));
 
@@ -17,8 +24,6 @@ bool Position::is_move_legal(square_t src_square, square_t dst_square)
   piece_t original_src_piece = m_mailbox[src_square];
   piece_t original_dst_piece = m_mailbox[dst_square];
 
-  // m_mailbox[dst_square] =
-  //     promotion_piece ? promotion_piece : m_mailbox[src_square];
   // we can ignore promotion because it doesnt affect the legality of the move
   // i.e. if it was legal to move the pawn up (pawn wasnt blocking check) then
   // it doesnt matter what piece it gets promoted to, it will be legal either
@@ -35,9 +40,9 @@ bool Position::is_move_legal(square_t src_square, square_t dst_square)
     assert(m_mailbox[square_of_pawn_being_captured] == m_whites_turn
                ? B_PAWN
                : W_PAWN);
-    m_mailbox[square_of_pawn_being_captured] = 0;
+    m_mailbox[square_of_pawn_being_captured] = VOID_PIECE;
   }
-  m_mailbox[src_square] = 0;
+  m_mailbox[src_square] = VOID_PIECE;
 
   bool legal = legal_position();
 
@@ -59,7 +64,7 @@ generate_pseudolegal_pawn_moves(std::shared_ptr<Position> position,
 {
 
   assert(is_valid_square(src_square));
-  assert(position->m_mailbox[src_square] == PAWNC(C));
+  assert(position->m_mailbox[src_square] == PAWN_C(C));
 
   square_t candidate_square;
   std::vector<MoveKey> moves;
@@ -140,7 +145,7 @@ generate_pseudolegal_king_moves(std::shared_ptr<Position> position,
 {
 
   assert(is_valid_square(src_square));
-  assert(position->m_mailbox[src_square] == KINGC(C));
+  assert(position->m_mailbox[src_square] == KING_C(C));
 
   square_t candidates[8] = {
       NEXT_RANK(PREV_FILE(src_square)),
@@ -212,7 +217,7 @@ generate_pseudolegal_knight_moves(std::shared_ptr<Position> position,
                                   square_t src_square)
 {
   assert(is_valid_square(src_square));
-  assert(position->m_mailbox[src_square] == KNIGHTC(C));
+  assert(position->m_mailbox[src_square] == KNIGHT_C(C));
 
   square_t candidates[8] = {
       NEXT_RANK(PREV_FILE(PREV_FILE(src_square))),
@@ -303,7 +308,7 @@ generate_pseudolegal_queen_moves(std::shared_ptr<Position> position,
                                  square_t src_square)
 {
   assert(is_valid_square(src_square));
-  assert(position->m_mailbox[src_square] == QUEENC(C));
+  assert(position->m_mailbox[src_square] == QUEEN_C(C));
   std::vector<MoveKey> rook_moves;
   std::vector<MoveKey> bishop_moves;
 

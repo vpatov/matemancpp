@@ -101,6 +101,50 @@ const square_t B_ROOK_LONG_CASTLE_SQUARE = D8_SQ;
 
 const square_t INVALID_SQUARE = 127;
 
+#define KING_ROOK_SQUARE_C(C) \
+    (is_white(C) ? W_KING_ROOK_SQUARE : B_KING_ROOK_SQUARE)
+#define QUEEN_ROOK_SQUARE_C(C) \
+    (is_white(C) ? W_QUEEN_ROOK_SQUARE : B_QUEEN_ROOK_SQUARE)
+#define KING_SHORT_CASTLE_SQUARE_C(C) \
+    (is_white(C) ? W_KING_SHORT_CASTLE_SQUARE : B_KING_SHORT_CASTLE_SQUARE)
+#define KING_LONG_CASTLE_SQUARE_C(C) \
+    (is_white(C) ? W_KING_LONG_CASTLE_SQUARE : B_KING_LONG_CASTLE_SQUARE)
+
+#define ROOK_SHORT_CASTLE_SQUARE_C(C) \
+    (is_white(C) ? W_ROOK_SHORT_CASTLE_SQUARE : B_ROOK_SHORT_CASTLE_SQUARE)
+#define ROOK_LONG_CASTLE_SQUARE_C(C) \
+    (is_white(C) ? W_ROOK_LONG_CASTLE_SQUARE : B_ROOK_LONG_CASTLE_SQUARE)
+
+#define KING_KNIGHT_SQUARE_C(C) \
+    (is_white(C) ? W_KING_KNIGHT_SQUARE : B_KING_KNIGHT_SQUARE)
+#define KING_BISHOP_SQUARE_C(C) \
+    (is_white(C) ? W_KING_BISHOP_SQUARE : B_KING_BISHOP_SQUARE)
+
+#define QUEEN_SQUARE_C(C) \
+    (is_white(C) ? W_QUEEN_SQUARE : B_QUEEN_SQUARE)
+#define QUEEN_KNIGHT_SQUARE_C(C) \
+    (is_white(C) ? W_QUEEN_KNIGHT_SQUARE : B_QUEEN_KNIGHT_SQUARE)
+#define QUEEN_BISHOP_SQUARE_C(C) \
+    (is_white(C) ? W_QUEEN_BISHOP_SQUARE : B_QUEEN_BISHOP_SQUARE)
+
+#define KING_SQUARE_C(C) \
+    (is_white(C) ? W_KING_SQUARE : B_KING_SQUARE)
+
+#define IN_FIRST_RANK(square) \
+    square <= H1_SQ
+#define IN_EIGHTH_RANK(square) \
+    square >= A8_SQ
+#define IN_LAST_PAWN_RANK_C(C, square) \
+    (is_white(C) ? IN_EIGHTH_RANK(square) : IN_FIRST_RANK(square))
+
+#define IN_SECOND_RANK(sq) (sq >= 16 && sq <= 23)
+#define IN_SEVENTH_RANK(sq) (sq >= 96 && sq <= 103)
+#define IN_START_PAWN_RANK(C, square) \
+    (is_white(C) ? IN_SECOND_RANK(square) : IN_SEVENTH_RANK(square))
+
+#define RANKC_TO_RANK(rankc) (rankc - '1')
+#define FILEC_TO_FILE(filec) (filec - 'a')
+
 inline bool is_invalid_square(square_t sq)
 {
     return sq & 0x88;
