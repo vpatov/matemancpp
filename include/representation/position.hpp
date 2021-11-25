@@ -177,6 +177,7 @@ const std::vector<int> knight_move_offsets = {
 
 struct Position
 {
+public:
   piece_t m_mailbox[128]; // x88 mailbox flat array
   bool m_whites_turn;     // true if white's turn
   bool m_white_kingside_castle;
@@ -187,7 +188,6 @@ struct Position
   int m_moves;
   square_t m_en_passant_square; // 0 if no en passant possible, is index of square
                                 // otherwise
-
   uint32_t castling_move(std::smatch &matches, bool white);
   uint32_t non_castling_move(
       char piece_char, char src_file, char src_rank, char capture,
@@ -235,6 +235,8 @@ struct Position
     return true;
   }
 };
+
+// TODO put some of these methods in a different file, cut dead code, refactor similarities
 
 square_t an_square_to_index(std::string square);
 #define sq(s) an_square_to_index(s)

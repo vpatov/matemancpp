@@ -1,9 +1,22 @@
 #include "representation/move.hpp"
+#include <sstream>
 
 Move unpack_move_key(MoveKey move_key)
 {
     Move move(move_key >> 16, (move_key & 0xff00) >> 8, move_key & 0xff);
     return move;
+}
+
+std::string movekey_to_lan(MoveKey move_key)
+{
+    std::stringstream ss;
+    auto move = unpack_move_key(move_key);
+    ss << index_to_an_square(move.m_src_square) << index_to_an_square(move.m_dst_square);
+    if (move.m_promotion_piece)
+    {
+        ss << "=" << piece_to_char(move.m_promotion_piece);
+    }
+    return ss.str();
 }
 
 /* 

@@ -45,6 +45,8 @@ target_link_libraries (matemancpp PRIVATE matemancpp_lib)
 include_directories(../include)
 target_include_directories(matemancpp PRIVATE ../include)
 
-add_compile_definitions(PROJECT_ROOT_DIR="../${CMAKE_CURRENT_SOURCE_DIR}")
+add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/..")
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ../build)
+
 
 

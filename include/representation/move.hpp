@@ -74,6 +74,7 @@ std::ostream &operator<<(std::ostream &os, MoveEdge &move_edge);
 std::string generate_long_algebraic_notation(MoveKey move_key);
 MoveKey generate_move_key(square_t src_square, square_t dest_square, piece_t promotion_piece);
 Move unpack_move_key(MoveKey move_key);
+std::string movekey_to_lan(MoveKey move_key);
 
 // since there are only 4 promotion candidates, we can use 2 bits to represent them.
 // promotion_piece (2 bits) - dst_square (7 bits) - src_square (7 bits)

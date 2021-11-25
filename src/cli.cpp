@@ -1,6 +1,7 @@
 #include "cli.hpp"
 #include "options.hpp"
 #include "process_pgn/read_pgn_data.hpp"
+#include "representation/fen.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <iostream>
@@ -162,6 +163,7 @@ void CLI::process_command_position(std::vector<std::string> args)
       // ----
 
       m_engine.m_current_position->advance_position2(src_square, dst_square, promotion_piece);
+      m_logger.info(position_to_fen(m_engine.m_current_position));
       m_logger.info(m_engine.m_current_position->pretty_string());
       m_logger.info(m_engine.string_list_all_moves());
 
@@ -197,21 +199,9 @@ void CLI::process_command_go(std::vector<std::string> args)
   // * infinite
   // 	search until the "stop" command. Do not exit the search without being told so in this mode!
   // write function that creates vector of pairs for keys/values
-  int x = 1;
+
   auto time = std::chrono::milliseconds(5000);
-  //movetime
-  if (x == 1)
-  {
-    // assume pos is already set up
-    best_move = m_engine.find_best_move(time);
-    // std::this_thread::sleep_for(time);
-  }
-  // infinite
-  else if (x == 2)
-  {
-    best_move = m_engine.find_best_move(std::chrono::milliseconds(0));
-  }
-  // std::cout << "bestmove " << best_move << std::endl;
+  best_move = m_engine.find_best_move(time);
   log_and_respond("bestmove " + best_move);
 };
 void CLI::process_command_stop(std::vector<std::string> args)

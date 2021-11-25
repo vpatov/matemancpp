@@ -19,8 +19,6 @@ public:
         m_current_position = starting_position();
     }
 
-    // std::string find_best_move(std::chrono::milliseconds time);
-
     void set_tablebase(std::shared_ptr<Tablebase> tablebase)
     {
         m_master_tablebase = tablebase;
@@ -31,18 +29,11 @@ public:
         m_current_position = position;
     }
 
-    // should just return random legal moves at first.
     std::string search_for_best_move()
     {
         std::vector<MoveKey> all_moves = get_all_moves();
         auto movekey = all_moves.at(random_bitstring() % all_moves.size());
-        auto move = unpack_move_key(movekey);
-        std::stringstream ss;
-        if (move.m_promotion_piece)
-        {
-            ss << "=" << piece_to_char(move.m_promotion_piece);
-        }
-        return index_to_an_square(move.m_src_square) + index_to_an_square(move.m_dst_square) + ss.str();
+        return movekey_to_lan(movekey);
     }
 
     std::vector<MoveKey> get_all_moves()
@@ -50,7 +41,7 @@ public:
         Color c = m_current_position->m_whites_turn ? Color::WHITE : Color::BLACK;
         square_t square = 0;
         std::vector<MoveKey> all_moves;
-        while (square < 120)
+        while (square <= H8_SQ)
         {
             if (is_invalid_square(square))
             {
@@ -92,11 +83,11 @@ public:
     // make a move for black
     // looks like it was a threading issue
     // TODO
-    // implement fen
-    // 0) write some god damn tests
-    // 1) print out fen
-    // 2) position from fen
-    // 2a) test fen for some positions
+    // implement fen                    XXXXXXXX
+    // 0) write some god damn tests      XXXXXXXX
+    // 1) print out fen                  XXXXXXXX
+    // 2) position from fen              XXXXXXXX
+    // 2a) test fen for some positions   XXXXXXXX
     // 3) log fen string after every position change
     // 4) use fen string debug situation where illegal move was given
     // 5) clean up code
@@ -127,11 +118,11 @@ public:
 
     std::string find_best_move(std::chrono::milliseconds time)
     {
-        // std::string tablebase_move = tablebase_move_lookup();
-        // if (tablebase_move.size())
-        // {
-        //     return tablebase_move;
-        // }
+        std::string tablebase_move = tablebase_move_lookup();
+        if (tablebase_move.size())
+        {
+            return tablebase_move;
+        }
 
         return search_for_best_move();
     }
