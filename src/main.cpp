@@ -3,11 +3,14 @@
 #include "cli.hpp"
 #include "representation/position.hpp"
 #include "tablebase/zobrist.hpp"
+#include "test/launcher.hpp"
 #include <unordered_map>
 
 int main(int argc, char *argv[])
 
 {
+   run_tests();
+   exit(0);
    CLI cli;
    cli.process_command_read_tablebases({"read_tablebases", "latest"});
 
