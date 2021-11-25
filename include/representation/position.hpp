@@ -220,14 +220,13 @@ struct Position
         return false;
       }
     }
+    // TODO compare m_moves and or m_plies once you've figured out their semantics
     if (
         m_whites_turn != rhs.m_whites_turn ||
         m_white_kingside_castle != rhs.m_white_kingside_castle ||
         m_white_queenside_castle != rhs.m_white_queenside_castle ||
         m_black_kingside_castle != rhs.m_black_kingside_castle ||
         m_black_queenside_castle != rhs.m_black_queenside_castle ||
-        m_moves != rhs.m_moves ||
-        m_plies != rhs.m_plies ||
         m_en_passant_square != rhs.m_en_passant_square)
     {
       return false;

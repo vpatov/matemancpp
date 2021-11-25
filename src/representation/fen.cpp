@@ -119,5 +119,13 @@ std::shared_ptr<Position> fen_to_position(std::string fen)
     }
   }
 
+  if (fen_parts.at(2).size() == 2)
+  {
+
+    square_t square = an_square_to_index(fen_parts.at(2));
+    assert(is_valid_square(square));
+    position->m_en_passant_square = square;
+  }
+
   return position;
 }
