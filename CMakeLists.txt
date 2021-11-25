@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(matemancpp VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.5)
+project(matemancpp LANGUAGES CXX VERSION 0.1.0)
+
+
 
 if(NOT TARGET spdlog)
     # Stand-alone build
@@ -27,49 +29,19 @@ endif()
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 
-#find_package( Boost REQUIRED COMPONENTS algorithm format )
 include_directories( ${Boost_INCLUDE_DIRS} )
 
-set(SOURCES
-    src/process_pgn/pgn_game.cpp
-    src/process_pgn/read_pgn_data.cpp
-    src/process_pgn/pgn_position.cpp
-    src/main.cpp
-    src/cli.cpp
-    src/representation/position.cpp
-    src/representation/fen.cpp
-    src/options.cpp
-    src/move_generation.cpp
-    src/tablebase/move.cpp
-    src/tablebase/persistence.cpp
-    src/tablebase/tablebase.cpp
-    src/tablebase/zobrist.cpp
-    src/threadpool/threadpool.cpp
-    src/util.cpp
-    src/engine/engine.cpp
-    src/test/launcher.cpp
-    include/cli.hpp
-    include/engine/engine.hpp
-    include/representation/position.hpp
-    include/representation/move.hpp
-    include/representation/pieces.hpp
-    include/representation/fen.hpp
-    include/representation/color.hpp
-    include/options.hpp
-    include/move_generation.hpp
-    include/threadpool/threadpool.hpp
-    include/representation/squares.hpp
-    include/process_pgn/read_pgn_data.hpp
-    include/process_pgn/pgn_game.hpp
-    include/util.hpp
-    include/tablebase/tablebase.hpp
-    include/tablebase/zobrist.hpp
-    include/test/launcher.hpp
-)
+add_subdirectory (src) 
+add_subdirectory (tests)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+# enable_testing ()
+# add_test (NAME MyTest COMMAND Test)
 
 
-
-add_executable(matemancpp ${SOURCES})
+# add_executable(matemancpp ${MATEMAN_SOURCES})
+# add_executable(test_runner ${TEST_SOURCES})
 
 
 # find_path(BOOST_ALGORITHM_INCLUDE_DIRS "boost/algorithm/algorithm.hpp")
@@ -77,15 +49,13 @@ add_executable(matemancpp ${SOURCES})
 # find_path(BOOST_FORMAT_INCLUDE_DIRS "boost/format.hpp")
 # target_include_directories(matemancpp PRIVATE ${BOOST_FORMAT_INCLUDE_DIRS})
 
-target_include_directories(matemancpp PRIVATE ${PROJECT_SOURCE_DIR}/include)
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-target_link_libraries(matemancpp PRIVATE Threads::Threads)
-target_link_libraries(matemancpp PRIVATE spdlog::spdlog)
 
 
-add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+
+
+
+
 
 
 

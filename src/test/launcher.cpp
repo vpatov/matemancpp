@@ -10,6 +10,11 @@
 
 // a position is legal, if you cannot capture the king.
 
+unsigned int Factorial(unsigned int number)
+{
+    return number <= 1 ? number : Factorial(number - 1) * number;
+}
+
 MoveKey m(square_t sq1, square_t sq2)
 {
     return pack_move_key(sq1, sq2);
