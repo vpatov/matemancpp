@@ -11,3 +11,8 @@ target_link_libraries (Test
                        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
                        )
 
+include_directories(../include)
+add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+
+
