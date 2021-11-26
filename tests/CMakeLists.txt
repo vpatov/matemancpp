@@ -3,7 +3,17 @@ include_directories (${MATEMANCPP_SOURCE_DIR}/src
                      ${Boost_INCLUDE_DIRS}
                      )
 add_definitions (-DBOOST_TEST_DYN_LINK)
-add_executable (Test test.cpp move_generation.cpp fen.cpp catch.hpp)
+
+set(SOURCES
+
+    test.cpp
+    fen.cpp
+    catch.hpp
+    move_generation.cpp
+    engine.cpp
+)
+
+add_executable (Test ${SOURCES})
 target_link_libraries (Test
                        matemancpp_lib
                        ${Boost_FILESYSTEM_LIBRARY}

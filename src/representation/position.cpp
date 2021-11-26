@@ -407,7 +407,7 @@ bool check_diagonal_or_file_or_rank(Position *position, square_t king_square, in
   return true;
 }
 
-void Position::advance_position(Move move)
+PositionAdjustment Position::advance_position(Move move)
 {
   return advance_position(move.m_src_square, move.m_dst_square, move.m_promotion_piece);
 }
@@ -417,8 +417,9 @@ void Position::advance_position(Move move)
 // should not contain an assertion for legality. this will be handled later down the line
 // by the move-generation functions, and it can be checked that the output of this is within
 // the list of legal moves.
-void Position::advance_position(square_t src_square, square_t dst_square, piece_t promotion_piece)
+PositionAdjustment Position::advance_position(square_t src_square, square_t dst_square, piece_t promotion_piece)
 {
+  PositionAdjustment adjustment;
   piece_t moving_piece = m_mailbox[src_square];
   piece_t captured_piece = m_mailbox[dst_square];
   square_t new_en_passant_square = INVALID_SQUARE;
@@ -426,6 +427,29 @@ void Position::advance_position(square_t src_square, square_t dst_square, piece_
   Color C = m_whites_turn ? Color::WHITE : Color::BLACK;
   assert(moving_piece != VOID_PIECE);
   assert(IS_YOUR_PIECE(C, moving_piece));
+
+  adjustment.src_square = src_square;
+  adjustment.dst_square = dst_square;
+  adjustment.captured_piece = captured_piece;
+  adjustment.moving_piece = moving_piece;
+  adjustment.pawn_captured_en_passant_square = INVALID_SQUARE;
+  adjustment.old_en_passant_square = m_en_passant_square;
+  adjustment.old_castling_rights = (m_white_kingside_castle) |
+                                   (m_white_queenside_castle << 1) |
+                                   (m_black_kingside_castle << 2) |
+                                   (m_black_queenside_castle << 3);
+
+  // storing this here makes undoing the move easier
+  adjustment.castled = 0;
+  if (src_square == KING_SQUARE_C(C) && moving_piece == KING_C(C))
+  {
+    adjustment.castled =
+        (dst_square == KING_SHORT_CASTLE_SQUARE_C(C)
+             ? 1
+             : (dst_square == KING_LONG_CASTLE_SQUARE_C(C)
+                    ? 2
+                    : 0));
+  }
 
   // remove castling rights if the rook moves or gets captured
   if (src_square == W_KING_ROOK_SQUARE || dst_square == W_KING_ROOK_SQUARE)
@@ -495,6 +519,7 @@ void Position::advance_position(square_t src_square, square_t dst_square, piece_
                ? B_PAWN
                : W_PAWN);
     m_mailbox[square_of_pawn_being_captured] = 0;
+    adjustment.pawn_captured_en_passant_square = square_of_pawn_being_captured;
   }
 
   // if pawn is advancing two squares, set the en passant square
@@ -508,5 +533,10 @@ void Position::advance_position(square_t src_square, square_t dst_square, piece_
 
   m_whites_turn = !m_whites_turn;
   m_plies++;
+  if (m_whites_turn)
+  {
+    m_moves++;
+  }
   m_mailbox[src_square] = 0;
+  return adjustment;
 }

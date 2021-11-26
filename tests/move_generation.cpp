@@ -7,11 +7,6 @@
 #include <iostream>
 #include <set>
 
-MoveKey m(square_t sq1, square_t sq2)
-{
-    return pack_move_key(sq1, sq2);
-}
-
 TEST_CASE("move generation works correctly for starting position", "[move_generation]")
 {
     Engine engine;

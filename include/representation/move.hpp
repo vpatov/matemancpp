@@ -145,3 +145,8 @@ inline Move lan_to_move(std::string move_str)
     }
     return Move(src_square, dst_square, promotion_piece);
 }
+
+inline MoveKey m(square_t sq1, square_t sq2)
+{
+    return pack_move_key(sq1, sq2);
+}

@@ -41,6 +41,7 @@ a   b   c   d   e   f   g   h
 a   b   c   d   e   f   g   h
 */
 
+// can this be one 64-bit word??????
 struct PositionAdjustment
 {
   square_t src_square;
@@ -50,6 +51,7 @@ struct PositionAdjustment
   piece_t moving_piece;
   square_t old_en_passant_square;
   uint8_t old_castling_rights;
+  uint8_t castled; // if this move was a castle, will be non zero. 1 -> short castle, 2-> long castle
 };
 
 struct Position
@@ -81,9 +83,71 @@ public:
   void assert_correct_player_turn(square_t src_square, square_t dest_square);
   void adjust_position(square_t src_square, square_t dest_square, piece_t promotion_piece, square_t en_passant_square);
   bool legal_position();
-  void advance_position(Move move);
-  void advance_position(square_t src_square, square_t dst_square, uint8_t promotion_piece);
+  PositionAdjustment advance_position(Move move);
+  PositionAdjustment advance_position(square_t src_square, square_t dst_square, uint8_t promotion_piece);
   bool is_move_legal(square_t src_square, square_t dst_square);
+
+  void undo_adjustment(PositionAdjustment a)
+  {
+    // square_t old_en_passant_square;
+    // uint8_t old_castling_rights;
+    // uint8_t castled;
+
+    // color of the pieces (if any) that were captured, that we are restoring
+    Color captured_color = m_whites_turn ? Color::WHITE : Color::BLACK;
+    // color of the player that made the move we are undoing
+    Color move_maker_color = m_whites_turn ? Color::BLACK : Color::WHITE;
+
+    m_mailbox[a.src_square] = a.moving_piece;
+    m_mailbox[a.dst_square] = a.captured_piece;
+    if (is_valid_square(a.pawn_captured_en_passant_square))
+    {
+      m_mailbox[a.pawn_captured_en_passant_square] = PAWN_C(captured_color);
+    }
+    m_en_passant_square = a.old_en_passant_square;
+
+    // restore castling rights
+    m_white_kingside_castle = a.old_castling_rights & (1);
+    m_white_queenside_castle = a.old_castling_rights & (1 << 1);
+    m_black_kingside_castle = a.old_castling_rights & (1 << 2);
+    m_black_queenside_castle = a.old_castling_rights & (1 << 3);
+
+    // undo castling move if done
+    switch (a.castled)
+    {
+    case 0:
+      break;
+    // short castle
+    case 1:
+    {
+      m_mailbox[KING_SHORT_CASTLE_SQUARE_C(move_maker_color)] = VOID_PIECE;
+      m_mailbox[ROOK_SHORT_CASTLE_SQUARE_C(move_maker_color)] = VOID_PIECE;
+      m_mailbox[KING_ROOK_SQUARE_C(move_maker_color)] = ROOK_C(move_maker_color);
+      m_mailbox[KING_SQUARE_C(move_maker_color)] = KING_C(move_maker_color);
+      (move_maker_color == Color::WHITE ? m_white_kingside_castle : m_black_kingside_castle) = true;
+      break;
+    }
+    // long castle
+    case 2:
+    {
+      m_mailbox[KING_LONG_CASTLE_SQUARE_C(move_maker_color)] = VOID_PIECE;
+      m_mailbox[ROOK_LONG_CASTLE_SQUARE_C(move_maker_color)] = VOID_PIECE;
+      m_mailbox[QUEEN_ROOK_SQUARE_C(move_maker_color)] = ROOK_C(move_maker_color);
+      m_mailbox[KING_SQUARE_C(move_maker_color)] = KING_C(move_maker_color);
+      (move_maker_color == Color::WHITE ? m_white_queenside_castle : m_black_queenside_castle) = true;
+      break;
+    }
+    default:
+      __builtin_unreachable();
+    }
+
+    m_plies--;
+    if (move_maker_color == Color::BLACK)
+    {
+      m_moves--;
+    }
+    m_whites_turn = !m_whites_turn;
+  }
 
   bool operator==(const Position &rhs) const
   {

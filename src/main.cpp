@@ -8,6 +8,7 @@
 int main(int argc, char *argv[])
 
 {
+   std::cout << sizeof(PositionAdjustment) << std::endl;
    CLI cli;
    cli.process_command_read_tablebases({"read_tablebases", "latest"});
    cli.cli_loop();
