@@ -12,6 +12,7 @@ set(SOURCES
     move_generation.cpp
     engine.cpp
     evaluation.cpp
+    position.cpp
 )
 
 add_executable (Test ${SOURCES})

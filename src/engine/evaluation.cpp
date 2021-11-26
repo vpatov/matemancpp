@@ -58,8 +58,7 @@ count_material(std::shared_ptr<Position> position)
 }
 
 // negative is good for black, positive is good for white
-double
-evaluate(std::shared_ptr<Position> position)
+int evaluate(std::shared_ptr<Position> position)
 {
     auto material_eval = count_material(position);
     return material_eval.white_material - material_eval.black_material;

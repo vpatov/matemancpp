@@ -2,6 +2,7 @@
 #include "representation/notation.hpp"
 #include "representation/offsets.hpp"
 #include "move_generation.hpp"
+#include "representation/move.hpp"
 #include <sstream>
 #include <iostream>
 #include <algorithm>
@@ -405,6 +406,11 @@ bool check_diagonal_or_file_or_rank(Position *position, square_t king_square, in
     }
   }
   return true;
+}
+
+PositionAdjustment Position::advance_position(MoveKey movekey)
+{
+  return advance_position(movekey >> 16, (movekey & 0xff00) >> 8, movekey & 0xff);
 }
 
 PositionAdjustment Position::advance_position(square_t src_square, square_t dst_square)

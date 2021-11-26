@@ -13,4 +13,4 @@ struct PositionEval count_material(std::shared_ptr<Position> position);
 int basic_material_for_piece(piece_t piece);
 
 // negative is good for black, positive is good for white
-double evaluate(std::shared_ptr<Position> position);
+int evaluate(std::shared_ptr<Position> position);

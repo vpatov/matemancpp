@@ -68,40 +68,14 @@ inline MoveKey_16 pack_move_key_16(square_t src_square, square_t dst_square, pie
     //    return ((uint16_t)src_square << 9) | ()
 }
 
-inline Move unpack_move_key_16(MoveKey_16 movekey)
+inline MoveKey pack_move_key(square_t src_square, square_t dst_square, piece_t promotion_piece)
 {
-    piece_t promotion_piece = 0;
-    switch (movekey >> 14)
-    {
-    case VOID_PIECE:
-        promotion_piece = 0;
-        break;
-    case 1:
-        promotion_piece = ROOK;
-        break;
-    case 2:
-        promotion_piece = KNIGHT;
-        break;
-    case 3:
-        promotion_piece = BISHOP;
-        break;
-    case 4:
-        promotion_piece = QUEEN;
-        break;
-    default:
-        __builtin_unreachable();
-    }
-    return Move(movekey & 0x7f, (movekey >> 7) & 0x7f, promotion_piece);
+    return ((uint32_t)src_square << 16) + ((uint32_t)dst_square << 8) + promotion_piece;
 }
 
 inline MoveKey pack_move_key(square_t src_square, square_t dst_square)
 {
-    return ((uint32_t)src_square << 16) + ((uint32_t)dst_square << 8);
-}
-
-inline MoveKey pack_move_key(square_t src_square, square_t dst_square, piece_t promotion_piece)
-{
-    return ((uint32_t)src_square << 16) + ((uint32_t)dst_square << 8) + promotion_piece;
+    return pack_move_key(src_square, dst_square, VOID_PIECE);
 }
 
 inline std::string movekey_to_lan(MoveKey move_key)

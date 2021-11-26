@@ -25,6 +25,7 @@ TEST_CASE("starting position is correctly read from fen string after d4", "[fen_
 
 TEST_CASE("starting position is correctly read from fen string after a set of moves", "[fen_to_position]")
 {
+    const std::string expected_fen_string = "rnbqkb1r/pp2pppp/2p2n2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 2 4";
     auto expected_position = starting_position();
     expected_position->advance_position(D2_SQ, D4_SQ, VOID_PIECE);
     expected_position->advance_position(D7_SQ, D5_SQ, VOID_PIECE);
@@ -34,9 +35,10 @@ TEST_CASE("starting position is correctly read from fen string after a set of mo
     expected_position->advance_position(G8_SQ, F6_SQ, VOID_PIECE);
 
     std::shared_ptr<Position> fen_position =
-        fen_to_position("rnbqkb1r/pp2pppp/2p2n2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 2 4");
+        fen_to_position(expected_fen_string);
 
     REQUIRE((*fen_position) == (*expected_position));
+    REQUIRE(position_to_fen(expected_position) == expected_fen_string);
 }
 
 TEST_CASE("position_to_fen returns expected FEN ", "[position_to_fen]")

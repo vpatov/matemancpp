@@ -84,6 +84,7 @@ public:
   void adjust_position(square_t src_square, square_t dest_square, piece_t promotion_piece, square_t en_passant_square);
   bool legal_position();
   PositionAdjustment advance_position(Move move);
+  PositionAdjustment advance_position(MoveKey movekey);
   PositionAdjustment advance_position(square_t src_square, square_t dst_square);
   PositionAdjustment advance_position(square_t src_square, square_t dst_square, uint8_t promotion_piece);
   bool is_move_legal(square_t src_square, square_t dst_square);
@@ -173,6 +174,10 @@ public:
     }
 
     return true;
+  }
+  bool operator!=(const Position &rhs) const
+  {
+    return !((*this) == rhs);
   }
 };
 
