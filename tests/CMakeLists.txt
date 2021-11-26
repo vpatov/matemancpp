@@ -11,6 +11,7 @@ set(SOURCES
     catch.hpp
     move_generation.cpp
     engine.cpp
+    evaluation.cpp
 )
 
 add_executable (Test ${SOURCES})

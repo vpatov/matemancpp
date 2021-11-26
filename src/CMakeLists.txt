@@ -17,9 +17,10 @@ tablebase/move_edge.cpp
 threadpool/threadpool.cpp
 util.cpp
 engine/engine.cpp
-# src/test/launcher.cpp
+engine/evaluation.cpp
 ../include/cli.hpp
 ../include/engine/engine.hpp
+../include/engine/evaluation.hpp
 ../include/representation/position.hpp
 ../include/representation/move.hpp
 ../include/representation/pieces.hpp

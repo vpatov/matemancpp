@@ -6,6 +6,7 @@
 #include "tablebase/tablebase.hpp"
 #include "move_generation.hpp"
 #include "representation/position.hpp"
+#include "engine/evaluation.hpp"
 
 class Engine
 {
@@ -33,7 +34,32 @@ public:
     {
         int depth = 3;
         std::vector<MoveKey> all_moves = get_all_moves();
+        bool whites_turn = m_current_position->m_whites_turn;
 
+        MoveKey best_move = 0;
+        double best_score = 0;
+        for (auto it = all_moves.begin(); it != all_moves.end(); it++)
+        {
+            MoveKey movekey = *it;
+            Move move = unpack_move_key(movekey);
+            std::string lan = movekey_to_lan(movekey);
+            auto adjustment = m_current_position->advance_position(unpack_move_key(movekey));
+            double score = evaluate(m_current_position);
+            if (!best_move || (whites_turn ? (score > best_score) : (score < best_score)))
+            {
+                best_score = score;
+                best_move = movekey;
+            }
+            m_current_position->undo_adjustment(adjustment);
+        }
+
+        std::string res_lan = movekey_to_lan(best_move);
+        return best_move;
+    }
+
+    MoveKey make_random_move()
+    {
+        std::vector<MoveKey> all_moves = get_all_moves();
         auto movekey = all_moves.at(random_bitstring() % all_moves.size());
         return movekey;
     }

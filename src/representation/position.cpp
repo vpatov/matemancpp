@@ -407,6 +407,11 @@ bool check_diagonal_or_file_or_rank(Position *position, square_t king_square, in
   return true;
 }
 
+PositionAdjustment Position::advance_position(square_t src_square, square_t dst_square)
+{
+  return advance_position(src_square, dst_square, VOID_PIECE);
+}
+
 PositionAdjustment Position::advance_position(Move move)
 {
   return advance_position(move.m_src_square, move.m_dst_square, move.m_promotion_piece);
@@ -427,6 +432,7 @@ PositionAdjustment Position::advance_position(square_t src_square, square_t dst_
   Color C = m_whites_turn ? Color::WHITE : Color::BLACK;
   assert(moving_piece != VOID_PIECE);
   assert(IS_YOUR_PIECE(C, moving_piece));
+  assert(captured_piece == VOID_PIECE || IS_OPPONENT_PIECE(C, captured_piece));
 
   adjustment.src_square = src_square;
   adjustment.dst_square = dst_square;
