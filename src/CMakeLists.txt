@@ -18,6 +18,7 @@ threadpool/threadpool.cpp
 util.cpp
 engine/engine.cpp
 engine/evaluation.cpp
+engine/search.cpp
 ../include/cli.hpp
 ../include/engine/engine.hpp
 ../include/engine/search.hpp

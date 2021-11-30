@@ -9,9 +9,8 @@
 
 TEST_CASE("move generation works correctly for starting position", "[move_generation]")
 {
-    Engine engine;
-    engine.m_current_position = starting_position();
-    auto move_list = engine.get_all_moves();
+    auto position = starting_position();
+    auto move_list = get_all_moves(position);
     std::set<MoveKey> move_set(move_list.begin(), move_list.end());
 
     REQUIRE(move_list.size() == move_set.size());
@@ -44,8 +43,9 @@ TEST_CASE("move generation works correctly for starting position", "[move_genera
         REQUIRE(move_set.find(*it) != move_set.end());
     }
 
-    engine.m_current_position->advance_position(E2_SQ, E4_SQ, 0);
-    move_list = engine.get_all_moves();
+    position->advance_position(E2_SQ, E4_SQ, 0);
+    move_list = get_all_moves(position);
+
     move_set = std::set<MoveKey>(move_list.begin(), move_list.end());
     REQUIRE(move_list.size() == move_set.size());
 
@@ -80,11 +80,10 @@ TEST_CASE("move generation works correctly for starting position", "[move_genera
 
 TEST_CASE("doesn't generate illegal moves", "[move_generation]")
 {
-    Engine engine;
-    engine.m_current_position =
+    auto position =
         fen_to_position("rnbqkbnr/ppp2Qpp/8/3pp3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3");
 
-    auto moves = engine.get_all_moves();
+    auto moves = get_all_moves(position);
     REQUIRE(moves.size() == 1);
     REQUIRE(moves.at(0) == m(E8_SQ, F7_SQ));
 }

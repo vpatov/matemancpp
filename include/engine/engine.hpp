@@ -9,6 +9,7 @@
 #include "representation/position.hpp"
 #include "representation/fen.hpp"
 #include "engine/evaluation.hpp"
+#include "engine/search.hpp"
 #include <algorithm>
 #include <cstdlib>
 #include <limits>
@@ -154,7 +155,7 @@ public:
         // then we would reward unjustified piece sacrifices.
         // assert(max_depth % 2 == 0);
 
-        auto all_moves = get_all_moves();
+        auto all_moves = get_all_moves(m_current_position);
 
         // the move_stack consists of <depth, movekey>.
         using depth = int;
@@ -268,7 +269,7 @@ public:
             // if not at the leaf yet, go deeper
             if (current_depth < max_depth)
             {
-                std::vector<MoveKey> node_moves = get_all_moves();
+                std::vector<MoveKey> node_moves = get_all_moves(m_current_position);
                 for (auto it = node_moves.begin(); it != node_moves.end(); it++)
                 {
                     move_stack.push_back(std::make_pair(current_depth, *it));
@@ -337,7 +338,7 @@ public:
     MoveKey best_move_material_d1()
     {
 
-        std::vector<MoveKey> all_moves = get_all_moves();
+        std::vector<MoveKey> all_moves = get_all_moves(m_current_position);
         std::shuffle(all_moves.begin(), all_moves.end(), m_g);
         bool whites_turn = m_current_position->m_whites_turn;
 
@@ -364,53 +365,14 @@ public:
 
     MoveKey make_random_move()
     {
-        std::vector<MoveKey> all_moves = get_all_moves();
+        std::vector<MoveKey> all_moves = get_all_moves(m_current_position);
         auto movekey = all_moves.at(random_bitstring() % all_moves.size());
         return movekey;
     }
 
-    std::vector<MoveKey> get_all_moves()
-    {
-        return get_all_moves(m_current_position);
-    }
-
-    static std::vector<MoveKey> get_all_moves(std::shared_ptr<Position> position)
-    {
-        Color c = position->m_whites_turn ? Color::WHITE : Color::BLACK;
-        square_t square = 0;
-        std::vector<MoveKey> all_moves;
-        while (square <= H8_SQ)
-        {
-            if (is_invalid_square(square))
-            {
-                square += 8;
-            }
-
-            if (IS_YOUR_PIECE(c, position->m_mailbox[square]))
-            {
-                auto moves = generate_legal_moves(position, square);
-                all_moves.insert(all_moves.end(), moves.begin(), moves.end());
-            }
-            square++;
-        }
-        return all_moves;
-    }
-
-    std::string string_list_all_moves()
-    {
-        std::stringstream ss;
-        std::vector<MoveKey> all_moves = get_all_moves();
-        for (auto m = all_moves.begin(); m != all_moves.end(); m++)
-        {
-            ss << movekey_to_lan(*m) << " ";
-        }
-        ss << '\n';
-        return ss.str();
-    }
-
     void print_all_moves()
     {
-        std::cout << string_list_all_moves() << std::endl;
+        std::cout << string_list_all_moves(m_current_position) << std::endl;
     }
 
     MoveKey tablebase_move_lookup()
@@ -426,17 +388,13 @@ public:
 
     MoveKey find_best_move(std::chrono::milliseconds time)
     {
-        // MoveKey tablebase_move = tablebase_move_lookup();
+        MoveKey tablebase_move = tablebase_move_lookup();
 
-        // if (tablebase_move)
-        // {
-        //     return tablebase_move;
-        // }
+        if (tablebase_move)
+        {
+            return tablebase_move;
+        }
 
-        return best_move_material_dn(2);
-        // return best_move_material_dn_r_helper(3);
-        // return best_move_material_dn(4);
-        // return best_move_material_dn(4);
-        // return best_move_material_d1();
+        return minmax_search(m_current_position, 4);
     }
 };

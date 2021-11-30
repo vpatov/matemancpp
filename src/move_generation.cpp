@@ -385,6 +385,40 @@ generate_pseudolegal_piece_moves(std::shared_ptr<Position> position,
              : generate_pseudolegal_piece_moves<Color::BLACK>(position, src_square);
 }
 
+std::vector<MoveKey> get_all_moves(std::shared_ptr<Position> position)
+{
+  Color c = position->m_whites_turn ? Color::WHITE : Color::BLACK;
+  square_t square = 0;
+  std::vector<MoveKey> all_moves;
+  while (square <= H8_SQ)
+  {
+    if (is_invalid_square(square))
+    {
+      square += 8;
+    }
+
+    if (IS_YOUR_PIECE(c, position->m_mailbox[square]))
+    {
+      auto moves = generate_legal_moves(position, square);
+      all_moves.insert(all_moves.end(), moves.begin(), moves.end());
+    }
+    square++;
+  }
+  return all_moves;
+}
+
+std::string string_list_all_moves(std::shared_ptr<Position> position)
+{
+  std::stringstream ss;
+  std::vector<MoveKey> all_moves = get_all_moves(position);
+  for (auto m = all_moves.begin(); m != all_moves.end(); m++)
+  {
+    ss << movekey_to_lan(*m) << " ";
+  }
+  ss << '\n';
+  return ss.str();
+}
+
 template std::vector<MoveKey> generate_pseudolegal_pawn_moves<Color::WHITE>(
     std::shared_ptr<Position> position, square_t src_square);
 

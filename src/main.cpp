@@ -10,11 +10,8 @@ int main(int argc, char *argv[])
 
 {
    CLI cli;
-   cli.process_command_position({"position", "fen", "r7/8/k7/3N4/8/PK5P/8/8 w - - 0 1"});
-   assert(cli.m_engine.m_current_position->m_whites_turn);
-   minmax_search(cli.m_engine.m_current_position, 4);
-   // cli.process_command_read_tablebases({"read_tablebases", "latest"});
-   // cli.cli_loop();
+   cli.process_command_read_tablebases({"read_tablebases", "latest"});
+   cli.cli_loop();
 }
 /*
 High-level Design.
