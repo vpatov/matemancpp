@@ -52,6 +52,7 @@ struct PositionAdjustment
   square_t old_en_passant_square;
   uint8_t old_castling_rights;
   uint8_t castled; // if this move was a castle, will be non zero. 1 -> short castle, 2-> long castle
+  MoveKey movekey = 0;
 };
 
 struct Position

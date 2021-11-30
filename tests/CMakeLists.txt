@@ -9,6 +9,8 @@ set(SOURCES
     test.cpp
     fen.cpp
     catch.hpp
+    search.cpp
+    move.cpp
     move_generation.cpp
     engine.cpp
     evaluation.cpp

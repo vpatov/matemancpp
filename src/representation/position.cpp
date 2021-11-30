@@ -441,6 +441,7 @@ PositionAdjustment Position::advance_position(square_t src_square, square_t dst_
   assert(IS_YOUR_PIECE(C, moving_piece));
   assert(captured_piece == VOID_PIECE || IS_OPPONENT_PIECE(C, captured_piece));
 
+  adjustment.movekey = pack_move_key(src_square, dst_square, promotion_piece);
   adjustment.src_square = src_square;
   adjustment.dst_square = dst_square;
   adjustment.captured_piece = captured_piece;
