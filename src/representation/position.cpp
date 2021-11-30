@@ -436,6 +436,7 @@ PositionAdjustment Position::advance_position(square_t src_square, square_t dst_
   square_t new_en_passant_square = INVALID_SQUARE;
 
   Color C = m_whites_turn ? Color::WHITE : Color::BLACK;
+  assert(src_square != dst_square);
   assert(moving_piece != VOID_PIECE);
   assert(IS_YOUR_PIECE(C, moving_piece));
   assert(captured_piece == VOID_PIECE || IS_OPPONENT_PIECE(C, captured_piece));

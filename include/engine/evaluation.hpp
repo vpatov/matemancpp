@@ -1,6 +1,5 @@
 #pragma once
 #include "representation/position.hpp"
-#include "representation/position.hpp"
 
 struct PositionEval
 {

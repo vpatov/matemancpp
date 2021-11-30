@@ -91,10 +91,6 @@ public:
 
   void undo_adjustment(PositionAdjustment a)
   {
-    // square_t old_en_passant_square;
-    // uint8_t old_castling_rights;
-    // uint8_t castled;
-
     // color of the pieces (if any) that were captured, that we are restoring
     Color captured_color = m_whites_turn ? Color::WHITE : Color::BLACK;
     // color of the player that made the move we are undoing

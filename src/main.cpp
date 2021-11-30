@@ -2,16 +2,18 @@
 #include "process_pgn/read_pgn_data.hpp"
 #include "cli.hpp"
 #include "representation/position.hpp"
+#include "engine/search.hpp"
 #include "tablebase/zobrist.hpp"
 #include <unordered_map>
 
 int main(int argc, char *argv[])
 
 {
-   std::cout << sizeof(PositionAdjustment) << std::endl;
    CLI cli;
-   cli.process_command_read_tablebases({"read_tablebases", "latest"});
-   cli.cli_loop();
+   cli.process_command_position({"position", "fen", "r7/8/k7/3N4/8/PK5P/8/8 w - - 0 1"});
+   minmax_search(cli.m_engine.m_current_position);
+   // cli.process_command_read_tablebases({"read_tablebases", "latest"});
+   // cli.cli_loop();
 }
 /*
 High-level Design.

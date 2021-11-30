@@ -20,6 +20,7 @@ engine/engine.cpp
 engine/evaluation.cpp
 ../include/cli.hpp
 ../include/engine/engine.hpp
+../include/engine/search.hpp
 ../include/engine/evaluation.hpp
 ../include/representation/position.hpp
 ../include/representation/move.hpp

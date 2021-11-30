@@ -374,7 +374,7 @@ public:
         return get_all_moves(m_current_position);
     }
 
-    std::vector<MoveKey> get_all_moves(std::shared_ptr<Position> position)
+    static std::vector<MoveKey> get_all_moves(std::shared_ptr<Position> position)
     {
         Color c = position->m_whites_turn ? Color::WHITE : Color::BLACK;
         square_t square = 0;
