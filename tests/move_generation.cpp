@@ -86,4 +86,10 @@ TEST_CASE("doesn't generate illegal moves", "[move_generation]")
     auto moves = get_all_moves(position);
     REQUIRE(moves.size() == 1);
     REQUIRE(moves.at(0) == m(E8_SQ, F7_SQ));
+
+    position =
+        fen_to_position("rnbqkbnr/ppp2Ppp/8/3pp3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3");
+
+    moves = get_all_moves(position);
+    REQUIRE(moves.size() == 3);
 }

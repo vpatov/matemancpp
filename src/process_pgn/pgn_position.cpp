@@ -138,7 +138,7 @@ uint32_t Position::non_castling_move(
 
     else if (piece_char == KING_CHAR)
     {
-        src_square = find_king();
+        src_square = find_king(m_whites_turn);
         assert(is_valid_square(src_square));
 
         // assert that the square that we found the king at, is one square away from the square he supposedly moved to.
@@ -180,8 +180,7 @@ uint32_t Position::non_castling_move(
     }
     else
     {
-        adjust_position(src_square, dest_square,
-                        promotion_piece, new_en_passant_square);
+        advance_position(src_square, dest_square, promotion_piece);
         // print_with_borders_highlight_squares(src_square, dest_square);
     }
 
@@ -191,9 +190,9 @@ uint32_t Position::non_castling_move(
 /*
   Returns the square with the (white ? white : black) king. Returns 127 otherwise.
 */
-square_t Position::find_king()
+square_t Position::find_king(bool white)
 {
-    uint8_t target = m_whites_turn ? W_KING : B_KING;
+    uint8_t target = white ? W_KING : B_KING;
     for (int rank = 0; rank < 8; rank++)
     {
         for (int file = 0; file < 8; file++)
@@ -213,26 +212,26 @@ bool Position::is_king_in_check()
 {
     Color enemy_color = m_whites_turn ? Color::BLACK : Color::WHITE;
 
-    uint8_t king_square = find_king();
+    // uint8_t king_square = find_king();
     return false;
 }
 
-// king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
+// check that whosever turn it is, isn't attacking the king
 bool Position::legal_position()
 {
-    Color enemy_color = m_whites_turn ? Color::BLACK : Color::WHITE;
+    Color attacker_color = m_whites_turn ? Color::WHITE : Color::BLACK;
 
-    // If it is white's turn to move, we have to make sure the black king is not in check (and vice-versa)
-    uint8_t king_square = find_king();
+    // If it is white's turn to move, make sure white isnt already attacking black king
+    uint8_t king_square = find_king(!m_whites_turn);
 
     // look for pawns attacking king
-    uint8_t target = m_whites_turn ? B_PAWN : W_PAWN;
-    uint8_t candidate = PREV_FILE(BACKWARD_RANK(enemy_color, king_square));
+    uint8_t target = m_whites_turn ? W_PAWN : B_PAWN;
+    uint8_t candidate = PREV_FILE(BACKWARD_RANK(attacker_color, king_square));
     if (is_valid_square(candidate) && m_mailbox[candidate] == target)
     {
         return false;
     }
-    candidate = NEXT_FILE(BACKWARD_RANK(enemy_color, king_square));
+    candidate = NEXT_FILE(BACKWARD_RANK(attacker_color, king_square));
     if (is_valid_square(candidate) && m_mailbox[candidate] == target)
     {
         return false;
@@ -240,7 +239,7 @@ bool Position::legal_position()
 
     // look for knights attacking king
     std::vector<uint8_t> knights;
-    target = m_whites_turn ? B_KNIGHT : W_KNIGHT;
+    target = m_whites_turn ? W_KNIGHT : B_KNIGHT;
     for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
     {
         candidate = *it + king_square;
@@ -254,19 +253,19 @@ bool Position::legal_position()
         }
     }
 
-    if (!check_diagonals(this, king_square, !m_whites_turn).empty())
+    if (!check_diagonals(this, king_square, m_whites_turn).empty())
     {
         return false;
     }
 
     //look for bishops/queens attacking king on diagonals
-    if (!check_files_ranks(this, king_square, !m_whites_turn).empty())
+    if (!check_files_ranks(this, king_square, m_whites_turn).empty())
     {
         return false;
     }
 
     // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.
-    target = m_whites_turn ? B_KING : W_KING;
+    target = m_whites_turn ? W_KING : B_KING;
     for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
     {
         candidate = king_square + direction_offset(*it);
@@ -381,29 +380,14 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
                 (!src_file && !src_rank))
             {
 
-                // temporarily assume the move
-                // LASTLEFTOFF
-                // TODO (replace this horrible adjust_position method with advance_position.)
-                // legal_position looks for the white king is it's whites turn, and returns false
-                // if anything is attacking it. it relies on the fact that adjust_position doesnt change
-                // whose turn it is. legal_position should be renamed to is_king_in_check or something.
-                // there should be another method called is_legal that checks that the king is not in check if
-                // its not that players turn to move.
-                adjust_position(*it, dest_square, 0, INVALID_SQUARE);
+                auto adjustment = advance_position(*it, dest_square, 0);
+                bool is_legal = legal_position();
+                undo_adjustment(adjustment);
 
-                // ensure the position is legal (king is not in check)
-                if (legal_position())
+                if (is_legal)
                 {
-                    // set the src_square and undo the move.
                     src_square = *it;
-                    adjust_position(dest_square, src_square, 0, INVALID_SQUARE);
                     break;
-                }
-                else
-                {
-
-                    // undo the move
-                    adjust_position(dest_square, *it, 0, INVALID_SQUARE);
                 }
             }
         }
@@ -415,36 +399,6 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
     return src_square;
 }
 
-void Position::adjust_position(uint8_t src_square,
-                               uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square)
-{
-    assert(is_valid_square(src_square));
-    assert(is_valid_square(dest_square));
-
-    Color color = m_whites_turn ? Color::WHITE : Color::BLACK;
-
-    m_mailbox[dest_square] =
-        promotion_piece ? promotion_piece : m_mailbox[src_square];
-
-    if (is_valid_square(m_en_passant_square) &&
-        m_en_passant_square == dest_square &&
-        ((m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN))))
-    {
-        // If we are capturing en-passant there should never be a promotion piece
-        assert(!promotion_piece);
-
-        // Remove the pawn that is being captured
-        uint8_t square_of_pawn_being_captured = BACKWARD_RANK(color, dest_square);
-        assert(m_mailbox[square_of_pawn_being_captured] == m_whites_turn
-                   ? B_PAWN
-                   : W_PAWN);
-        m_mailbox[square_of_pawn_being_captured] = 0;
-    }
-    m_en_passant_square = new_en_passant_square;
-
-    m_mailbox[src_square] = 0;
-}
-
 void Position::assert_correct_player_turn(uint8_t src_square, uint8_t dest_square)
 {
     assert(is_valid_square(src_square));
@@ -452,5 +406,3 @@ void Position::assert_correct_player_turn(uint8_t src_square, uint8_t dest_squar
     uint8_t moving_piece = m_mailbox[src_square];
     assert(m_whites_turn ? is_white_piece(moving_piece) : is_black_piece(moving_piece));
 }
-
-// TODO write some tests

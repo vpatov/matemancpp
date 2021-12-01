@@ -76,13 +76,12 @@ public:
   void print_with_borders_highlight_squares(square_t src_square, square_t dest_square);
   std::string pretty_string();
 
-  square_t find_king();
+  square_t find_king(bool white);
   uint16_t get_src_square_pawn_move(char capture, char src_file, square_t dest_square, uint8_t dest_rank);
   square_t get_src_square_minmaj_piece_move(
       char piece_char, uint8_t src_file, uint8_t src_rank,
       square_t dest_square, square_t en_passant_square);
   void assert_correct_player_turn(square_t src_square, square_t dest_square);
-  void adjust_position(square_t src_square, square_t dest_square, piece_t promotion_piece, square_t en_passant_square);
   bool legal_position();
   bool is_king_in_check();
 
