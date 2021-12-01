@@ -104,6 +104,20 @@ TEST_CASE("order in which games appear in pgn file doesn't affect binary content
     }
 }
 
+TEST_CASE("process larger amount of pgn files successfully", "pgnProcessor")
+{
+    const fs::path tablebase_test_dir = fs::path("/tmp") / program_start_timestamp;
+    const fs::path pgn_test_database_path = fs::path(TEST_ROOT_DIR) /
+                                            "database" / "pgn" / "test_04";
+    const std::string tablebase_name = "test_tb";
+
+    PgnProcessor pgnProcessor(tablebase_test_dir / tablebase_name, pgn_test_database_path);
+    pgnProcessor.process_pgn_files();
+    pgnProcessor.serialize_all();
+
+    REQUIRE(pgnProcessor.get_tablebase()->total_size() == 56131);
+}
+
 // TEST_CASE("pgn processor recognizes illegal move in pgn file", "pgnProcessor")
 // {
 

@@ -14,7 +14,7 @@
 
 #define ELO_THRESHOLD 2200
 
-const bool debug_disabled = true;
+const bool debug_disabled = false;
 #define debugStream     \
     if (debug_disabled) \
     {                   \
@@ -143,7 +143,6 @@ public:
 
             if (reading_game_moves)
             {
-
                 bool is_game_line = games->back()->read_game_move_line(line, m_tablebase.get());
                 if (games->back()->m_finishedReading)
                 {
