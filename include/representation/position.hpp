@@ -84,6 +84,8 @@ public:
   void assert_correct_player_turn(square_t src_square, square_t dest_square);
   void adjust_position(square_t src_square, square_t dest_square, piece_t promotion_piece, square_t en_passant_square);
   bool legal_position();
+  bool is_king_in_check();
+
   PositionAdjustment advance_position(Move move);
   PositionAdjustment advance_position(MoveKey movekey);
   PositionAdjustment advance_position(square_t src_square, square_t dst_square);

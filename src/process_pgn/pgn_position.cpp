@@ -191,7 +191,7 @@ uint32_t Position::non_castling_move(
 /*
   Returns the square with the (white ? white : black) king. Returns 127 otherwise.
 */
-uint8_t Position::find_king()
+square_t Position::find_king()
 {
     uint8_t target = m_whites_turn ? W_KING : B_KING;
     for (int rank = 0; rank < 8; rank++)
@@ -205,6 +205,16 @@ uint8_t Position::find_king()
         }
     }
     return INVALID_SQUARE;
+}
+
+// if it is player X's turn to move, returns true if their king is currently in check.
+// TODO LASTLEFTOFF look at pgnposition notes
+bool Position::is_king_in_check()
+{
+    Color enemy_color = m_whites_turn ? Color::BLACK : Color::WHITE;
+
+    uint8_t king_square = find_king();
+    return false;
 }
 
 // king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
@@ -269,7 +279,13 @@ bool Position::legal_position()
     return true;
 }
 
-uint16_t Position::get_src_square_pawn_move(char capture, char src_file, uint8_t dest_square, uint8_t dest_rank)
+void _throw(bool b, const char *assertion_description)
+{
+    if (!b)
+        throw std::invalid_argument(assertion_description);
+}
+
+uint16_t Position::get_src_square_pawn_move(char capture, char src_file, square_t dest_square, uint8_t dest_rank)
 {
     uint8_t src_rank = 0;
     uint8_t src_square = 0;
@@ -280,16 +296,15 @@ uint16_t Position::get_src_square_pawn_move(char capture, char src_file, uint8_t
     if (capture)
     {
         // if we are capturing, the src_file should be present
-        assert(src_file);
+        _throw(src_file, "src_file should be non-zero");
         src_rank = m_whites_turn ? dest_rank - 1 : dest_rank + 1;
         src_square = an_square_to_index(src_file, src_rank);
-        assert(m_mailbox[src_square] == target);
-        assert(is_piece(m_mailbox[dest_square]) || m_en_passant_square == dest_square);
+        _throw(m_mailbox[src_square] == target, "src_square should contain the pawn that is moving");
+        _throw(is_piece(m_mailbox[dest_square]) || m_en_passant_square == dest_square, "either we are capturing a piece or pawn is moving to en passant square");
     }
     else
     {
-        // if the pawn isn't capturing, the square it is moving to should be empty.
-        assert(m_mailbox[dest_square] == 0);
+        _throw(m_mailbox[dest_square] == 0, "if the pawn isn't capturing, the square it is moving to should be empty");
         Direction direction = m_whites_turn ? Direction::DOWN : Direction::UP;
         uint8_t candidate_square = STEP_DIRECTION(direction, dest_square);
         uint8_t candidate_en_passant_square = candidate_square;
@@ -301,9 +316,9 @@ uint16_t Position::get_src_square_pawn_move(char capture, char src_file, uint8_t
         {
             // If the pawn didn't come from the square we just checked, that
             // square must be empty
-            assert(m_mailbox[candidate_square] == 0);
+            _throw(m_mailbox[candidate_square] == 0, "if pawn is moving two squares, the square it skips needs to be empty");
             candidate_square = STEP_DIRECTION(direction, candidate_square);
-            assert(m_mailbox[candidate_square] == target);
+            _throw(m_mailbox[candidate_square] == target, "src_square should have the moving pawn");
             src_square = candidate_square;
             new_en_passant_square = candidate_en_passant_square;
         }
@@ -367,6 +382,13 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
             {
 
                 // temporarily assume the move
+                // LASTLEFTOFF
+                // TODO (replace this horrible adjust_position method with advance_position.)
+                // legal_position looks for the white king is it's whites turn, and returns false
+                // if anything is attacking it. it relies on the fact that adjust_position doesnt change
+                // whose turn it is. legal_position should be renamed to is_king_in_check or something.
+                // there should be another method called is_legal that checks that the king is not in check if
+                // its not that players turn to move.
                 adjust_position(*it, dest_square, 0, INVALID_SQUARE);
 
                 // ensure the position is legal (king is not in check)

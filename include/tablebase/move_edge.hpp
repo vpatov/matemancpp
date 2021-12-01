@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tablebase/zobrist.hpp"
+#include <cstring>
 
 struct MoveEdge
 {
@@ -43,6 +44,17 @@ struct MoveEdge
         m_dest_hash = other.m_dest_hash;
         m_times_played = other.m_times_played;
         strncpy(m_pgn_move, other.m_pgn_move, 8);
+    }
+
+    bool operator==(const MoveEdge &rhs) const
+    {
+        return m_dest_hash == rhs.m_dest_hash &&
+               m_times_played == rhs.m_times_played &&
+               strcmp(m_pgn_move, rhs.m_pgn_move) == 0;
+    }
+    bool operator!=(const MoveEdge &rhs) const
+    {
+        return !((*this) == rhs);
     }
 };
 

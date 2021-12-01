@@ -17,7 +17,7 @@ bool PgnGame::read_metadata_line(std::string &line)
     return false;
 }
 
-void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tablebase *masterTablebase)
+void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tablebase *tablebase)
 {
     uint32_t move_key;
     boost::algorithm::trim(player_move);
@@ -80,11 +80,11 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tab
     m_position.m_whites_turn = !whites_turn;
     z_hash_t zhash2 = zobrist_hash(&m_position);
 
-    // master tablebase update here
-    masterTablebase->update(zhash1, zhash2, move_key, std::string(player_move));
+    // tablebase update here
+    tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
 }
 
-bool PgnGame::read_game_move_line(std::string &line, Tablebase *masterTablebase)
+bool PgnGame::read_game_move_line(std::string &line, Tablebase *tablebase)
 {
 
     bool is_game_line = false;
@@ -96,8 +96,8 @@ bool PgnGame::read_game_move_line(std::string &line, Tablebase *masterTablebase)
         // stop processing moves after ply 15 such that the tablebases arent too large.
         if (m_position.m_plies < 15)
         {
-            process_player_move(matches[1], true, masterTablebase);
-            process_player_move(matches[2], false, masterTablebase);
+            process_player_move(matches[1], true, tablebase);
+            process_player_move(matches[2], false, tablebase);
         }
 
         if (matches[3].length() > 0)

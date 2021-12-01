@@ -76,6 +76,7 @@ tablebase requires 140 TB of storage space.[41]
 
 /*
 TODO
+- change raw pointers to unique and shared ptrs
 - Consider how to go about error handling (for invalid FEN strings for example)
 - Look into setoptions
     one option could be threadcount

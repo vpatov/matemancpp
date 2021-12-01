@@ -14,6 +14,7 @@ set(SOURCES
     move_generation.cpp
     engine.cpp
     evaluation.cpp
+    read_pgn_data.cpp
     position.cpp
 )
 
@@ -26,7 +27,8 @@ target_link_libraries (Test
                        )
 
 include_directories(../include)
-add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+add_compile_definitions(TEST_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 
 

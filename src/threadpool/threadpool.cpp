@@ -33,12 +33,7 @@ ThreadPool::ThreadPool(int num_threads)
 void ThreadPool::initialize_threads()
 {
     for (int i = 0; i < m_num_threads; i++)
-    {
         pool.push_back(std::thread(&ThreadPool::spin, this));
-    }
-    std::cout
-        << ColorCode::teal << "Initialized thread pool with "
-        << m_num_threads << " threads." << ColorCode::end << std::endl;
 }
 
 // predicate which returns ​false if the waiting should be continued.
@@ -52,7 +47,6 @@ void ThreadPool::spin()
     std::thread::id id = std::this_thread::get_id();
     while (true)
     {
-
         Task task;
         {
             std::unique_lock<std::mutex> lock(queue_mutex);

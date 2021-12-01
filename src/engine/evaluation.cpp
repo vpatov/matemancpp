@@ -57,6 +57,14 @@ count_material(std::shared_ptr<Position> position)
     return eval;
 }
 
+// LASTLEFTOFF
+// need to encode checkmate, king safety, number of squares being controlled, into evaluation
+
+bool is_checkmate(std::shared_ptr<Position> position)
+{
+    return false;
+}
+
 // negative is good for black, positive is good for white
 int evaluate(std::shared_ptr<Position> position)
 {

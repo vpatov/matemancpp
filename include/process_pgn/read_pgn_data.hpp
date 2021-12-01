@@ -14,6 +14,14 @@
 
 #define ELO_THRESHOLD 2200
 
+const bool debug_disabled = true;
+#define debugStream     \
+    if (debug_disabled) \
+    {                   \
+    }                   \
+    else                \
+        std::cerr
+
 namespace fs = std::filesystem;
 
 const std::string result_regex_str =
@@ -42,27 +50,31 @@ class PgnProcessor
 {
     std::shared_ptr<Tablebase> m_tablebase;
     fs::path m_tablebase_destination_file_path;
+    fs::path m_pgn_database_path;
 
 public:
-    PgnProcessor(std::string tablebase_destination_file_path) : m_tablebase_destination_file_path(tablebase_destination_file_path)
+    PgnProcessor(std::string tablebase_destination_file_path, std::string pgn_database_path)
+        : m_tablebase_destination_file_path(tablebase_destination_file_path), m_pgn_database_path(pgn_database_path)
     {
         m_tablebase = std::make_shared<Tablebase>();
+    }
+
+    std::shared_ptr<Tablebase> get_tablebase()
+    {
+        return m_tablebase;
     }
 
     std::shared_ptr<Tablebase> serialize_all()
     {
         auto clock_start = std::chrono::high_resolution_clock::now();
-        std::cout << ColorCode::yellow << "Serializing tablebases..." << ColorCode::end << std::endl;
+        debugStream << ColorCode::yellow << "Serializing tablebases..." << ColorCode::end << std::endl;
 
         m_tablebase->serialize_all(m_tablebase_destination_file_path);
 
         auto clock_end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
-        std::cout << ColorCode::green << "Done serializing! " << ColorCode::end
-                  << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
-
-        // test tablebases
-        m_tablebase->walk_down_most_popular_path();
+        debugStream << ColorCode::green << "Done serializing! " << ColorCode::end
+                    << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
 
         return m_tablebase;
     }
@@ -70,8 +82,8 @@ public:
     void process_pgn_files()
     {
         auto clock_start = std::chrono::high_resolution_clock::now();
-        std::cout << std::endl
-                  << ColorCode::yellow << "Starting PGN processing..." << ColorCode::end << std::endl;
+        debugStream << std::endl
+                    << ColorCode::yellow << "Starting PGN processing..." << ColorCode::end << std::endl;
 
         ThreadPool thread_pool = ThreadPool();
         print_pgn_processing_header();
@@ -79,7 +91,7 @@ public:
         std::function<void(std::string &)> process_pgn_file_bound_fn =
             std::bind(&PgnProcessor::process_pgn_file, this, std::placeholders::_1);
 
-        for (const auto &entry : std::filesystem::directory_iterator(pgn_database_path))
+        for (const auto &entry : std::filesystem::directory_iterator(m_pgn_database_path))
         {
             std::string filepath = entry.path().generic_string();
             size_t path_end = filepath.rfind('/');
@@ -93,8 +105,8 @@ public:
 
         auto clock_end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock_end - clock_start);
-        std::cout << ColorCode::green << "ThreadPool has completed pgn processing tasks. " << ColorCode::end
-                  << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
+        debugStream << ColorCode::green << "ThreadPool has completed pgn processing tasks. " << ColorCode::end
+                    << "Elapsed time: " << duration.count() << " milliseconds." << std::endl;
     }
 
     void process_pgn_file(std::string file_path)
@@ -112,7 +124,7 @@ public:
         // TODO (put the pgn file reading code into its own function, read_pgn_file or something)
         if (!infile.is_open())
         {
-            std::cerr << "Could not open " << file_path << std::endl;
+            debugStream << "Could not open " << file_path << std::endl;
             return;
         }
         for (std::string line; getline(infile, line);)

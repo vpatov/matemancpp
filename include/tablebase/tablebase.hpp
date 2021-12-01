@@ -53,6 +53,43 @@ public:
         return TABLEBASE_SHARD_COUNT;
     }
 
+    bool operator==(const Tablebase &rhs) const
+    {
+        if (m_root_hash != rhs.m_root_hash)
+            return false;
+
+        for (size_t shard = 0; shard < TABLEBASE_SHARD_COUNT; shard++)
+        {
+
+            if (shards[shard].size() != rhs.shards[shard].size())
+                return false;
+
+            for (auto it = shards[shard].begin(); it != shards[shard].end(); it++)
+            {
+                auto hash = it->first;
+                auto moves_played_ptr = it->second;
+                auto rhs_moves_played_ptr = rhs.shards[shard].at(hash);
+
+                if (moves_played_ptr->size() != rhs_moves_played_ptr->size())
+                    return false;
+
+                for (auto it2 = moves_played_ptr->begin(); it2 != moves_played_ptr->end(); it2++)
+                {
+                    auto res = rhs_moves_played_ptr->find(it2->first);
+                    if (res == rhs_moves_played_ptr->end())
+                    {
+                        return false;
+                    }
+                    if (it2->second != res->second)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     bool position_exists(z_hash_t position_hash);
     void update(z_hash_t insert_hash, z_hash_t dest_hash, MoveKey move_key, std::string pgn_move);
     void insert_new_move_map(z_hash_t insert_hash, MoveKey moveKey, MoveEdge moveEdge);

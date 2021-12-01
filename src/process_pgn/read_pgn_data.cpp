@@ -18,7 +18,7 @@ const std::string test_files[8] = {
 
 std::shared_ptr<Tablebase> create_tablebases_from_pgn_data(std::string tablebase_name)
 {
-  PgnProcessor pgnProcessor(tablebase_data_dir / tablebase_name);
+  PgnProcessor pgnProcessor(tablebase_data_dir / tablebase_name, pgn_database_path);
   pgnProcessor.process_pgn_files();
   return pgnProcessor.serialize_all();
 
@@ -87,7 +87,7 @@ std::shared_ptr<Tablebase> create_tablebases_from_pgn_data(std::string tablebase
             */
   // ----------------
 
-  std::cout
+  debugStream
       << ColorCode::green << "Success!" << ColorCode::end << std::endl;
 }
 
@@ -103,7 +103,7 @@ void print_pgn_processing_performance_summary(
   std::string duration_str = std::to_string((double)duration.count() / 1000);
   duration_str = duration_str.substr(0, duration_str.find(".") + 3);
 
-  std::cout
+  debugStream
       << std::left << std::setw(16) << thread_id
       << std::left << std::setw(16) << duration_str + "s"
       << std::left << std::setw(16) << games_list_size
@@ -116,7 +116,7 @@ void print_pgn_processing_performance_summary(
 }
 void print_pgn_processing_header()
 {
-  std::cout
+  debugStream
       << "\u001b[33m"
       << std::left << std::setw(16) << "Thread ID"
       << std::left << std::setw(16) << "Duration"
