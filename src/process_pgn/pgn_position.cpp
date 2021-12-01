@@ -381,7 +381,7 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
                 adjust_position(*it, dest_square, 0, INVALID_SQUARE);
 
                 // ensure the position is legal (king is not in check)
-                if (legal_position())
+                if (is_king_in_check(m_whites_turn))
                 {
                     // set the src_square and undo the move.
                     src_square = *it;
