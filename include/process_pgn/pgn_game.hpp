@@ -29,7 +29,7 @@ struct PgnGame
     bool read_metadata_line(std::string &line);
     void process_player_move(std::string player_move, bool whites_turn, Tablebase *masterTablebase);
     void process_result(std::string resultstr);
-    bool read_game_move_line(std::string &line, Tablebase *masterTablebase);
+    bool read_game_move_line(std::string &line, Tablebase *masterTablebase, int max_plies);
     void populateMetadata();
     void printGameSummary();
 

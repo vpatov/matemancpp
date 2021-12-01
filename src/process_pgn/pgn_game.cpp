@@ -84,7 +84,7 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tab
     tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
 }
 
-bool PgnGame::read_game_move_line(std::string &line, Tablebase *tablebase)
+bool PgnGame::read_game_move_line(std::string &line, Tablebase *tablebase, int max_plies)
 {
 
     bool is_game_line = false;
@@ -93,8 +93,8 @@ bool PgnGame::read_game_move_line(std::string &line, Tablebase *tablebase)
     {
         is_game_line = true;
 
-        // stop processing moves after ply 15 such that the tablebases arent too large.
-        if (m_position.m_plies < 15)
+        // stop processing moves after ply max_plies such that the tablebases arent too large.
+        if (m_position.m_plies < max_plies)
         {
             process_player_move(matches[1], true, tablebase);
             process_player_move(matches[2], false, tablebase);

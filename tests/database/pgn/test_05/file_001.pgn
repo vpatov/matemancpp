@@ -1,0 +1,18 @@
+[Event "?"]
+[Site "?"]
+[Date "2021.12.01"]
+[Round "?"]
+[White "Vasia"]
+[Black "Vasia"]
+[Result "*"]
+[ECO "C20"]
+[GameStartTime "2021-12-01T21:12:41.028 CET"]
+[Opening "KP"]
+[Termination "unterminated"]
+[TimeControl "inf"]
+[Variation "Patzer Opening"]
+
+1.e4 e5 2.Qh5 c5 3.d4 Qa5+ 4.Nd2 d5 5.exd5 cxd4 6.Ne2 Ne7 7.Ng3 Nd7
+8.Ne4 b6 9.d6 Bb7 10.dxe7 Bc6 11.exf8=N Bb7 12.Ne6 Bc6 13.Ng3 g6
+14.Nc5 Qb4 15.Nce4  1-0
+

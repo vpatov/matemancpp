@@ -104,6 +104,32 @@ TEST_CASE("order in which games appear in pgn file doesn't affect binary content
     }
 }
 
+TEST_CASE("process pgn disambiguates pgn moves", "pgnProcessor")
+{
+    const fs::path tablebase_test_dir = fs::path("/tmp") / program_start_timestamp;
+    const fs::path pgn_test_database_path = fs::path(TEST_ROOT_DIR) /
+                                            "database" / "pgn" / "test_05";
+    const std::string tablebase_name = "test_tb";
+
+    PgnProcessor pgnProcessor(tablebase_test_dir / tablebase_name, pgn_test_database_path);
+    pgnProcessor.set_max_plies(50);
+    pgnProcessor.process_pgn_files();
+
+    auto tablebase_ptr = pgnProcessor.get_tablebase();
+
+    const std::string fen = "r3k2r/p2n1p1p/1pb3p1/2N1p2Q/1q1p4/6N1/PPPN1PPP/R1B1KB1R w KQkq - 2 15";
+    auto pos = fen_to_position(fen);
+    auto hash = zobrist_hash(pos.get());
+
+    REQUIRE(tablebase_ptr->position_exists(hash));
+    auto moves = (*tablebase_ptr)[hash];
+    auto move_edge = moves->at(m(C5_SQ, E4_SQ));
+
+    pos->advance_position(m(C5_SQ, E4_SQ));
+    auto dest_hash = zobrist_hash(pos.get());
+    REQUIRE(move_edge.m_dest_hash == dest_hash);
+}
+
 TEST_CASE("process larger amount of pgn files successfully", "pgnProcessor")
 {
     const fs::path tablebase_test_dir = fs::path("/tmp") / program_start_timestamp;

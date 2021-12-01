@@ -138,7 +138,7 @@ uint32_t Position::non_castling_move(
 
     else if (piece_char == KING_CHAR)
     {
-        src_square = find_king();
+        src_square = find_king(m_whites_turn);
         assert(is_valid_square(src_square));
 
         // assert that the square that we found the king at, is one square away from the square he supposedly moved to.
@@ -191,9 +191,9 @@ uint32_t Position::non_castling_move(
 /*
   Returns the square with the (white ? white : black) king. Returns 127 otherwise.
 */
-square_t Position::find_king()
+square_t Position::find_king(bool king_color)
 {
-    uint8_t target = m_whites_turn ? W_KING : B_KING;
+    uint8_t target = king_color ? W_KING : B_KING;
     for (int rank = 0; rank < 8; rank++)
     {
         for (int file = 0; file < 8; file++)
@@ -207,32 +207,21 @@ square_t Position::find_king()
     return INVALID_SQUARE;
 }
 
-// if it is player X's turn to move, returns true if their king is currently in check.
-// TODO LASTLEFTOFF look at pgnposition notes
-bool Position::is_king_in_check()
-{
-    Color enemy_color = m_whites_turn ? Color::BLACK : Color::WHITE;
-
-    uint8_t king_square = find_king();
-    return false;
-}
-
 // king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
 bool Position::legal_position()
 {
-    Color enemy_color = m_whites_turn ? Color::BLACK : Color::WHITE;
+    Color attacker_color = m_whites_turn ? Color::BLACK : Color::WHITE;
 
-    // If it is white's turn to move, we have to make sure the black king is not in check (and vice-versa)
-    uint8_t king_square = find_king();
+    uint8_t king_square = find_king(m_whites_turn);
 
     // look for pawns attacking king
-    uint8_t target = m_whites_turn ? B_PAWN : W_PAWN;
-    uint8_t candidate = PREV_FILE(BACKWARD_RANK(enemy_color, king_square));
+    uint8_t target = PAWN_C(attacker_color);
+    uint8_t candidate = PREV_FILE(BACKWARD_RANK(attacker_color, king_square));
     if (is_valid_square(candidate) && m_mailbox[candidate] == target)
     {
         return false;
     }
-    candidate = NEXT_FILE(BACKWARD_RANK(enemy_color, king_square));
+    candidate = NEXT_FILE(BACKWARD_RANK(attacker_color, king_square));
     if (is_valid_square(candidate) && m_mailbox[candidate] == target)
     {
         return false;
@@ -240,7 +229,7 @@ bool Position::legal_position()
 
     // look for knights attacking king
     std::vector<uint8_t> knights;
-    target = m_whites_turn ? B_KNIGHT : W_KNIGHT;
+    target = KNIGHT_C(attacker_color);
     for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
     {
         candidate = *it + king_square;
@@ -266,7 +255,7 @@ bool Position::legal_position()
     }
 
     // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.
-    target = m_whites_turn ? B_KING : W_KING;
+    target = KING_C(attacker_color);
     for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
     {
         candidate = king_square + direction_offset(*it);

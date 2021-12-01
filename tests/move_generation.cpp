@@ -78,7 +78,7 @@ TEST_CASE("move generation works correctly for starting position", "[move_genera
     }
 }
 
-TEST_CASE("doesn't generate illegal moves", "[move_generation]")
+TEST_CASE("doesn't generate illegal moves 01", "[move_generation]")
 {
     auto position =
         fen_to_position("rnbqkbnr/ppp2Qpp/8/3pp3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3");
@@ -86,4 +86,22 @@ TEST_CASE("doesn't generate illegal moves", "[move_generation]")
     auto moves = get_all_moves(position);
     REQUIRE(moves.size() == 1);
     REQUIRE(moves.at(0) == m(E8_SQ, F7_SQ));
+}
+
+TEST_CASE("doesn't generate illegal moves 02", "[move_generation]")
+{
+    auto position =
+        fen_to_position("rnbqkbnr/ppp2Bpp/8/3pp3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3");
+
+    auto moves = get_all_moves(position);
+    REQUIRE(moves.size() == 3);
+}
+
+TEST_CASE("doesn't generate illegal moves 03", "[move_generation]")
+{
+    auto position =
+        fen_to_position("rnbqkbnr/ppp2Ppp/8/3pp3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3");
+
+    auto moves = get_all_moves(position);
+    REQUIRE(moves.size() == 3);
 }
