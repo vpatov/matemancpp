@@ -418,12 +418,12 @@ bool Position::is_king_in_check(bool white_king)
   uint8_t candidate = PREV_FILE(BACKWARD_RANK(attacker_color, king_square));
   if (is_valid_square(candidate) && m_mailbox[candidate] == target)
   {
-    return false;
+    return true;
   }
   candidate = NEXT_FILE(BACKWARD_RANK(attacker_color, king_square));
   if (is_valid_square(candidate) && m_mailbox[candidate] == target)
   {
-    return false;
+    return true;
   }
 
   // look for knights attacking king
@@ -438,19 +438,19 @@ bool Position::is_king_in_check(bool white_king)
     }
     if (m_mailbox[candidate] == target)
     {
-      return false;
+      return true;
     }
   }
 
   if (!check_diagonals(this, king_square, !white_king).empty())
   {
-    return false;
+    return true;
   }
 
   //look for bishops/queens attacking king on diagonals
   if (!check_files_ranks(this, king_square, !white_king).empty())
   {
-    return false;
+    return true;
   }
 
   // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.
@@ -460,11 +460,11 @@ bool Position::is_king_in_check(bool white_king)
     candidate = king_square + direction_offset(*it);
     if (is_valid_square(candidate) && m_mailbox[candidate] == target)
     {
-      return false;
+      return true;
     }
   }
 
-  return true;
+  return false;
 }
 
 PositionAdjustment Position::advance_position(MoveKey movekey)

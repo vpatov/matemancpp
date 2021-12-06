@@ -14,7 +14,7 @@
 
 #define ELO_THRESHOLD 2200
 
-const bool debug_disabled = false;
+const bool debug_disabled = true;
 #define debugStream     \
     if (debug_disabled) \
     {                   \

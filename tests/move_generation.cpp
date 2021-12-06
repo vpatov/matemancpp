@@ -105,3 +105,42 @@ TEST_CASE("doesn't generate illegal moves 03", "[move_generation]")
     auto moves = get_all_moves(position);
     REQUIRE(moves.size() == 3);
 }
+
+template <typename T>
+bool contains(std::vector<T> *arg, T target)
+{
+    return std::find(arg->begin(), arg->end(), target) != arg->end();
+}
+
+TEST_CASE("doesn't generate illegal moves 04", "[move_generation]")
+{
+    auto position =
+        fen_to_position("2b4k/pppprp1p/6p1/8/1b5q/1P6/P1PPBPPP/RrQ1KNrR w KQ - 0 1");
+    auto moves = get_all_moves(position);
+
+    REQUIRE(contains(&moves, m(A1_SQ, B1_SQ)));
+    REQUIRE(contains(&moves, m(C1_SQ, B1_SQ)));
+    REQUIRE(contains(&moves, m(C1_SQ, D1_SQ)));
+    REQUIRE(contains(&moves, m(E1_SQ, D1_SQ)));
+    REQUIRE(contains(&moves, m(H1_SQ, G1_SQ)));
+
+    REQUIRE(contains(&moves, m(A2_SQ, A4_SQ)));
+    REQUIRE(contains(&moves, m(A2_SQ, A3_SQ)));
+    REQUIRE(contains(&moves, m(C2_SQ, C3_SQ)));
+    REQUIRE(contains(&moves, m(C2_SQ, C4_SQ)));
+    REQUIRE(contains(&moves, m(G2_SQ, G3_SQ)));
+    REQUIRE(contains(&moves, m(G2_SQ, G4_SQ)));
+    REQUIRE(contains(&moves, m(H2_SQ, H3_SQ)));
+
+    REQUIRE(moves.size() == 12);
+}
+
+TEST_CASE("make illegal move, and both kings are in check", "[move_generation]")
+{
+    auto position =
+        fen_to_position("2b4k/pppprp1p/6p1/8/1b5q/1P6/P1PPBPPP/RrQ1KNrR w KQ - 0 1");
+    position->advance_position(m(C1_SQ, B2_SQ));
+
+    REQUIRE(position->is_king_in_check(true));
+    REQUIRE(position->is_king_in_check(false));
+}
