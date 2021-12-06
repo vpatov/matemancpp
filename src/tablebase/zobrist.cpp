@@ -81,3 +81,19 @@ z_hash_t zobrist_hash(Position *position)
 
   return hash;
 }
+
+void debug_print_position(Position *position)
+{
+  std::cout << "-----------------------------------" << std::endl;
+  std::cout << "zobrist: " << zobrist_hash(position) << std::endl;
+  std::cout << "plies: " << position->m_plies << std::endl;
+  std::cout << "moves: " << position->m_moves << std::endl;
+  std::cout << "whites_turn: " << position->m_whites_turn << std::endl;
+  std::cout << "white short castle: " << position->m_white_kingside_castle << std::endl;
+  std::cout << "white long castle: " << position->m_white_queenside_castle << std::endl;
+  std::cout << "black short castle: " << position->m_black_kingside_castle << std::endl;
+  std::cout << "black long castle: " << position->m_black_queenside_castle << std::endl;
+  print_position_with_borders(position);
+  std::cout << "-----------------------------------\n\n"
+            << std::endl;
+}

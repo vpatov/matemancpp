@@ -12,7 +12,6 @@
 
 uint32_t Position::castling_move(std::smatch &matches, bool white)
 {
-    m_whites_turn = white;
 
     std::string whichever_castle = matches[1];
     std::string queenside_castle = matches[2];
@@ -39,7 +38,8 @@ uint32_t Position::castling_move(std::smatch &matches, bool white)
         assert(false);
     }
 
-    perform_castle(white, short_castle);
+    // perform_castle(white, short_castle);
+    advance_position(m(src_square, dest_square));
     // print_with_borders_highlight_squares(src_square, dest_square);
 
     return generate_move_key(src_square, dest_square, 0);
@@ -178,13 +178,16 @@ uint32_t Position::non_castling_move(
         std::cout << "Impl incomplete for move. " << std::endl;
         assert(false);
     }
+    // else
+    // {
+    //     adjust_position(src_square, dest_square,
+    //                     promotion_piece, new_en_passant_square);
+    //     // print_with_borders_highlight_squares(src_square, dest_square);
+    // }
     else
     {
-        adjust_position(src_square, dest_square,
-                        promotion_piece, new_en_passant_square);
-        // print_with_borders_highlight_squares(src_square, dest_square);
+        advance_position(pack_move_key(src_square, dest_square, promotion_piece));
     }
-
     return generate_move_key(src_square, dest_square, promotion_piece);
 }
 
@@ -370,29 +373,10 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
                 (!src_file && !src_rank))
             {
 
-                // temporarily assume the move
-                // LASTLEFTOFF
-                // TODO (replace this horrible adjust_position method with advance_position.)
-                // legal_position looks for the white king is it's whites turn, and returns false
-                // if anything is attacking it. it relies on the fact that adjust_position doesnt change
-                // whose turn it is. legal_position should be renamed to is_king_in_check or something.
-                // there should be another method called is_legal that checks that the king is not in check if
-                // its not that players turn to move.
-                adjust_position(*it, dest_square, 0, INVALID_SQUARE);
-
-                // ensure the position is legal (king is not in check)
-                if (!is_king_in_check(m_whites_turn))
+                if (is_move_legal(*it, dest_square))
                 {
-                    // set the src_square and undo the move.
                     src_square = *it;
-                    adjust_position(dest_square, src_square, 0, INVALID_SQUARE);
                     break;
-                }
-                else
-                {
-
-                    // undo the move
-                    adjust_position(dest_square, *it, 0, INVALID_SQUARE);
                 }
             }
         }

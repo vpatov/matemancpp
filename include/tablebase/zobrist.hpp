@@ -7,6 +7,7 @@ typedef uint64_t z_hash_t;
 void print_zobrist();
 uint64_t random_bitstring();
 z_hash_t zobrist_hash(Position *position);
+void debug_print_position(Position *position);
 
 /** Generated using print_zobrist() */
 static inline const uint64_t zobrist_piece_table[MAILBOX_LENGTH][MAX_PIECE] = {

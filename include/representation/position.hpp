@@ -74,6 +74,8 @@ public:
       char check_or_mate);
   void perform_castle(bool white, bool short_castle);
   void print_with_borders_highlight_squares(square_t src_square, square_t dest_square);
+  void debug_print_position();
+
   std::string pretty_string();
 
   square_t find_king(bool king_color);

@@ -104,7 +104,7 @@ TEST_CASE("order in which games appear in pgn file doesn't affect binary content
     }
 }
 
-TEST_CASE("process pgn disambiguates pgn moves", "pgnProcessor")
+TEST_CASE("process_pgn_disambiguates_pgn_moves", "pgnProcessor")
 {
     const fs::path tablebase_test_dir = fs::path("/tmp") / program_start_timestamp;
     const fs::path pgn_test_database_path = fs::path(TEST_ROOT_DIR) /
@@ -119,6 +119,7 @@ TEST_CASE("process pgn disambiguates pgn moves", "pgnProcessor")
 
     const std::string fen = "r3k2r/p2n1p1p/1pb3p1/2N1p2Q/1q1p4/6N1/PPPN1PPP/R1B1KB1R w KQkq - 2 15";
     auto pos = fen_to_position(fen);
+    debug_print_position(pos.get());
     auto hash = zobrist_hash(pos.get());
 
     REQUIRE(tablebase_ptr->position_exists(hash));

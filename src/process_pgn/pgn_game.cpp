@@ -27,9 +27,12 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tab
         return;
     }
 
-    m_position.m_whites_turn = whites_turn;
+    assert(m_position.m_whites_turn == whites_turn);
 
+    // before processing the pgn move, get the zobrist hash of the current position
+    // this will be used as the insert hash for the tablebase.
     z_hash_t zhash1 = zobrist_hash(&m_position);
+    // debug_print_position(&m_position);
 
     std::smatch matches;
     if (std::regex_match(player_move, matches,
@@ -75,10 +78,12 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tab
     }
     // push the parsed move key to the move list
     m_move_list.push_back(move_key);
-    m_position.m_plies++;
 
-    m_position.m_whites_turn = !whites_turn;
+    // m_position.m_whites_turn = !whites_turn;
+    // after the move has been made, calculate the hash again. this is the destination ash for the
+    // tablebase update
     z_hash_t zhash2 = zobrist_hash(&m_position);
+    // debug_print_position(&m_position);
 
     // tablebase update here
     tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
