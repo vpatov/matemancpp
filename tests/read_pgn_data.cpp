@@ -119,7 +119,6 @@ TEST_CASE("process_pgn_disambiguates_pgn_moves", "pgnProcessor")
 
     const std::string fen = "r3k2r/p2n1p1p/1pb3p1/2N1p2Q/1q1p4/6N1/PPPN1PPP/R1B1KB1R w KQkq - 2 15";
     auto pos = fen_to_position(fen);
-    debug_print_position(pos.get());
     auto hash = zobrist_hash(pos.get());
 
     REQUIRE(tablebase_ptr->position_exists(hash));
@@ -142,7 +141,7 @@ TEST_CASE("process larger amount of pgn files successfully", "pgnProcessor")
     pgnProcessor.process_pgn_files();
     pgnProcessor.serialize_all();
 
-    REQUIRE(pgnProcessor.get_tablebase()->total_size() == 56131);
+    REQUIRE(pgnProcessor.get_tablebase()->total_size() == 54896);
 }
 
 // TEST_CASE("pgn processor recognizes illegal move in pgn file", "pgnProcessor")

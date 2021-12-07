@@ -178,16 +178,8 @@ uint32_t Position::non_castling_move(
         std::cout << "Impl incomplete for move. " << std::endl;
         assert(false);
     }
-    // else
-    // {
-    //     adjust_position(src_square, dest_square,
-    //                     promotion_piece, new_en_passant_square);
-    //     // print_with_borders_highlight_squares(src_square, dest_square);
-    // }
-    else
-    {
-        advance_position(pack_move_key(src_square, dest_square, promotion_piece));
-    }
+
+    advance_position(pack_move_key(src_square, dest_square, promotion_piece));
     return generate_move_key(src_square, dest_square, promotion_piece);
 }
 
@@ -386,36 +378,6 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
         std::cout << "couldn't find_legal " << piece_char << " move." << std::endl;
     }
     return src_square;
-}
-
-void Position::adjust_position(uint8_t src_square,
-                               uint8_t dest_square, uint8_t promotion_piece, uint8_t new_en_passant_square)
-{
-    assert(is_valid_square(src_square));
-    assert(is_valid_square(dest_square));
-
-    Color color = m_whites_turn ? Color::WHITE : Color::BLACK;
-
-    m_mailbox[dest_square] =
-        promotion_piece ? promotion_piece : m_mailbox[src_square];
-
-    if (is_valid_square(m_en_passant_square) &&
-        m_en_passant_square == dest_square &&
-        ((m_mailbox[src_square] == (m_whites_turn ? W_PAWN : B_PAWN))))
-    {
-        // If we are capturing en-passant there should never be a promotion piece
-        assert(!promotion_piece);
-
-        // Remove the pawn that is being captured
-        uint8_t square_of_pawn_being_captured = BACKWARD_RANK(color, dest_square);
-        assert(m_mailbox[square_of_pawn_being_captured] == m_whites_turn
-                   ? B_PAWN
-                   : W_PAWN);
-        m_mailbox[square_of_pawn_being_captured] = 0;
-    }
-    m_en_passant_square = new_en_passant_square;
-
-    m_mailbox[src_square] = 0;
 }
 
 void Position::assert_correct_player_turn(uint8_t src_square, uint8_t dest_square)
