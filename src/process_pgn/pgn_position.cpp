@@ -202,67 +202,6 @@ square_t Position::find_king(bool king_color)
     return INVALID_SQUARE;
 }
 
-// king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
-bool Position::legal_position()
-{
-    Color attacker_color = m_whites_turn ? Color::BLACK : Color::WHITE;
-
-    uint8_t king_square = find_king(m_whites_turn);
-
-    // look for pawns attacking king
-    uint8_t target = PAWN_C(attacker_color);
-    uint8_t candidate = PREV_FILE(BACKWARD_RANK(attacker_color, king_square));
-    if (is_valid_square(candidate) && m_mailbox[candidate] == target)
-    {
-        return false;
-    }
-    candidate = NEXT_FILE(BACKWARD_RANK(attacker_color, king_square));
-    if (is_valid_square(candidate) && m_mailbox[candidate] == target)
-    {
-        return false;
-    }
-
-    // look for knights attacking king
-    std::vector<uint8_t> knights;
-    target = KNIGHT_C(attacker_color);
-    for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
-    {
-        candidate = *it + king_square;
-        if (is_invalid_square(candidate))
-        {
-            continue;
-        }
-        if (m_mailbox[candidate] == target)
-        {
-            return false;
-        }
-    }
-
-    if (!check_diagonals(this, king_square, m_whites_turn).empty())
-    {
-        return false;
-    }
-
-    //look for bishops/queens attacking king on diagonals
-    if (!check_files_ranks(this, king_square, m_whites_turn).empty())
-    {
-        return false;
-    }
-
-    // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.
-    target = KING_C(attacker_color);
-    for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
-    {
-        candidate = king_square + direction_offset(*it);
-        if (is_valid_square(candidate) && m_mailbox[candidate] == target)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 void _throw(bool b, const char *assertion_description)
 {
     if (!b)

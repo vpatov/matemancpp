@@ -84,7 +84,6 @@ public:
       char piece_char, uint8_t src_file, uint8_t src_rank,
       square_t dest_square, square_t en_passant_square);
   void assert_correct_player_turn(square_t src_square, square_t dest_square);
-  bool legal_position();
   bool is_king_in_check(bool white_king);
 
   PositionAdjustment advance_position(Move move);

@@ -14,7 +14,7 @@ TEST_CASE("position copy makes different position", "[fen_to_position]")
     REQUIRE((*position) != (*new_position));
 }
 
-TEST_CASE("legal_position correctly identifies illegal position", "legal_position")
+TEST_CASE("is_king_in_check returns correct answer", "is_king_in_check")
 {
     auto position = starting_position();
     position->advance_position(m(E2_SQ, E4_SQ));
@@ -22,5 +22,6 @@ TEST_CASE("legal_position correctly identifies illegal position", "legal_positio
     position->advance_position(m(D1_SQ, H5_SQ));
     position->advance_position(m(F7_SQ, F6_SQ));
 
-    REQUIRE(position->legal_position() == false);
+    REQUIRE(position->is_king_in_check(false));
+    REQUIRE(!position->is_king_in_check(true));
 }
