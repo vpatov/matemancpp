@@ -8,8 +8,11 @@ Makefile
 /CMakeFiles
 tests/Test
 src/CMakeFiles
+src/libmatemancpp_lib.a
 tests/CMakeFiles
 allgames_debug.txt
 matemancpp
 /dev_data
 /logs
+src/libmatemancpp_lib.a
+tests/Test

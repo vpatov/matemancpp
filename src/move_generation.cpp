@@ -8,14 +8,20 @@
 /** Pseudolegal moves don't take check into account. */
 
 // TODO ensure that king cannot castle in check, and cannot pass through check
+
 bool Position::is_move_legal(square_t src_square, square_t dst_square)
 {
+<<<<<<< HEAD
   // we can ignore promotion because it doesnt affect the legality of the move
   // i.e. if it was legal to move the pawn up (pawn wasnt blocking check) then
   // it doesnt matter what piece it gets promoted to, it will be legal either
   // way.
   auto adjustment = advance_position(src_square, dst_square);
   bool legal = legal_position();
+=======
+  auto adjustment = advance_position(src_square, dst_square);
+  bool legal = !is_king_in_check(!m_whites_turn);
+>>>>>>> remove-old-advance-position-try-again
   undo_adjustment(adjustment);
   return legal;
 }
@@ -307,7 +313,6 @@ generate_legal_moves(std::shared_ptr<Position> position,
     {
       legal_moves.push_back(*it);
     }
-    // assume_position()
   }
 
   return legal_moves;

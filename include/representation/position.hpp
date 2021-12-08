@@ -74,16 +74,22 @@ public:
       char check_or_mate);
   void perform_castle(bool white, bool short_castle);
   void print_with_borders_highlight_squares(square_t src_square, square_t dest_square);
+  void debug_print_position();
+
   std::string pretty_string();
 
+<<<<<<< HEAD
   square_t find_king(bool white);
+=======
+  square_t find_king(bool king_color);
+>>>>>>> remove-old-advance-position-try-again
   uint16_t get_src_square_pawn_move(char capture, char src_file, square_t dest_square, uint8_t dest_rank);
   square_t get_src_square_minmaj_piece_move(
       char piece_char, uint8_t src_file, uint8_t src_rank,
       square_t dest_square, square_t en_passant_square);
   void assert_correct_player_turn(square_t src_square, square_t dest_square);
   bool legal_position();
-  bool is_king_in_check();
+  bool is_king_in_check(bool white_king);
 
   PositionAdjustment advance_position(Move move);
   PositionAdjustment advance_position(MoveKey movekey);
@@ -188,12 +194,7 @@ std::shared_ptr<Position> starting_position();
 void populate_starting_position(Position *position);
 std::unique_ptr<Position> generate_starting_position();
 
-uint8_t find_king(Position *position, bool white);
-
 void perform_castle(Position *position, bool white, bool short_castle);
-
-// king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
-bool legal_position(Position *position, bool whites_turn);
 
 square_t check_line(Position *position, square_t target, int offset, bool (*piece_type_function)(piece_t));
 std::vector<square_t> check_files_ranks(Position *position, square_t target_square, bool color_of_attackers);

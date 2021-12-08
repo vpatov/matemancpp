@@ -27,8 +27,10 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tab
         return;
     }
 
-    m_position.m_whites_turn = whites_turn;
+    assert(m_position.m_whites_turn == whites_turn);
 
+    // before processing the pgn move, get the zobrist hash of the current position
+    // this will be used as the insert hash for the tablebase.
     z_hash_t zhash1 = zobrist_hash(&m_position);
 
     std::smatch matches;
@@ -75,16 +77,16 @@ void PgnGame::process_player_move(std::string player_move, bool whites_turn, Tab
     }
     // push the parsed move key to the move list
     m_move_list.push_back(move_key);
-    m_position.m_plies++;
 
-    m_position.m_whites_turn = !whites_turn;
+    // after the move has been made, calculate the hash again. this is the destination hash for the
+    // tablebase update
     z_hash_t zhash2 = zobrist_hash(&m_position);
 
     // tablebase update here
     tablebase->update(zhash1, zhash2, move_key, std::string(player_move));
 }
 
-bool PgnGame::read_game_move_line(std::string &line, Tablebase *tablebase)
+bool PgnGame::read_game_move_line(std::string &line, Tablebase *tablebase, int max_plies)
 {
 
     bool is_game_line = false;
@@ -93,8 +95,8 @@ bool PgnGame::read_game_move_line(std::string &line, Tablebase *tablebase)
     {
         is_game_line = true;
 
-        // stop processing moves after ply 15 such that the tablebases arent too large.
-        if (m_position.m_plies < 15)
+        // stop processing moves after ply max_plies such that the tablebases arent too large.
+        if (m_position.m_plies < max_plies)
         {
             process_player_move(matches[1], true, tablebase);
             process_player_move(matches[2], false, tablebase);

@@ -408,6 +408,65 @@ bool check_diagonal_or_file_or_rank(Position *position, square_t king_square, in
   return true;
 }
 
+bool Position::is_king_in_check(bool white_king)
+{
+  uint8_t king_square = find_king(white_king);
+  Color attacker_color = white_king ? Color::BLACK : Color::WHITE;
+
+  // look for pawns attacking king
+  uint8_t target = PAWN_C(attacker_color);
+  uint8_t candidate = PREV_FILE(BACKWARD_RANK(attacker_color, king_square));
+  if (is_valid_square(candidate) && m_mailbox[candidate] == target)
+  {
+    return true;
+  }
+  candidate = NEXT_FILE(BACKWARD_RANK(attacker_color, king_square));
+  if (is_valid_square(candidate) && m_mailbox[candidate] == target)
+  {
+    return true;
+  }
+
+  // look for knights attacking king
+  std::vector<uint8_t> knights;
+  target = KNIGHT_C(attacker_color);
+  for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
+  {
+    candidate = *it + king_square;
+    if (is_invalid_square(candidate))
+    {
+      continue;
+    }
+    if (m_mailbox[candidate] == target)
+    {
+      return true;
+    }
+  }
+
+  if (!check_diagonals(this, king_square, !white_king).empty())
+  {
+    return true;
+  }
+
+  //look for bishops/queens attacking king on diagonals
+  if (!check_files_ranks(this, king_square, !white_king).empty())
+  {
+    return true;
+  }
+
+  // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.
+  target = KING_C(attacker_color);
+  for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
+  {
+    candidate = king_square + direction_offset(*it);
+    if (is_valid_square(candidate) && m_mailbox[candidate] == target)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 PositionAdjustment Position::advance_position(MoveKey movekey)
 {
   return advance_position(movekey >> 16, (movekey & 0xff00) >> 8, movekey & 0xff);

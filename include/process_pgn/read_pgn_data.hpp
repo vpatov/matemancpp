@@ -14,7 +14,7 @@
 
 #define ELO_THRESHOLD 2200
 
-const bool debug_disabled = false;
+const bool debug_disabled = true;
 #define debugStream     \
     if (debug_disabled) \
     {                   \
@@ -51,17 +51,24 @@ class PgnProcessor
     std::shared_ptr<Tablebase> m_tablebase;
     fs::path m_tablebase_destination_file_path;
     fs::path m_pgn_database_path;
+    int m_max_plies;
 
 public:
     PgnProcessor(std::string tablebase_destination_file_path, std::string pgn_database_path)
         : m_tablebase_destination_file_path(tablebase_destination_file_path), m_pgn_database_path(pgn_database_path)
     {
         m_tablebase = std::make_shared<Tablebase>();
+        m_max_plies = 15;
     }
 
     std::shared_ptr<Tablebase> get_tablebase()
     {
         return m_tablebase;
+    }
+
+    void set_max_plies(int plies)
+    {
+        m_max_plies = plies;
     }
 
     std::shared_ptr<Tablebase> serialize_all()
@@ -143,7 +150,7 @@ public:
 
             if (reading_game_moves)
             {
-                bool is_game_line = games->back()->read_game_move_line(line, m_tablebase.get());
+                bool is_game_line = games->back()->read_game_move_line(line, m_tablebase.get(), m_max_plies);
                 if (games->back()->m_finishedReading)
                 {
 

@@ -12,7 +12,6 @@
 
 uint32_t Position::castling_move(std::smatch &matches, bool white)
 {
-    m_whites_turn = white;
 
     std::string whichever_castle = matches[1];
     std::string queenside_castle = matches[2];
@@ -39,7 +38,8 @@ uint32_t Position::castling_move(std::smatch &matches, bool white)
         assert(false);
     }
 
-    perform_castle(white, short_castle);
+    // perform_castle(white, short_castle);
+    advance_position(m(src_square, dest_square));
     // print_with_borders_highlight_squares(src_square, dest_square);
 
     return generate_move_key(src_square, dest_square, 0);
@@ -178,21 +178,31 @@ uint32_t Position::non_castling_move(
         std::cout << "Impl incomplete for move. " << std::endl;
         assert(false);
     }
+<<<<<<< HEAD
     else
     {
         advance_position(src_square, dest_square, promotion_piece);
         // print_with_borders_highlight_squares(src_square, dest_square);
     }
+=======
+>>>>>>> remove-old-advance-position-try-again
 
+    advance_position(pack_move_key(src_square, dest_square, promotion_piece));
     return generate_move_key(src_square, dest_square, promotion_piece);
 }
 
 /*
   Returns the square with the (white ? white : black) king. Returns 127 otherwise.
 */
+<<<<<<< HEAD
 square_t Position::find_king(bool white)
 {
     uint8_t target = white ? W_KING : B_KING;
+=======
+square_t Position::find_king(bool king_color)
+{
+    uint8_t target = king_color ? W_KING : B_KING;
+>>>>>>> remove-old-advance-position-try-again
     for (int rank = 0; rank < 8; rank++)
     {
         for (int file = 0; file < 8; file++)
@@ -206,6 +216,7 @@ square_t Position::find_king(bool white)
     return INVALID_SQUARE;
 }
 
+<<<<<<< HEAD
 // if it is player X's turn to move, returns true if their king is currently in check.
 // TODO LASTLEFTOFF look at pgnposition notes
 bool Position::is_king_in_check()
@@ -226,6 +237,17 @@ bool Position::legal_position()
 
     // look for pawns attacking king
     uint8_t target = m_whites_turn ? W_PAWN : B_PAWN;
+=======
+// king cannot be attacked by an enemy piece (unless it is the king's player's turn to move)
+bool Position::legal_position()
+{
+    Color attacker_color = m_whites_turn ? Color::BLACK : Color::WHITE;
+
+    uint8_t king_square = find_king(m_whites_turn);
+
+    // look for pawns attacking king
+    uint8_t target = PAWN_C(attacker_color);
+>>>>>>> remove-old-advance-position-try-again
     uint8_t candidate = PREV_FILE(BACKWARD_RANK(attacker_color, king_square));
     if (is_valid_square(candidate) && m_mailbox[candidate] == target)
     {
@@ -239,7 +261,11 @@ bool Position::legal_position()
 
     // look for knights attacking king
     std::vector<uint8_t> knights;
+<<<<<<< HEAD
     target = m_whites_turn ? W_KNIGHT : B_KNIGHT;
+=======
+    target = KNIGHT_C(attacker_color);
+>>>>>>> remove-old-advance-position-try-again
     for (auto it = knight_move_offsets.begin(); it != knight_move_offsets.end(); it++)
     {
         candidate = *it + king_square;
@@ -265,7 +291,11 @@ bool Position::legal_position()
     }
 
     // look for kings next to each other. it doesnt matter whose turn it is when this happens, its always illegal.
+<<<<<<< HEAD
     target = m_whites_turn ? W_KING : B_KING;
+=======
+    target = KING_C(attacker_color);
+>>>>>>> remove-old-advance-position-try-again
     for (auto it = directions_vector.begin(); it != directions_vector.end(); it++)
     {
         candidate = king_square + direction_offset(*it);
@@ -380,11 +410,15 @@ uint8_t Position::get_src_square_minmaj_piece_move(char piece_char, uint8_t src_
                 (!src_file && !src_rank))
             {
 
+<<<<<<< HEAD
                 auto adjustment = advance_position(*it, dest_square, 0);
                 bool is_legal = legal_position();
                 undo_adjustment(adjustment);
 
                 if (is_legal)
+=======
+                if (is_move_legal(*it, dest_square))
+>>>>>>> remove-old-advance-position-try-again
                 {
                     src_square = *it;
                     break;
