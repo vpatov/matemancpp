@@ -144,26 +144,13 @@ TEST_CASE("process larger amount of pgn files successfully", "pgnProcessor")
     REQUIRE(pgnProcessor.get_tablebase()->total_size() == 54896);
 }
 
-// TEST_CASE("pgn processor recognizes illegal move in pgn file", "pgnProcessor")
-// {
+TEST_CASE("pgn processor recognizes illegal move in pgn file", "pgnProcessor")
+{
+    const fs::path tablebase_test_dir = fs::path("/tmp") / program_start_timestamp;
+    const fs::path pgn_test_database_path = fs::path(TEST_ROOT_DIR) /
+                                            "database" / "pgn" / "test_03";
+    const std::string tablebase_name = "test_tb";
 
-// TODO exceptions are thrown from threads so you would have to write some extra code
-// to catch it in the main thread, so that you can use REQUIRE_THROWS
-
-// const fs::path tablebase_test_dir = fs::path("/tmp") / program_start_timestamp;
-// const fs::path pgn_test_database_path = fs::path(TEST_ROOT_DIR) /
-//                                         "database" / "pgn" / "test_03";
-// const std::string tablebase_name = "test_tb";
-
-// PgnProcessor pgnProcessor(tablebase_test_dir / tablebase_name, pgn_test_database_path);
-// // REQUIRE_THROWS(pgnProcessor.process_pgn_files());
-// try
-// {
-//     pgnProcessor.process_pgn_files();
-// }
-// catch (std::exception &ex)
-// {
-
-//     REQUIRE(true);
-// }
-// }
+    PgnProcessor pgnProcessor(tablebase_test_dir / tablebase_name, pgn_test_database_path);
+    REQUIRE_THROWS(pgnProcessor.process_pgn_file(pgn_test_database_path / "file_001.pgn"));
+}
