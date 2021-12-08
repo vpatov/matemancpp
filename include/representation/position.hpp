@@ -78,11 +78,7 @@ public:
 
   std::string pretty_string();
 
-<<<<<<< HEAD
-  square_t find_king(bool white);
-=======
   square_t find_king(bool king_color);
->>>>>>> remove-old-advance-position-try-again
   uint16_t get_src_square_pawn_move(char capture, char src_file, square_t dest_square, uint8_t dest_rank);
   square_t get_src_square_minmaj_piece_move(
       char piece_char, uint8_t src_file, uint8_t src_rank,

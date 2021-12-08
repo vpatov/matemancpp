@@ -14,5 +14,5 @@ allgames_debug.txt
 matemancpp
 /dev_data
 /logs
-src/libmatemancpp_lib.a
 tests/Test
+libmatemancpp_lib.a
