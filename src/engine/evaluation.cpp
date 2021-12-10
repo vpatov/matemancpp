@@ -1,4 +1,5 @@
 #include "engine/evaluation.hpp"
+#include "move_generation.hpp"
 #include "representation/position.hpp"
 
 int basic_material_for_piece(piece_t piece)
@@ -60,14 +61,20 @@ count_material(std::shared_ptr<Position> position)
 // LASTLEFTOFF
 // need to encode checkmate, king safety, number of squares being controlled, into evaluation
 
+// returns true if the player whose turn it is just got mated
 bool is_checkmate(std::shared_ptr<Position> position)
 {
-    return false;
+    return position->is_king_in_check(position->m_whites_turn) &&
+           get_all_moves(position).size() == 0;
 }
 
 // negative is good for black, positive is good for white
 int evaluate(std::shared_ptr<Position> position)
 {
+    if (is_checkmate(position))
+    {
+        return position->m_whites_turn ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
+    }
     auto material_eval = count_material(position);
     return material_eval.white_material - material_eval.black_material;
 }
